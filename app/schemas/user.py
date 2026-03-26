@@ -8,10 +8,12 @@ from datetime import datetime
 # --- Auth Schemas ---
 
 class UserRegister(BaseModel):
-    church_id: int
+    church_id: Optional[int] = None
     email: EmailStr
+    username: Optional[str] = None
     password: str
     full_name: str
+    date_of_birth: Optional[datetime] = None
     role: str = "member"
 
 
@@ -24,6 +26,10 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+class JoinChurchRequest(BaseModel):
+    church_id: int
 
 
 class TokenRefresh(BaseModel):
@@ -40,7 +46,9 @@ class UserBase(BaseModel):
 
 class UserResponse(UserBase):
     id: int
-    church_id: int
+    church_id: Optional[int] = None
+    username: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
     is_active: bool
     member_id: Optional[int] = None
     created_at: datetime
@@ -50,7 +58,9 @@ class UserResponse(UserBase):
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
+    username: Optional[str] = None
     email: Optional[EmailStr] = None
+    date_of_birth: Optional[datetime] = None
 
 
 class UserRoleUpdate(BaseModel):

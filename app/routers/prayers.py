@@ -17,7 +17,7 @@ from app.utils.security import get_current_user, require_role
 router = APIRouter(prefix="/prayers", tags=["Prayer Requests"])
 
 
-def _prayer_response(p, author_name=None, responses=None):
+def _prayer_response(p, author_name=None, responses=None, is_prayed_by_me=False):
     return PrayerRequestResponse(
         id=p.id, church_id=p.church_id,
         author_id=None if p.is_anonymous else p.author_id,
@@ -26,6 +26,7 @@ def _prayer_response(p, author_name=None, responses=None):
         is_anonymous=p.is_anonymous, is_urgent=p.is_urgent,
         is_answered=p.is_answered, answered_testimony=p.answered_testimony,
         prayed_count=p.prayed_count, visibility=p.visibility,
+        is_prayed_by_me=is_prayed_by_me,
         created_at=p.created_at, responses=responses or [])
 
 
@@ -56,10 +57,23 @@ async def prayer_wall(
     query = query.offset(offset).limit(limit)
 
     prayers = (await db.execute(query)).scalars().all()
+    
+    prayer_ids = [p.id for p in prayers]
+    my_prayers = set()
+    if prayer_ids:
+        prayed_rows = (await db.execute(
+            select(PrayerResponseEntry.prayer_request_id).where(
+                PrayerResponseEntry.prayer_request_id.in_(prayer_ids),
+                PrayerResponseEntry.responder_id == current_user.id,
+                PrayerResponseEntry.is_prayed == True
+            )
+        )).scalars().all()
+        my_prayers = set(prayed_rows)
+        
     items = []
     for p in prayers:
         author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-        items.append(_prayer_response(p, author.full_name if author else None))
+        items.append(_prayer_response(p, author.full_name if author else None, is_prayed_by_me=(p.id in my_prayers)))
     return items
 
 
@@ -77,7 +91,8 @@ async def submit_prayer(
     await db.flush()
     await db.refresh(prayer)
     return _prayer_response(prayer,
-        None if data.is_anonymous else current_user.full_name)
+        None if data.is_anonymous else current_user.full_name,
+        is_prayed_by_me=False)
 
 
 @router.get("/{prayer_id}", response_model=PrayerRequestResponse)
@@ -109,7 +124,13 @@ async def get_prayer(
             content=r.content, is_prayed=r.is_prayed,
             created_at=r.created_at))
 
-    return _prayer_response(p, author.full_name if author else None, responses)
+    is_prayed = (await db.execute(select(PrayerResponseEntry).where(
+        PrayerResponseEntry.prayer_request_id == prayer_id,
+        PrayerResponseEntry.responder_id == current_user.id,
+        PrayerResponseEntry.is_prayed == True
+    ))).scalar_one_or_none() is not None
+
+    return _prayer_response(p, author.full_name if author else None, responses, is_prayed_by_me=is_prayed)
 
 
 @router.post("/{prayer_id}/pray", status_code=201)

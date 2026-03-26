@@ -624,22 +624,30 @@ async function renderShorts() {
 async function renderGiving() {
     const area = document.getElementById('contentArea');
     try {
-        const trends = await apiGet('/reports/analytics/giving-trends');
+        const [trends, givingAnalytics, funds] = await Promise.all([
+            apiGet('/reports/analytics/giving-trends'),
+            apiGet('/reports/giving'),
+            apiGet('/funds')
+        ]);
         const months = trends.monthly_trends || [];
         const totalThisYear = months.reduce((s, m) => s + m.current_year, 0);
         const totalLastYear = months.reduce((s, m) => s + m.previous_year, 0);
         const maxMonth = Math.max(...months.map(m => m.current_year), 1);
 
+        const byFund = givingAnalytics.by_fund || [];
+        // Color palette for charts
+        const colors = ['#fd79a8', '#00cec9', '#f0c040', '#6c5ce7', '#ff6b6b', '#51cf66', '#a29bfe', '#fdcb6e'];
+
         area.innerHTML = `
             <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
                 <div class="stat-card gold">
                     <div class="stat-icon">${icon('wallet', 22)}</div>
-                    <div class="stat-value">$${totalThisYear.toLocaleString()}</div>
+                    <div class="stat-value">$${parseFloat(totalThisYear).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     <div class="stat-label">Year to Date (${trends.year})</div>
                 </div>
                 <div class="stat-card teal">
                     <div class="stat-icon">${icon('bar-chart-3', 22)}</div>
-                    <div class="stat-value">$${totalLastYear.toLocaleString()}</div>
+                    <div class="stat-value">$${parseFloat(totalLastYear).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     <div class="stat-label">Previous Year</div>
                 </div>
                 <div class="stat-card ${totalThisYear >= totalLastYear ? 'purple' : 'pink'}">
@@ -649,32 +657,151 @@ async function renderGiving() {
                 </div>
             </div>
 
+            <div class="grid-2" style="margin-bottom:20px">
+                <div class="panel" style="margin-bottom:0">
+                    <div class="panel-header">
+                        <div class="panel-title">${icon('wallet', 16)} Monthly Giving (${trends.year})</div>
+                    </div>
+                    <div class="panel-body">
+                        ${months.length === 0 ? '<div class="empty-state">No monthly data</div>' : months.map(m => `
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                                <div style="width:50px;font-size:12px;color:var(--text-muted);text-align:right">${m.month.slice(0,3)}</div>
+                                <div style="flex:1;height:24px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
+                                    <div style="height:100%;width:${(m.current_year/maxMonth)*100}%;background:linear-gradient(90deg,var(--accent),var(--accent-light));border-radius:4px;transition:width 0.5s"></div>
+                                </div>
+                                <div style="width:80px;font-size:12px;font-weight:600;text-align:right">$${parseFloat(m.current_year).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                                <div style="width:60px;font-size:11px;text-align:right;color:${m.yoy_change_pct > 0 ? 'var(--success)' : m.yoy_change_pct < 0 ? 'var(--danger)' : 'var(--text-muted)'}">
+                                    ${m.yoy_change_pct !== null ? (m.yoy_change_pct > 0 ? '+' : '') + m.yoy_change_pct + '%' : '—'}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-bottom:0">
+                    <div class="panel-header">
+                        <div class="panel-title">${icon('pie-chart', 16)} Fund Distribution</div>
+                    </div>
+                    <div class="panel-body" style="display:flex;justify-content:center;align-items:center;height:250px">
+                        ${byFund.length === 0 
+                            ? `<div class="empty-state-title">No donations recorded yet</div>`
+                            : `<canvas id="fundPieChart"></canvas>`}
+                    </div>
+                </div>
+            </div>
+
             <div class="panel">
                 <div class="panel-header">
-                    <div class="panel-title">${icon('wallet', 16)} Monthly Giving (${trends.year})</div>
+                    <div class="panel-title">${icon('layers', 16)} Fund Management</div>
+                    <div class="panel-actions">
+                        <button class="btn btn-primary" onclick="showAddFundModal()">+ Create Fund</button>
+                    </div>
                 </div>
                 <div class="panel-body">
-                    ${months.map(m => `
-                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-                            <div style="width:50px;font-size:12px;color:var(--text-muted);text-align:right">${m.month.slice(0,3)}</div>
-                            <div style="flex:1;height:24px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
-                                <div style="height:100%;width:${(m.current_year/maxMonth)*100}%;background:linear-gradient(90deg,var(--accent),var(--accent-light));border-radius:4px;transition:width 0.5s"></div>
-                            </div>
-                            <div style="width:80px;font-size:12px;font-weight:600;text-align:right">$${m.current_year.toLocaleString()}</div>
-                            <div style="width:60px;font-size:11px;text-align:right;color:${m.yoy_change_pct > 0 ? 'var(--success)' : m.yoy_change_pct < 0 ? 'var(--danger)' : 'var(--text-muted)'}">
-                                ${m.yoy_change_pct !== null ? (m.yoy_change_pct > 0 ? '+' : '') + m.yoy_change_pct + '%' : '—'}
-                            </div>
-                        </div>
-                    `).join('')}
+                    ${funds.length === 0
+                        ? `<div class="empty-state">
+                            <div class="empty-state-title">No Funds Created</div>
+                            <div class="empty-state-text">Create funds like Tithes, Offering, or Building Fund.</div>
+                           </div>`
+                        : `<table class="data-table">
+                            <thead><tr><th>Fund Name</th><th>Type</th><th>Current Balance</th><th>Status</th></tr></thead>
+                            <tbody>
+                                ${funds.map(f => `
+                                    <tr>
+                                        <td><strong>${f.name}</strong><br><span style="font-size:11px;color:var(--text-muted)">${f.description || ''}</span></td>
+                                        <td><span class="badge badge-purple">${f.fund_type}</span> ${f.is_restricted ? '<span class="badge badge-danger">Restricted</span>' : ''}</td>
+                                        <td><strong>$${parseFloat(f.current_balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+                                        <td>${f.is_active ? '<span style="color:var(--success)">Active</span>' : '<span style="color:var(--text-muted)">Inactive</span>'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                           </table>`
+                    }
                 </div>
             </div>
         `;
         refreshIcons();
+
+        // Draw Pie Chart
+        if (byFund.length > 0) {
+            const ctx = document.getElementById('fundPieChart')?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: byFund.map(f => f.fund_name),
+                        datasets: [{
+                            data: byFund.map(f => parseFloat(f.total)),
+                            backgroundColor: colors.slice(0, byFund.length),
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#f0f0f8', font: { family: 'Inter', size: 12 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
     } catch (e) {
         area.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${icon('alert-circle', 40)}</div>
             <div class="empty-state-title">${e.message}</div></div>`;
         refreshIcons();
     }
+}
+
+function showAddFundModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    overlay.innerHTML = `
+        <div class="modal">
+            <div class="modal-header"><h3>Create New Fund</h3>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i data-lucide="x" style="width:18px;height:18px"></i></button></div>
+            <div class="modal-body">
+                <div class="field"><label>Fund Name</label><input id="fdName" placeholder="e.g. Building Fund"></div>
+                <div class="field"><label>Description</label><input id="fdDesc" placeholder="Optional details..."></div>
+                <div class="field"><label>Fund Type</label>
+                    <select id="fdType">
+                        <option value="general">General</option>
+                        <option value="missions">Missions</option>
+                        <option value="building">Building</option>
+                        <option value="benevolence">Benevolence</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:20px;cursor:pointer">
+                    <input type="checkbox" id="fdRestrict"> This is a restricted fund
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                <button class="btn btn-primary" onclick="addFund()">Create Fund</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    refreshIcons();
+}
+
+async function addFund() {
+    try {
+        await apiPost('/funds', {
+            name: document.getElementById('fdName').value,
+            description: document.getElementById('fdDesc').value || null,
+            fund_type: document.getElementById('fdType').value,
+            is_restricted: document.getElementById('fdRestrict').checked,
+            is_active: true
+        });
+        document.querySelector('.modal-overlay')?.remove();
+        renderGiving();
+    } catch (e) { alert(e.message); }
 }
 
 // ── NOTIFICATIONS ──────────────────

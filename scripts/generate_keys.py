@@ -3,7 +3,7 @@ import secrets
 import string
 import argparse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import async_session_maker
+from app.database import async_session
 from app.models.church import RegistrationKey
 
 def generate_key_string() -> str:
@@ -18,7 +18,7 @@ async def main():
     parser.add_argument("--count", type=int, default=1, help="Number of keys to generate")
     args = parser.parse_args()
 
-    async with async_session_maker() as session:
+    async with async_session() as session:
         keys = []
         for _ in range(args.count):
             key = RegistrationKey(key_string=generate_key_string())

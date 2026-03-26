@@ -36,6 +36,7 @@ class PrayerRequestResponse(BaseModel):
     answered_testimony: Optional[str] = None
     prayed_count: int = 0
     visibility: str
+    is_prayed_by_me: bool = False
     created_at: datetime
     responses: Optional[list["PrayerResponseSchema"]] = []
 

@@ -31,10 +31,26 @@ from app.routers.bible import router as bible_router
 from app.routers.scriptures import router as scriptures_router
 
 
+from sqlalchemy import text
+from app.database import engine
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize database on startup."""
     await init_db()
+    
+    # Run critical one-time migration for church_id 
+    async with engine.begin() as conn:
+        try:
+            await conn.execute(text("ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;"))
+            print("Successfully made users.church_id nullable.")
+            
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50);"))
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth TIMESTAMP WITH TIME ZONE;"))
+            print("Successfully ensured username and date_of_birth columns exist.")
+        except Exception as e:
+            print(f"Migration logged: {e}")
+
     yield
 
 

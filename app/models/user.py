@@ -21,10 +21,12 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    church_id = Column(Integer, ForeignKey("churches.id"), nullable=False, index=True)
+    church_id = Column(Integer, ForeignKey("churches.id"), nullable=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
+    username = Column(String(50), unique=True, index=True, nullable=True)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
+    date_of_birth = Column(DateTime(timezone=True), nullable=True)
     role = Column(String(20), default=UserRole.MEMBER.value, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     member_id = Column(Integer, ForeignKey("members.id"), nullable=True)
