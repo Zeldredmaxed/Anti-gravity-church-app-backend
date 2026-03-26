@@ -50,10 +50,11 @@ class UserResponse(UserBase):
     username: Optional[str] = None
     date_of_birth: Optional[datetime] = None
     stripe_customer_id: Optional[str] = None
-    bio: Optional[str] = None
+    testimony_summary: Optional[str] = None
     website: Optional[str] = None
     avatar_url: Optional[str] = None
     is_active: bool
+    is_anointed: bool = False
     member_id: Optional[int] = None
     created_at: datetime
 
@@ -65,7 +66,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     date_of_birth: Optional[datetime] = None
-    bio: Optional[str] = None
+    testimony_summary: Optional[str] = None
     website: Optional[str] = None
     avatar_url: Optional[str] = None
 

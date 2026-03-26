@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.database import get_db
-from app.models.feed import Post, PostLike, PostComment
+from app.models.feed import Post, PostAmen, PostComment
 from app.models.user import User
 from app.schemas.feed import (
     PostCreate, PostUpdate, PostResponse, PostDetailResponse,
@@ -17,14 +17,14 @@ from app.utils.mentions import process_mentions
 router = APIRouter(prefix="/feed", tags=["Feed & Social"])
 
 
-def _post_response(p, author_name=None, is_liked=False):
+def _post_response(p, author_name=None, is_amened=False):
     return PostResponse(
         id=p.id, church_id=p.church_id, author_id=p.author_id,
         author_name=author_name, content=p.content, media_urls=p.media_urls or [],
         post_type=p.post_type, visibility=p.visibility,
-        likes_count=p.likes_count, comments_count=p.comments_count,
+        amen_count=p.amen_count, comments_count=p.comments_count,
         shares_count=p.shares_count, is_pinned=p.is_pinned,
-        is_liked_by_me=is_liked, created_at=p.created_at, updated_at=p.updated_at)
+        is_amened_by_me=is_amened, created_at=p.created_at, updated_at=p.updated_at)
 
 
 @router.get("", response_model=list[PostResponse])
@@ -58,10 +58,10 @@ async def get_feed(
     items = []
     for p in posts:
         author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-        is_liked = (await db.execute(select(PostLike).where(
-            PostLike.post_id == p.id, PostLike.user_id == current_user.id
+        is_amened = (await db.execute(select(PostAmen).where(
+            PostAmen.post_id == p.id, PostAmen.user_id == current_user.id
         ))).scalar_one_or_none() is not None
-        items.append(_post_response(p, author.full_name if author else None, is_liked))
+        items.append(_post_response(p, author.full_name if author else None, is_amened))
     return items
 
 
@@ -103,8 +103,8 @@ async def get_post(
         raise HTTPException(status_code=404, detail="Post not found")
 
     author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-    is_liked = (await db.execute(select(PostLike).where(
-        PostLike.post_id == p.id, PostLike.user_id == current_user.id
+    is_amened = (await db.execute(select(PostAmen).where(
+        PostAmen.post_id == p.id, PostAmen.user_id == current_user.id
     ))).scalar_one_or_none() is not None
 
     # Get top-level comments
@@ -138,7 +138,7 @@ async def get_post(
             content=c.content, parent_id=c.parent_id,
             is_deleted=c.is_deleted, created_at=c.created_at, replies=replies))
 
-    resp = _post_response(p, author.full_name if author else None, is_liked)
+    resp = _post_response(p, author.full_name if author else None, is_amened)
     return PostDetailResponse(**resp.model_dump(), comments=comments)
 
 
@@ -204,10 +204,10 @@ async def share_post(
     return {"message": "Post shared", "shares_count": p.shares_count, "share_url": share_url}
 
 
-# --- Likes ---
+# --- Amens ---
 
-@router.post("/posts/{post_id}/like", status_code=201)
-async def like_post(
+@router.post("/posts/{post_id}/amen", status_code=201)
+async def amen_post(
     post_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
@@ -217,37 +217,37 @@ async def like_post(
     if not p:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    existing = (await db.execute(select(PostLike).where(
-        PostLike.post_id == post_id, PostLike.user_id == current_user.id
+    existing = (await db.execute(select(PostAmen).where(
+        PostAmen.post_id == post_id, PostAmen.user_id == current_user.id
     ))).scalar_one_or_none()
     if existing:
-        raise HTTPException(status_code=400, detail="Already liked")
+        raise HTTPException(status_code=400, detail="Already amened")
 
-    like = PostLike(post_id=post_id, user_id=current_user.id)
+    like = PostAmen(post_id=post_id, user_id=current_user.id)
     db.add(like)
-    p.likes_count = (p.likes_count or 0) + 1
+    p.amen_count = (p.amen_count or 0) + 1
     db.add(p)
     await db.flush()
-    return {"message": "Liked", "likes_count": p.likes_count}
+    return {"message": "Amened", "amen_count": p.amen_count}
 
 
-@router.delete("/posts/{post_id}/like", status_code=200)
-async def unlike_post(
+@router.delete("/posts/{post_id}/amen", status_code=200)
+async def unamen_post(
     post_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
-    existing = (await db.execute(select(PostLike).where(
-        PostLike.post_id == post_id, PostLike.user_id == current_user.id
+    existing = (await db.execute(select(PostAmen).where(
+        PostAmen.post_id == post_id, PostAmen.user_id == current_user.id
     ))).scalar_one_or_none()
     if not existing:
-        raise HTTPException(status_code=400, detail="Not liked")
+        raise HTTPException(status_code=400, detail="Not amened")
     await db.delete(existing)
 
     p = (await db.execute(select(Post).where(Post.id == post_id))).scalar_one_or_none()
     if p:
-        p.likes_count = max((p.likes_count or 0) - 1, 0)
+        p.amen_count = max((p.amen_count or 0) - 1, 0)
         db.add(p)
-    return {"message": "Unliked", "likes_count": p.likes_count if p else 0}
+    return {"message": "Unamened", "amen_count": p.amen_count if p else 0}
 
 
 # --- Comments ---

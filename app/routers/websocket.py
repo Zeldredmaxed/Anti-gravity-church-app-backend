@@ -69,11 +69,11 @@ async def _authenticate_ws(token: str) -> User | None:
         return None
 
 
-@router.websocket("/ws/chat/{conversation_id}")
+@router.websocket("/ws/fellowship-chat/{conversation_id}")
 async def websocket_chat(websocket: WebSocket, conversation_id: int):
     """
     WebSocket for real-time chat.
-    Connect with: ws://host/ws/chat/{id}?token=JWT_TOKEN
+    Connect with: ws://host/ws/fellowship-chat/{id}?token=JWT_TOKEN
     
     Client sends:
       {"type": "message", "content": "Hello", "message_type": "text"}

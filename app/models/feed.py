@@ -35,7 +35,7 @@ class Post(Base):
     media_urls = Column(JSON, default=list)  # Array of media URLs
     post_type = Column(String(30), default=PostType.TEXT.value, nullable=False)
     visibility = Column(String(20), default=PostVisibility.MEMBERS_ONLY.value, nullable=False)
-    likes_count = Column(Integer, default=0)
+    amen_count = Column(Integer, default=0)
     comments_count = Column(Integer, default=0)
     shares_count = Column(Integer, default=0)
     is_pinned = Column(Boolean, default=False)
@@ -46,15 +46,15 @@ class Post(Base):
 
     # Relationships
     author = relationship("User")
-    likes = relationship("PostLike", back_populates="post", cascade="all, delete-orphan")
+    amens = relationship("PostAmen", back_populates="post", cascade="all, delete-orphan")
     comments = relationship("PostComment", back_populates="post",
                              lazy="dynamic", cascade="all, delete-orphan")
 
 
-class PostLike(Base):
-    __tablename__ = "post_likes"
+class PostAmen(Base):
+    __tablename__ = "post_amens"
     __table_args__ = (
-        UniqueConstraint("post_id", "user_id", name="uq_post_like"),
+        UniqueConstraint("post_id", "user_id", name="uq_post_amen"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -64,7 +64,7 @@ class PostLike(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    post = relationship("Post", back_populates="likes")
+    post = relationship("Post", back_populates="amens")
     user = relationship("User")
 
 

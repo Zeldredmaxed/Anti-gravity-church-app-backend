@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class ShortCategory(str, enum.Enum):
+class GloryClipCategory(str, enum.Enum):
     WORSHIP = "worship"
     TESTIMONY = "testimony"
     SERMON_CLIP = "sermon_clip"
@@ -27,8 +27,8 @@ class ModerationStatus(str, enum.Enum):
     REJECTED = "rejected"
 
 
-class Short(Base):
-    __tablename__ = "shorts"
+class GloryClip(Base):
+    __tablename__ = "glory_clips"
 
     id = Column(Integer, primary_key=True, index=True)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
@@ -38,10 +38,10 @@ class Short(Base):
     video_url = Column(String(500), nullable=False)
     thumbnail_url = Column(String(500), nullable=True)
     duration_seconds = Column(Integer, nullable=True)
-    category = Column(String(30), default=ShortCategory.OTHER.value, nullable=False)
+    category = Column(String(30), default=GloryClipCategory.OTHER.value, nullable=False)
     moderation_status = Column(String(20), default=ModerationStatus.APPROVED.value, nullable=False)
     view_count = Column(Integer, default=0)
-    like_count = Column(Integer, default=0)
+    amen_count = Column(Integer, default=0)
     comment_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
     is_featured = Column(Boolean, default=False)
@@ -54,52 +54,52 @@ class Short(Base):
     # Relationships
     author = relationship("User")
     church = relationship("Church")
-    likes = relationship("ShortLike", back_populates="short", cascade="all, delete-orphan")
-    comments = relationship("ShortComment", back_populates="short",
+    amens = relationship("GloryClipAmen", back_populates="glory_clip", cascade="all, delete-orphan")
+    comments = relationship("GloryClipComment", back_populates="glory_clip",
                              lazy="dynamic", cascade="all, delete-orphan")
-    views = relationship("ShortView", back_populates="short", cascade="all, delete-orphan")
+    views = relationship("GloryClipView", back_populates="glory_clip", cascade="all, delete-orphan")
 
 
-class ShortLike(Base):
-    __tablename__ = "short_likes"
+class GloryClipAmen(Base):
+    __tablename__ = "glory_clip_amens"
     __table_args__ = (
-        UniqueConstraint("short_id", "user_id", name="uq_short_like"),
+        UniqueConstraint("glory_clip_id", "user_id", name="uq_glory_clip_amen"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    short_id = Column(Integer, ForeignKey("shorts.id", ondelete="CASCADE"),
+    glory_clip_id = Column(Integer, ForeignKey("glory_clips.id", ondelete="CASCADE"),
                        nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    short = relationship("Short", back_populates="likes")
+    glory_clip = relationship("GloryClip", back_populates="amens")
     user = relationship("User")
 
 
-class ShortComment(Base):
-    __tablename__ = "short_comments"
+class GloryClipComment(Base):
+    __tablename__ = "glory_clip_comments"
 
     id = Column(Integer, primary_key=True, index=True)
-    short_id = Column(Integer, ForeignKey("shorts.id", ondelete="CASCADE"),
+    glory_clip_id = Column(Integer, ForeignKey("glory_clips.id", ondelete="CASCADE"),
                        nullable=False, index=True)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     content = Column(Text, nullable=False)
-    parent_id = Column(Integer, ForeignKey("short_comments.id"), nullable=True)
+    parent_id = Column(Integer, ForeignKey("glory_clip_comments.id"), nullable=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    short = relationship("Short", back_populates="comments")
+    glory_clip = relationship("GloryClip", back_populates="comments")
     author = relationship("User")
-    replies = relationship("ShortComment", backref="parent", remote_side=[id])
+    replies = relationship("GloryClipComment", backref="parent", remote_side=[id])
 
 
-class ShortView(Base):
-    __tablename__ = "short_views"
+class GloryClipView(Base):
+    __tablename__ = "glory_clip_views"
 
     id = Column(Integer, primary_key=True, index=True)
-    short_id = Column(Integer, ForeignKey("shorts.id", ondelete="CASCADE"),
+    glory_clip_id = Column(Integer, ForeignKey("glory_clips.id", ondelete="CASCADE"),
                        nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     watched_seconds = Column(Integer, default=0)
@@ -107,4 +107,4 @@ class ShortView(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    short = relationship("Short", back_populates="views")
+    glory_clip = relationship("GloryClip", back_populates="views")

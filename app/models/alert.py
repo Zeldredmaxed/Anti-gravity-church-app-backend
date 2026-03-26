@@ -10,9 +10,9 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class NotificationType(str, enum.Enum):
+class AlertType(str, enum.Enum):
     MESSAGE = "message"
-    LIKE = "like"
+    AMEN = "amen"
     COMMENT = "comment"
     EVENT = "event"
     PRAYER = "prayer"
@@ -21,8 +21,8 @@ class NotificationType(str, enum.Enum):
     SYSTEM = "system"
 
 
-class Notification(Base):
-    __tablename__ = "notifications"
+class Alert(Base):
+    __tablename__ = "alerts"
 
     id = Column(Integer, primary_key=True, index=True)
     church_id = Column(Integer, ForeignKey("churches.id"), nullable=True, index=True)
@@ -38,7 +38,7 @@ class Notification(Base):
     user = relationship("User")
 
 
-async def create_notification(
+async def create_alert(
     db,
     user_id: int,
     type: str,
@@ -47,8 +47,8 @@ async def create_notification(
     data: dict = None,
     church_id: int = None,
 ):
-    """Utility to create a notification from any router."""
-    notif = Notification(
+    """Utility to create an alert from any router."""
+    alert = Alert(
         church_id=church_id,
         user_id=user_id,
         type=type,
@@ -56,5 +56,5 @@ async def create_notification(
         body=body,
         data=data or {},
     )
-    db.add(notif)
-    return notif
+    db.add(alert)
+    return alert

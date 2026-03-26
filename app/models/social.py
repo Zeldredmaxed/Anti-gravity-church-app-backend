@@ -13,10 +13,10 @@ class ReportStatus(str, enum.Enum):
     DISMISSED = "dismissed"
 
 
-class Follower(Base):
-    __tablename__ = "followers"
+class FlockMember(Base):
+    __tablename__ = "flock_members"
     __table_args__ = (
-        UniqueConstraint("follower_id", "followed_id", name="uq_user_follower"),
+        UniqueConstraint("follower_id", "followed_id", name="uq_user_flock"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -24,21 +24,18 @@ class Follower(Base):
     followed_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    # Real relationships would go on User model (e.g. followers, following)
 
-
-class SavedContent(Base):
-    __tablename__ = "saved_content"
+class Meditation(Base):
+    __tablename__ = "meditations"
     __table_args__ = (
-        UniqueConstraint("user_id", "entity_type", "entity_id", name="uq_user_saved_content"),
+        UniqueConstraint("user_id", "entity_type", "entity_id", name="uq_user_meditations"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    entity_type = Column(String(50), nullable=False, index=True)  # "post" or "short"
+    entity_type = Column(String(50), nullable=False, index=True)  # "post" or "glory_clip"
     entity_id = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-
 
 class Mention(Base):
     __tablename__ = "mentions"

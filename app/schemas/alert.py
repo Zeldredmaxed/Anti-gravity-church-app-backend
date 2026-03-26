@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 
-class NotificationResponse(BaseModel):
+class AlertResponse(BaseModel):
     id: int
     church_id: Optional[int] = None
     user_id: int
@@ -19,7 +19,7 @@ class NotificationResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class NotificationListResponse(BaseModel):
-    items: list[NotificationResponse]
+class AlertListResponse(BaseModel):
+    items: list[AlertResponse]
     unread_count: int
     total: int

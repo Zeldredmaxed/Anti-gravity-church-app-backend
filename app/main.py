@@ -19,18 +19,18 @@ from app.routers.attendance import router as attendance_router
 from app.routers.groups import router as groups_router
 from app.routers.reports import router as reports_router
 from app.routers.admin import router as admin_router
-from app.routers.chat import router as chat_router
+from app.routers.fellowship_chat import router as fellowship_chat_router
 from app.routers.feed import router as feed_router
 from app.routers.websocket import router as ws_router
-from app.routers.shorts import router as shorts_router
+from app.routers.glory_clips import router as glory_clips_router
 from app.routers.events import router as events_router
 from app.routers.prayers import router as prayers_router
-from app.routers.notifications import router as notifications_router
+from app.routers.alerts import router as alerts_router
 from app.routers.sermons import router as sermons_router
 from app.routers.bible import router as bible_router
 from app.routers.scriptures import router as scriptures_router
 from app.routers.social import router as social_router
-from app.routers.search import router as search_router
+from app.routers.seek import router as seek_router
 from app.routers.store import router as store_router
 
 
@@ -93,19 +93,19 @@ app.include_router(families_router, prefix=API_PREFIX)
 app.include_router(funds_router, prefix=API_PREFIX)
 app.include_router(donations_router, prefix=API_PREFIX)
 app.include_router(social_router, prefix=API_PREFIX)
-app.include_router(search_router, prefix=API_PREFIX)
+app.include_router(seek_router, prefix=API_PREFIX)
 app.include_router(store_router, prefix=API_PREFIX)
 app.include_router(pledge_router, prefix=API_PREFIX)
 app.include_router(attendance_router, prefix=API_PREFIX)
 app.include_router(groups_router, prefix=API_PREFIX)
 app.include_router(reports_router, prefix=API_PREFIX)
 app.include_router(admin_router, prefix=API_PREFIX)
-app.include_router(chat_router, prefix=API_PREFIX)
+app.include_router(fellowship_chat_router, prefix=API_PREFIX)
 app.include_router(feed_router, prefix=API_PREFIX)
-app.include_router(shorts_router, prefix=API_PREFIX)
+app.include_router(glory_clips_router, prefix=API_PREFIX)
 app.include_router(events_router, prefix=API_PREFIX)
 app.include_router(prayers_router, prefix=API_PREFIX)
-app.include_router(notifications_router, prefix=API_PREFIX)
+app.include_router(alerts_router, prefix=API_PREFIX)
 app.include_router(sermons_router, prefix=API_PREFIX)
 app.include_router(bible_router, prefix=API_PREFIX)
 app.include_router(scriptures_router, prefix=API_PREFIX)

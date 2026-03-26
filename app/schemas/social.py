@@ -6,7 +6,7 @@ from datetime import datetime
 from .user import UserResponse
 
 
-class FollowerResponse(BaseModel):
+class FlockMemberResponse(BaseModel):
     id: int
     follower_id: int
     followed_id: int
@@ -15,12 +15,12 @@ class FollowerResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class FollowListResponse(BaseModel):
+class FlockListResponse(BaseModel):
     user: UserResponse
     created_at: datetime
 
 
-class SaveResponse(BaseModel):
+class MeditationResponse(BaseModel):
     id: int
     user_id: int
     entity_type: str
@@ -30,7 +30,7 @@ class SaveResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class SaveCreate(BaseModel):
+class MeditationCreate(BaseModel):
     entity_type: str
     entity_id: int
 

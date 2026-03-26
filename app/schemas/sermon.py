@@ -55,7 +55,7 @@ class SermonResponse(BaseModel):
     recorded_date: Optional[date] = None
     is_live: bool
     view_count: int
-    like_count: int
+    amen_count: int
     tags: list = []
     is_published: bool
     created_at: datetime
