@@ -44,25 +44,26 @@ async def lifespan(app: FastAPI):
     await init_db()
     
     # Run critical one-time migration for church_id 
-    async with engine.begin() as conn:
-        migrations = [
-            "ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;",
-            "ALTER TABLE users ADD COLUMN username VARCHAR(50);",
-            "ALTER TABLE users ADD COLUMN date_of_birth TIMESTAMP WITH TIME ZONE;",
-            "ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255);",
-            "ALTER TABLE users ADD COLUMN testimony_summary TEXT;",
-            "ALTER TABLE users RENAME COLUMN bio TO testimony_summary;",
-            "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
-            "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
-            "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);"
-        ]
-        
-        for query in migrations:
-            try:
+    migrations = [
+        "ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;",
+        "ALTER TABLE users ADD COLUMN username VARCHAR(50);",
+        "ALTER TABLE users ADD COLUMN date_of_birth TIMESTAMP WITH TIME ZONE;",
+        "ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255);",
+        "ALTER TABLE users ADD COLUMN testimony_summary TEXT;",
+        "ALTER TABLE users RENAME COLUMN bio TO testimony_summary;",
+        "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
+        "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
+        "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);"
+    ]
+    
+    for query in migrations:
+        try:
+            async with engine.begin() as conn:
                 await conn.execute(text(query))
-            except Exception as e:
-                pass # Ignore if column already exists or bio doesn't exist
-        print("Completed automated schema checks.")
+        except Exception as e:
+            print(f"Migration skipped/failed for '{query[:30]}...': {e}")
+            pass # Ignore if column already exists or bio doesn't exist
+    print("Completed automated schema checks.")
 
     yield
 
