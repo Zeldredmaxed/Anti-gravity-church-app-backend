@@ -45,15 +45,24 @@ async def lifespan(app: FastAPI):
     
     # Run critical one-time migration for church_id 
     async with engine.begin() as conn:
-        try:
-            await conn.execute(text("ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;"))
-            print("Successfully made users.church_id nullable.")
-            
-            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50);"))
-            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth TIMESTAMP WITH TIME ZONE;"))
-            print("Successfully ensured username and date_of_birth columns exist.")
-        except Exception as e:
-            print(f"Migration logged: {e}")
+        migrations = [
+            "ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;",
+            "ALTER TABLE users ADD COLUMN username VARCHAR(50);",
+            "ALTER TABLE users ADD COLUMN date_of_birth TIMESTAMP WITH TIME ZONE;",
+            "ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255);",
+            "ALTER TABLE users ADD COLUMN testimony_summary TEXT;",
+            "ALTER TABLE users RENAME COLUMN bio TO testimony_summary;",
+            "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
+            "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
+            "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);"
+        ]
+        
+        for query in migrations:
+            try:
+                await conn.execute(text(query))
+            except Exception as e:
+                pass # Ignore if column already exists or bio doesn't exist
+        print("Completed automated schema checks.")
 
     yield
 
