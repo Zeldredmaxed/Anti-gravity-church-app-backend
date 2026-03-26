@@ -3,8 +3,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-import os
 
 from app.config import settings
 from app.database import init_db
@@ -134,11 +132,6 @@ app.include_router(payment_methods_router, prefix=API_PREFIX)
 app.include_router(support_router, prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(uploads_router, prefix=API_PREFIX)
-
-# Serve uploaded files statically at /uploads/*
-UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "/app/uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})
 app.include_router(ws_router)

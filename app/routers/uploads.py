@@ -1,21 +1,25 @@
-"""File upload router — direct media upload for feed posts and shorts."""
+"""File upload router — uploads media to Cloudinary for persistent cloud storage."""
 
 import os
-import uuid
-import shutil
-from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
-from sqlalchemy.ext.asyncio import AsyncSession
+import cloudinary
+import cloudinary.uploader
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from typing import Optional
 
-from app.database import get_db
 from app.models.user import User
 from app.utils.security import get_current_user
 
 router = APIRouter(prefix="/uploads", tags=["File Uploads"])
 
-# Upload directory — persists on Railway with a volume mount at /app/uploads
-UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "/app/uploads")
+# ── Cloudinary Configuration ─────────────────────────────────────
+# Set these in Railway environment variables:
+#   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME", ""),
+    api_key=os.environ.get("CLOUDINARY_API_KEY", ""),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET", ""),
+    secure=True,
+)
 
 # Allowed MIME types
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/heic"}
@@ -37,6 +41,15 @@ def _get_max_size(content_type: str) -> int:
     return MAX_IMAGE_SIZE
 
 
+def _resource_type(content_type: str) -> str:
+    """Map MIME type to Cloudinary resource_type."""
+    if content_type in ALLOWED_VIDEO_TYPES:
+        return "video"
+    if content_type in ALLOWED_AUDIO_TYPES:
+        return "video"  # Cloudinary treats audio as "video" resource_type
+    return "image"
+
+
 def _media_category(content_type: str) -> str:
     if content_type in ALLOWED_VIDEO_TYPES:
         return "video"
@@ -47,17 +60,19 @@ def _media_category(content_type: str) -> str:
 
 @router.post("")
 async def upload_file(
-    request: Request,
     file: UploadFile = File(...),
     category: Optional[str] = Form(None),
+    folder: Optional[str] = Form("church-media"),
     current_user: User = Depends(get_current_user),
 ):
-    """Upload an image, video, or audio file. Returns the public URL.
+    """Upload an image, video, or audio file to Cloudinary.
 
     Accepts multipart/form-data with a `file` field.
-    Optional `category` field: image, video, audio (auto-detected if omitted).
+    Optional fields:
+      - category: image, video, audio (auto-detected if omitted)
+      - folder: Cloudinary folder name (default: "church-media")
 
-    Returns: { data: { url, filename, content_type, size, category } }
+    Returns: { data: { url, public_id, content_type, size, category, width, height } }
     """
     # Validate content type
     content_type = file.content_type or "application/octet-stream"
@@ -79,55 +94,51 @@ async def upload_file(
         raise HTTPException(
             status_code=400,
             detail=f"File too large ({file_size // (1024 * 1024)}MB). "
-                   f"Maximum size for this file type is {max_mb}MB."
+                   f"Maximum for this type is {max_mb}MB."
         )
 
-    # Generate unique filename
-    ext = os.path.splitext(file.filename or "file")[1] or ".bin"
-    if not ext.startswith("."):
-        ext = "." + ext
-    unique_name = f"{uuid.uuid4().hex}{ext}"
-
-    # Organize by date and user
-    date_prefix = datetime.now(timezone.utc).strftime("%Y/%m/%d")
-    upload_subdir = os.path.join(UPLOAD_DIR, date_prefix)
-    os.makedirs(upload_subdir, exist_ok=True)
-
-    # Write file
-    file_path = os.path.join(upload_subdir, unique_name)
-    with open(file_path, "wb") as f:
-        f.write(content)
-
-    # Build public URL
-    # On Railway, this will be like: https://your-app.up.railway.app/uploads/2026/03/26/abc123.jpg
-    relative_path = f"/uploads/{date_prefix}/{unique_name}"
-    base_url = str(request.base_url).rstrip("/")
-    public_url = f"{base_url}{relative_path}"
+    # Upload to Cloudinary
+    resource = _resource_type(content_type)
+    try:
+        result = cloudinary.uploader.upload(
+            content,
+            resource_type=resource,
+            folder=folder or "church-media",
+            use_filename=True,
+            unique_filename=True,
+            overwrite=False,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
     detected_category = category or _media_category(content_type)
 
     return {"data": {
-        "url": public_url,
-        "filename": unique_name,
+        "url": result["secure_url"],
+        "public_id": result["public_id"],
         "original_name": file.filename,
         "content_type": content_type,
         "size": file_size,
         "category": detected_category,
+        "width": result.get("width"),
+        "height": result.get("height"),
+        "duration": result.get("duration"),
+        "format": result.get("format"),
     }}
 
 
 @router.post("/multiple")
 async def upload_multiple_files(
-    request: Request,
     files: list[UploadFile] = File(...),
+    folder: Optional[str] = Form("church-media"),
     current_user: User = Depends(get_current_user),
 ):
-    """Upload multiple files at once. Returns an array of URLs.
+    """Upload multiple files at once to Cloudinary.
 
     Accepts multipart/form-data with multiple `files` fields.
     Maximum 10 files per request.
 
-    Returns: { data: [ { url, filename, content_type, size, category }, ... ] }
+    Returns: { data: [ { url, public_id, content_type, size, category }, ... ] }
     """
     if len(files) > 10:
         raise HTTPException(status_code=400, detail="Maximum 10 files per upload")
@@ -148,30 +159,28 @@ async def upload_multiple_files(
             results.append({"error": f"Skipped '{file.filename}': too large ({file_size // (1024*1024)}MB > {max_mb}MB)"})
             continue
 
-        ext = os.path.splitext(file.filename or "file")[1] or ".bin"
-        if not ext.startswith("."):
-            ext = "." + ext
-        unique_name = f"{uuid.uuid4().hex}{ext}"
-
-        date_prefix = datetime.now(timezone.utc).strftime("%Y/%m/%d")
-        upload_subdir = os.path.join(UPLOAD_DIR, date_prefix)
-        os.makedirs(upload_subdir, exist_ok=True)
-
-        file_path = os.path.join(upload_subdir, unique_name)
-        with open(file_path, "wb") as f:
-            f.write(content)
-
-        relative_path = f"/uploads/{date_prefix}/{unique_name}"
-        base_url = str(request.base_url).rstrip("/")
-        public_url = f"{base_url}{relative_path}"
-
-        results.append({
-            "url": public_url,
-            "filename": unique_name,
-            "original_name": file.filename,
-            "content_type": content_type,
-            "size": file_size,
-            "category": _media_category(content_type),
-        })
+        resource = _resource_type(content_type)
+        try:
+            result = cloudinary.uploader.upload(
+                content,
+                resource_type=resource,
+                folder=folder or "church-media",
+                use_filename=True,
+                unique_filename=True,
+                overwrite=False,
+            )
+            results.append({
+                "url": result["secure_url"],
+                "public_id": result["public_id"],
+                "original_name": file.filename,
+                "content_type": content_type,
+                "size": file_size,
+                "category": _media_category(content_type),
+                "width": result.get("width"),
+                "height": result.get("height"),
+                "duration": result.get("duration"),
+            })
+        except Exception as e:
+            results.append({"error": f"Failed '{file.filename}': {str(e)}"})
 
     return {"data": results}
