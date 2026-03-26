@@ -31,10 +31,12 @@ from app.routers.bible import router as bible_router
 from app.routers.scriptures import router as scriptures_router
 from app.routers.social import router as social_router
 from app.routers.search import router as search_router
+from app.routers.store import router as store_router
 
 
 from sqlalchemy import text
 from app.database import engine
+import app.models.store  # Ensure Base metadata collects the Product model during migration
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -92,6 +94,7 @@ app.include_router(funds_router, prefix=API_PREFIX)
 app.include_router(donations_router, prefix=API_PREFIX)
 app.include_router(social_router, prefix=API_PREFIX)
 app.include_router(search_router, prefix=API_PREFIX)
+app.include_router(store_router, prefix=API_PREFIX)
 app.include_router(pledge_router, prefix=API_PREFIX)
 app.include_router(attendance_router, prefix=API_PREFIX)
 app.include_router(groups_router, prefix=API_PREFIX)

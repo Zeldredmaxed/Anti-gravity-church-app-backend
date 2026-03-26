@@ -29,6 +29,7 @@ class Church(Base):
     # Relationships
     users = relationship("User", back_populates="church", lazy="dynamic")
     members = relationship("Member", back_populates="church", lazy="dynamic")
+    products = relationship("Product", back_populates="church", lazy="dynamic", cascade="all, delete-orphan")
 
 
 class RegistrationKey(Base):
