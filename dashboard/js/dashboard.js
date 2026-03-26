@@ -18,7 +18,7 @@ let currentView = 'overview';
 
 // ── Init ──
 (function init() {
-    if (!getToken()) { window.location.href = 'login.html'; return; }
+    if (!getToken()) { window.location.href = 'index.html'; return; }
     const user = getUser();
     document.getElementById('churchName').textContent = 'Church Dashboard';
     document.getElementById('userRole').textContent = (user.role || 'member').toUpperCase();

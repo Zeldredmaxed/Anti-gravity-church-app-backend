@@ -26,7 +26,7 @@ async function api(path, opts = {}) {
 
     if (res.status === 401) {
         localStorage.clear();
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
         return;
     }
 
@@ -42,7 +42,7 @@ function apiDelete(path) { return api(path, { method: 'DELETE' }); }
 
 function logout() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 function timeAgo(dateStr) {
