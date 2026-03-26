@@ -29,7 +29,7 @@ class Family(Base):
     state = Column(String(50), nullable=True)
     zip_code = Column(String(10), nullable=True)
     phone = Column(String(20), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

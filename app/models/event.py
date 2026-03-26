@@ -36,8 +36,8 @@ class Event(Base):
     description = Column(Text, nullable=True)
     event_type = Column(String(30), default=EventType.SERVICE.value, nullable=False)
     location = Column(String(500), nullable=True)
-    start_datetime = Column(DateTime, nullable=False, index=True)
-    end_datetime = Column(DateTime, nullable=True)
+    start_datetime = Column(DateTime(timezone=True), nullable=False, index=True)
+    end_datetime = Column(DateTime(timezone=True), nullable=True)
     is_recurring = Column(Boolean, default=False)
     recurrence_rule = Column(String(100), nullable=True)  # iCal RRULE format
     max_capacity = Column(Integer, nullable=True)
@@ -47,8 +47,8 @@ class Event(Base):
     is_published = Column(Boolean, default=True)
     is_cancelled = Column(Boolean, default=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
@@ -69,8 +69,8 @@ class EventRSVP(Base):
     status = Column(String(20), default=RSVPStatus.GOING.value, nullable=False)
     guests_count = Column(Integer, default=0)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships

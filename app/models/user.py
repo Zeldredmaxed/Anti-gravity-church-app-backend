@@ -28,8 +28,8 @@ class User(Base):
     role = Column(String(20), default=UserRole.MEMBER.value, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     member_id = Column(Integer, ForeignKey("members.id"), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     church = relationship("Church", back_populates="users")
@@ -48,7 +48,7 @@ class AuditLog(Base):
     resource_id = Column(String(50), nullable=True)
     details = Column(Text, nullable=True)
     ip_address = Column(String(45), nullable=True)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+    timestamp = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
 
     # Relationships
     user = relationship("User", back_populates="audit_logs")

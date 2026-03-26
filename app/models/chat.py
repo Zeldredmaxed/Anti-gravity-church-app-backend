@@ -34,8 +34,8 @@ class Conversation(Base):
     avatar_url = Column(String(500), nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_active = Column(Boolean, default=True)
-    last_message_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_message_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     participants = relationship("ConversationParticipant", back_populates="conversation",
@@ -55,8 +55,8 @@ class ConversationParticipant(Base):
                               nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     role = Column(String(20), default="member")  # member, admin
-    last_read_at = Column(DateTime, nullable=True)
-    joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_read_at = Column(DateTime(timezone=True), nullable=True)
+    joined_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     conversation = relationship("Conversation", back_populates="participants")
@@ -78,8 +78,8 @@ class Message(Base):
     read_by = Column(JSON, default=dict)    # {user_id: timestamp}
     is_edited = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships

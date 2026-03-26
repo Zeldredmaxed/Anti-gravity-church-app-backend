@@ -90,7 +90,7 @@ class Member(Base):
     family_id = Column(Integer, ForeignKey("families.id"), nullable=True)
 
     # Timestamps
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -117,7 +117,7 @@ class MemberNote(Base):
     note_type = Column(String(30), default=NoteType.GENERAL.value, nullable=False)
     content = Column(Text, nullable=False)
     is_confidential = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     member = relationship("Member", back_populates="notes")

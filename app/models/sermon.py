@@ -30,7 +30,7 @@ class Sermon(Base):
 
     # Live
     is_live = Column(Boolean, default=False, index=True)
-    live_started_at = Column(DateTime, nullable=True)
+    live_started_at = Column(DateTime(timezone=True), nullable=True)
 
     # Engagement
     view_count = Column(Integer, default=0)
@@ -42,8 +42,8 @@ class Sermon(Base):
     is_published = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
 
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
@@ -63,8 +63,8 @@ class SermonNote(Base):
     content = Column(Text, nullable=False)
     timestamp_marker = Column(Integer, nullable=True)       # seconds into sermon
 
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships

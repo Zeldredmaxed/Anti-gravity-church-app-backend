@@ -47,8 +47,8 @@ class Short(Base):
     is_featured = Column(Boolean, default=False)
     tags = Column(JSON, default=list)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
@@ -70,7 +70,7 @@ class ShortLike(Base):
     short_id = Column(Integer, ForeignKey("shorts.id", ondelete="CASCADE"),
                        nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     short = relationship("Short", back_populates="likes")
@@ -87,7 +87,7 @@ class ShortComment(Base):
     content = Column(Text, nullable=False)
     parent_id = Column(Integer, ForeignKey("short_comments.id"), nullable=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     short = relationship("Short", back_populates="comments")
@@ -104,7 +104,7 @@ class ShortView(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     watched_seconds = Column(Integer, default=0)
     completed = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     short = relationship("Short", back_populates="views")

@@ -31,7 +31,7 @@ class Service(Base):
     start_time = Column(String(10), nullable=True)
     campus = Column(String(100), nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     attendance_records = relationship("AttendanceRecord", back_populates="service", lazy="dynamic")
@@ -45,12 +45,12 @@ class AttendanceRecord(Base):
     member_id = Column(Integer, ForeignKey("members.id"), nullable=True, index=True)
     service_id = Column(Integer, ForeignKey("services.id"), nullable=False, index=True)
     date = Column(Date, nullable=False, index=True)
-    check_in_time = Column(DateTime, nullable=True)
-    check_out_time = Column(DateTime, nullable=True)
+    check_in_time = Column(DateTime(timezone=True), nullable=True)
+    check_out_time = Column(DateTime(timezone=True), nullable=True)
     checked_in_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     is_first_time_guest = Column(Boolean, default=False)
     guest_info = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     member = relationship("Member", back_populates="attendance_records")
@@ -66,7 +66,7 @@ class GroupAttendance(Base):
     member_id = Column(Integer, ForeignKey("members.id"), nullable=False, index=True)
     date = Column(Date, nullable=False, index=True)
     recorded_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     group = relationship("Group", back_populates="attendance_records")

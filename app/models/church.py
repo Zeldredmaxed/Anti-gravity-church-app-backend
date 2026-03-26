@@ -22,8 +22,8 @@ class Church(Base):
     youtube_channel_id = Column(String(50), nullable=True)
     settings = Column(JSON, default=dict)  # Church-specific config
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
@@ -38,6 +38,6 @@ class RegistrationKey(Base):
     key_string = Column(String(50), unique=True, index=True, nullable=False)
     is_used = Column(Boolean, default=False, nullable=False)
     church_id = Column(Integer, nullable=True)  # Set when used
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    used_at = Column(DateTime(timezone=True), nullable=True)
 

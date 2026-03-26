@@ -55,7 +55,7 @@ class Donation(Base):
     is_anonymous = Column(Boolean, default=False)
     notes = Column(Text, nullable=True)
     recorded_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     donor = relationship("Member", back_populates="donations")
@@ -76,7 +76,7 @@ class Pledge(Base):
     end_date = Column(Date, nullable=True)
     status = Column(String(20), default=PledgeStatus.ACTIVE.value, nullable=False)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

@@ -33,7 +33,7 @@ class Fund(Base):
     is_active = Column(Boolean, default=True)
     target_amount = Column(Numeric(12, 2), nullable=True)
     current_balance = Column(Numeric(12, 2), default=0)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -57,7 +57,7 @@ class Budget(Base):
     budgeted_amount = Column(Numeric(12, 2), nullable=False)
     period = Column(String(20), default="annual")
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     fund = relationship("Fund", back_populates="budgets")
@@ -78,7 +78,7 @@ class Expense(Base):
     receipt_url = Column(String(500), nullable=True)
     approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     fund = relationship("Fund", back_populates="expenses")

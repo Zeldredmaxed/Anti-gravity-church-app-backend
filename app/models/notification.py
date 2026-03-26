@@ -32,7 +32,7 @@ class Notification(Base):
     body = Column(Text, nullable=True)
     data = Column(JSON, default=dict)  # {link_type: "post", link_id: 42} for deep linking
     is_read = Column(Boolean, default=False, index=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
 
     # Relationships
     user = relationship("User")

@@ -43,8 +43,8 @@ class PrayerRequest(Base):
     prayed_count = Column(Integer, default=0)
     visibility = Column(String(20), default=PrayerVisibility.CHURCH_ONLY.value, nullable=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
@@ -62,7 +62,7 @@ class PrayerResponseEntry(Base):
     responder_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     content = Column(Text, nullable=True)  # Encouragement message (optional)
     is_prayed = Column(Boolean, default=True)  # "I prayed for this"
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     prayer_request = relationship("PrayerRequest", back_populates="responses")

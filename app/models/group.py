@@ -43,7 +43,7 @@ class Group(Base):
     is_active = Column(Boolean, default=True)
     max_capacity = Column(Integer, nullable=True)
     campus = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -63,7 +63,7 @@ class GroupMembership(Base):
     member_id = Column(Integer, ForeignKey("members.id"), nullable=False, index=True)
     role = Column(String(20), default=GroupRole.MEMBER.value, nullable=False)
     joined_date = Column(Date, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     group = relationship("Group", back_populates="memberships")
