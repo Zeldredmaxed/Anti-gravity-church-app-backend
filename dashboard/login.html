@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Church Management — Sign In</title>
+    <meta name="description" content="Church Management SaaS Platform — Pastor Dashboard Login">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #12122a;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #6c5ce7;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --accent-light: #a29bfe;
+            --gold: #f0c040;
+            --text-primary: #f0f0f8;
+            --text-secondary: #8888aa;
+            --danger: #ff6b6b;
+            --success: #51cf66;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(600px circle at 20% 30%, rgba(108, 92, 231, 0.12), transparent 60%),
+                radial-gradient(500px circle at 80% 70%, rgba(162, 155, 254, 0.08), transparent 60%),
+                radial-gradient(400px circle at 50% 50%, rgba(240, 192, 64, 0.04), transparent 60%);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes bgPulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 900px;
+            max-width: 95vw;
+            min-height: 540px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 60px var(--accent-glow);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-branding {
+            flex: 1;
+            background: linear-gradient(135deg, var(--accent) 0%, #4834d4 50%, #2c1f8a 100%);
+            padding: 48px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-branding::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .login-branding .brand-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            backdrop-filter: blur(8px);
+        }
+
+        .brand-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: white;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .brand-title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .brand-subtitle {
+            font-size: 15px;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .brand-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .brand-features li {
+            font-size: 13px;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-features li::before {
+            content: '✓';
+            width: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+
+        .login-form-panel {
+            flex: 1;
+            background: var(--bg-secondary);
+            padding: 48px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 32px;
+        }
+
+        .form-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(136, 136, 170, 0.5);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), #4834d4);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .login-btn.loading::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-msg {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--danger);
+            margin-bottom: 16px;
+            display: none;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .onboard-link {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .onboard-link a {
+            color: var(--accent-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .onboard-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Onboard form (hidden by default) */
+        .onboard-form { display: none; }
+        .onboard-form.active { display: block; }
+        .login-fields.hidden { display: none; }
+
+        @media (max-width: 768px) {
+            .login-branding { display: none; }
+            .login-container { max-width: 440px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-branding">
+            <div class="brand-content">
+                <div class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="3" y1="22" y2="10"/><line x1="21" x2="21" y1="22" y2="10"/><path d="M5 22V6l7-4 7 4v16"/><line x1="9" x2="9" y1="22" y2="16"/><line x1="15" x2="15" y1="22" y2="16"/><line x1="9" x2="15" y1="16" y2="16"/></svg></div>
+                <h1 class="brand-title">Church Management<br>Platform</h1>
+                <p class="brand-subtitle">
+                    The all-in-one solution for modern church leadership. 
+                    Manage members, track engagement, and grow your community.
+                </p>
+                <ul class="brand-features">
+                    <li>Member CRM & Family Management</li>
+                    <li>Real-time Chat & Social Feed</li>
+                    <li>Event Planning & RSVP Tracking</li>
+                    <li>Prayer Wall & Community Engagement</li>
+                    <li>Financial Analytics & Giving Reports</li>
+                    <li>Multi-tenant White-label Ready</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="login-form-panel">
+            <div class="form-header">
+                <h2 id="formTitle">Welcome back</h2>
+                <p id="formSubtitle">Sign in to your pastor dashboard</p>
+            </div>
+
+            <div id="errorMsg" class="error-msg"></div>
+
+            <!-- Login Fields -->
+            <div id="loginFields" class="login-fields">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="pastor@yourchurch.org" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
+
+                <div class="divider">or</div>
+                <p class="onboard-link">
+                    New church? <a href="#" onclick="toggleOnboard(true); return false;">Register your church</a>
+                </p>
+            </div>
+
+            <!-- Onboard Fields -->
+            <div id="onboardFields" class="onboard-form">
+                <div class="form-group">
+                    <label>Church Name</label>
+                    <input type="text" id="obChurchName" placeholder="Grace Community Church">
+                </div>
+                <div class="form-group">
+                    <label>Church App ID (Short Name)</label>
+                    <input type="text" id="obSubdomain" placeholder="grace-church (no spaces or .com)">
+                </div>
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" id="obEmail" placeholder="pastor@yourchurch.org">
+                </div>
+                <div class="form-group">
+                    <label>Admin Name</label>
+                    <input type="text" id="obName" placeholder="Pastor John Smith">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="obPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>SaaS Registration Key</label>
+                    <input type="text" id="obRegistrationKey" placeholder="NG-XXXX-XXXX" style="border-color: var(--accent); background: rgba(108, 92, 231, 0.05);">
+                    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">Required to create a new church</p>
+                </div>
+                <button class="login-btn" id="onboardBtn" onclick="handleOnboard()">Register Church</button>
+
+                <div class="divider">or</div>
+                <p class="onboard-link">
+                    Already registered? <a href="#" onclick="toggleOnboard(false); return false;">Sign in instead</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://anti-gravity-church-app-backend-production.up.railway.app/api/v1';
+
+        // Check if already logged in
+        if (localStorage.getItem('token')) {
+            window.location.href = 'app.html';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function toggleOnboard(show) {
+            hideError();
+            document.getElementById('loginFields').classList.toggle('hidden', show);
+            document.getElementById('onboardFields').classList.toggle('active', show);
+            document.getElementById('formTitle').textContent = show ? 'Register your church' : 'Welcome back';
+            document.getElementById('formSubtitle').textContent = show 
+                ? 'Create your church and admin account' 
+                : 'Sign in to your pastor dashboard';
+        }
+
+        async function handleLogin() {
+            hideError();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) return showError('Please enter email and password');
+
+            const btn = document.getElementById('loginBtn');
+            btn.classList.add('loading');
+            btn.textContent = 'Signing in...';
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    if (Array.isArray(data.detail)) {
+                        throw new Error(data.detail.map(e => `${e.loc[e.loc.length-1]}: ${e.msg}`).join(', '));
+                    }
+                    throw new Error(data.detail || 'Login failed');
+                }
+
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('user', JSON.stringify(data.user || {}));
+                window.location.href = 'app.html';
+            } catch (e) {
+                showError(e.message);
+                btn.classList.remove('loading');
+                btn.textContent = 'Sign In';
+            }
+        }
+
+        async function handleOnboard() {
+            hideError();
+            const name = document.getElementById('obChurchName').value.trim();
+            const subdomain = document.getElementById('obSubdomain').value.trim();
+            const email = document.getElementById('obEmail').value.trim();
+            const adminName = document.getElementById('obName').value.trim();
+            const password = document.getElementById('obPassword').value;
+            const regKey = document.getElementById('obRegistrationKey').value.trim();
+
+            if (!name || !subdomain || !email || !adminName || !password || !regKey) 
+                return showError('All fields are required');
+
+            const btn = document.getElementById('onboardBtn');
+            btn.classList.add('loading');
+            btn.textContent = 'Creating...';
+
+            try {
+                const res = await fetch(`${API}/churches/onboard`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        church: {name, subdomain},
+                        admin_email: email,
+                        admin_password: password,
+                        admin_name: adminName,
+                        registration_key: regKey
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    if (Array.isArray(data.detail)) {
+                        throw new Error(data.detail.map(e => `${e.loc[e.loc.length-1]}: ${e.msg}`).join(', '));
+                    }
+                    throw new Error(data.detail || 'Registration failed');
+                }
+
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify({
+                    id: data.user_id,
+                    full_name: adminName,
+                    email: email,
+                    role: 'admin'
+                }));
+                window.location.href = 'app.html';
+            } catch (e) {
+                showError(e.message);
+                btn.classList.remove('loading');
+                btn.textContent = 'Register Church';
+            }
+        }
+
+        // Enter key support
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('onboardFields').classList.contains('active')) {
+                    handleOnboard();
+                } else {
+                    handleLogin();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
