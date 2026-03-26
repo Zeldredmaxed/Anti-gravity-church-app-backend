@@ -2,13 +2,13 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 
 from app.database import get_db
 from datetime import datetime, timezone
 from app.models.church import Church, RegistrationKey
 from app.models.user import User
-from app.schemas.church import ChurchCreate, ChurchUpdate, ChurchResponse, ChurchOnboardRequest
+from app.schemas.church import ChurchCreate, ChurchUpdate, ChurchResponse, ChurchOnboardRequest, ChurchPublicResponse
 from app.utils.security import (
     hash_password, create_access_token, create_refresh_token,
     get_current_user, require_role, get_church_id,
@@ -106,10 +106,18 @@ async def update_my_church(
     return church
 
 
-@router.get("", response_model=list[ChurchResponse])
-async def list_churches(db: AsyncSession = Depends(get_db)):
-    """Public: list all active churches (for discovery/directory)."""
-    churches = (await db.execute(
-        select(Church).where(Church.is_active == True).order_by(Church.name)
-    )).scalars().all()
+@router.get("", response_model=list[ChurchPublicResponse])
+async def list_churches(q: str | None = None, db: AsyncSession = Depends(get_db)):
+    """Public: list or search active churches (for discovery/directory/member signup)."""
+    query = select(Church).where(Church.is_active == True)
+    if q:
+        query = query.where(
+            or_(
+                Church.name.ilike(f"%{q}%"),
+                Church.subdomain.ilike(f"%{q}%")
+            )
+        )
+    query = query.order_by(Church.name).limit(50)
+    
+    churches = (await db.execute(query)).scalars().all()
     return churches

@@ -310,9 +310,52 @@
         }
 
         /* Onboard form (hidden by default) */
-        .onboard-form { display: none; }
-        .onboard-form.active { display: block; }
+        .onboard-form, .member-form { display: none; }
+        .onboard-form.active, .member-form.active { display: block; }
         .login-fields.hidden { display: none; }
+
+        /* Autocomplete styles */
+        .autocomplete-container {
+            position: relative;
+        }
+        .autocomplete-results {
+            position: absolute;
+            top: 100%; left: 0; right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .autocomplete-results.active {
+            display: block;
+        }
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+        }
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        .autocomplete-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .autocomplete-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        .autocomplete-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
 
         @media (max-width: 768px) {
             .login-branding { display: none; }
@@ -363,7 +406,10 @@
 
                 <div class="divider">or</div>
                 <p class="onboard-link">
-                    New church? <a href="#" onclick="toggleOnboard(true); return false;">Register your church</a>
+                    Want to join your church? <a href="#" onclick="switchTab('member'); return false;">Sign up as a Member</a>
+                </p>
+                <p class="onboard-link" style="margin-top: 8px;">
+                    New church? <a href="#" onclick="switchTab('onboard'); return false;">Register your church</a>
                 </p>
             </div>
 
@@ -398,7 +444,36 @@
 
                 <div class="divider">or</div>
                 <p class="onboard-link">
-                    Already registered? <a href="#" onclick="toggleOnboard(false); return false;">Sign in instead</a>
+                    Already registered? <a href="#" onclick="switchTab('login'); return false;">Sign in instead</a>
+                </p>
+            </div>
+
+            <!-- Member Fields -->
+            <div id="memberFields" class="member-form">
+                <div class="form-group autocomplete-container">
+                    <label>Find Your Church</label>
+                    <input type="text" id="mbChurchSearch" placeholder="Enter church name..." autocomplete="off">
+                    <input type="hidden" id="mbChurchId">
+                    <div id="churchResults" class="autocomplete-results"></div>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="mbName" placeholder="Jane Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="mbEmail" placeholder="jane@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="mbPassword" placeholder="••••••••">
+                </div>
+                
+                <button class="login-btn" id="memberBtn" onclick="handleMemberSignup()">Sign Up</button>
+
+                <div class="divider">or</div>
+                <p class="onboard-link">
+                    Already a member? <a href="#" onclick="switchTab('login'); return false;">Log in</a>
                 </p>
             </div>
         </div>
@@ -422,14 +497,29 @@
             document.getElementById('errorMsg').style.display = 'none';
         }
 
-        function toggleOnboard(show) {
+        function switchTab(tab) {
             hideError();
-            document.getElementById('loginFields').classList.toggle('hidden', show);
-            document.getElementById('onboardFields').classList.toggle('active', show);
-            document.getElementById('formTitle').textContent = show ? 'Register your church' : 'Welcome back';
-            document.getElementById('formSubtitle').textContent = show 
-                ? 'Create your church and admin account' 
-                : 'Sign in to your pastor dashboard';
+            document.getElementById('loginFields').classList.toggle('hidden', tab !== 'login');
+            
+            const ob = document.getElementById('onboardFields');
+            const mb = document.getElementById('memberFields');
+            
+            if(ob) ob.classList.toggle('active', tab === 'onboard');
+            if(mb) mb.classList.toggle('active', tab === 'member');
+            
+            const title = document.getElementById('formTitle');
+            const subtitle = document.getElementById('formSubtitle');
+
+            if (tab === 'onboard') {
+                title.textContent = 'Register your church';
+                subtitle.textContent = 'Create your church and admin account';
+            } else if (tab === 'member') {
+                title.textContent = 'Join your church';
+                subtitle.textContent = 'Create your secure member profile';
+            } else {
+                title.textContent = 'Welcome back';
+                subtitle.textContent = 'Sign in to your pastor dashboard';
+            }
         }
 
         async function handleLogin() {
@@ -518,11 +608,139 @@
             }
         }
 
+        // Autocomplete Logic
+        let searchTimeout;
+        const searchInput = document.getElementById('mbChurchSearch');
+        const resultsBox = document.getElementById('churchResults');
+        const hiddenId = document.getElementById('mbChurchId');
+
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                hiddenId.value = ''; // clear selected on typing
+                const q = e.target.value.trim();
+                
+                if (q.length < 2) {
+                    resultsBox.classList.remove('active');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const res = await fetch(`${API}/churches?q=${encodeURIComponent(q)}`);
+                        if (res.ok) {
+                            const churches = await res.json();
+                            renderChurchResults(churches);
+                        }
+                    } catch (err) {
+                        console.error("Search failed", err);
+                    }
+                }, 300); // 300ms debounce
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.autocomplete-container')) {
+                    resultsBox.classList.remove('active');
+                }
+            });
+        }
+
+        function renderChurchResults(churches) {
+            resultsBox.innerHTML = '';
+            if (churches.length === 0) {
+                resultsBox.innerHTML = '<div class="autocomplete-item"><div class="autocomplete-sub">No churches found</div></div>';
+            } else {
+                churches.forEach(church => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `
+                        <div class="autocomplete-name">${church.name}</div>
+                        <div class="autocomplete-sub">${church.subdomain}.rox.com</div>
+                    `;
+                    div.onclick = () => selectChurch(church.id, church.name);
+                    resultsBox.appendChild(div);
+                });
+            }
+            resultsBox.classList.add('active');
+        }
+
+        function selectChurch(id, name) {
+            searchInput.value = name;
+            hiddenId.value = id;
+            resultsBox.classList.remove('active');
+        }
+
+        async function handleMemberSignup() {
+            hideError();
+            const churchId = document.getElementById('mbChurchId').value;
+            const full_name = document.getElementById('mbName').value.trim();
+            const email = document.getElementById('mbEmail').value.trim();
+            const password = document.getElementById('mbPassword').value;
+
+            if (!churchId) return showError('Please find and select your church from the dropdown.');
+            if (!full_name || !email || !password) return showError('All fields are required');
+
+            const btn = document.getElementById('memberBtn');
+            btn.classList.add('loading');
+            btn.textContent = 'Creating Account...';
+
+            try {
+                // 1) Register as member
+                const res = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        church_id: parseInt(churchId),
+                        email, 
+                        password, 
+                        full_name,
+                        role: 'member'
+                    })
+                });
+                
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Registration failed');
+                }
+
+                // 2) Immediately log them in
+                handleLoginDirect(email, password);
+
+            } catch (e) {
+                showError(e.message);
+                btn.classList.remove('loading');
+                btn.textContent = 'Sign Up';
+            }
+        }
+
+        async function handleLoginDirect(email, password) {
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Auto-login failed. Please sign in manually.');
+
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('user', JSON.stringify(data.user || {}));
+                window.location.href = 'index.html'; // Members go to app, or index.html for now
+            } catch (e) {
+                showError(e.message);
+                switchTab('login');
+            }
+        }
+
         // Enter key support
         document.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 if (document.getElementById('onboardFields').classList.contains('active')) {
                     handleOnboard();
+                } else if (document.getElementById('memberFields').classList.contains('active')) {
+                    handleMemberSignup();
                 } else {
                     handleLogin();
                 }

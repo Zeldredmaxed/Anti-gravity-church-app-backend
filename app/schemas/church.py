@@ -28,6 +28,16 @@ class ChurchUpdate(BaseModel):
     settings: Optional[dict] = None
 
 
+class ChurchPublicResponse(BaseModel):
+    id: int
+    name: str
+    subdomain: str
+    logo_url: Optional[str] = None
+    is_active: bool
+
+    model_config = {"from_attributes": True}
+
+
 class ChurchResponse(BaseModel):
     id: int
     name: str
