@@ -4,15 +4,31 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Optional
+import string
+import secrets
 
 from app.database import get_db
 from app.models.user import User, AuditLog
+from app.models.church import RegistrationKey
 from app.schemas.user import UserResponse, UserRegister, UserRoleUpdate, AuditLogResponse
 from app.utils.security import hash_password, get_current_user, require_role
 from app.dependencies import PaginationParams
 from app.config import settings
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+
+@router.get("/generate-master-key")
+async def generate_master_key(db: AsyncSession = Depends(get_db)):
+    """Generate a master registration key (temporary endpoint for production setup)."""
+    chars = string.ascii_uppercase + string.digits
+    part1 = ''.join(secrets.choice(chars) for _ in range(4))
+    part2 = ''.join(secrets.choice(chars) for _ in range(4))
+    key_str = f"NG-{part1}-{part2}"
+    key = RegistrationKey(key_string=key_str)
+    db.add(key)
+    await db.commit()
+    return {"success": True, "master_key": key_str}
 
 
 @router.get("/users", response_model=list[UserResponse])
