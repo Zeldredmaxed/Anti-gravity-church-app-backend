@@ -15,6 +15,7 @@ from app.schemas.short import (
     ShortCommentCreate, ShortCommentResponse, ShortViewRecord,
 )
 from app.utils.security import get_current_user
+from app.utils.mentions import process_mentions
 
 router = APIRouter(prefix="/shorts", tags=["Shorts (Cross-Church)"])
 
@@ -130,6 +131,7 @@ async def create_short(
     db.add(short)
     await db.flush()
     await db.refresh(short)
+    await process_mentions(db, short.description, current_user.id, "short", short.id)
     return _short_response(short, current_user.full_name)
 
 
@@ -213,6 +215,9 @@ async def add_comment(
 
     await db.flush()
     await db.refresh(comment)
+    
+    await process_mentions(db, comment.content, current_user.id, "short_comment", comment.id)
+    
     return ShortCommentResponse(
         id=comment.id, short_id=comment.short_id, author_id=comment.author_id,
         author_name=current_user.full_name, content=comment.content,
@@ -271,6 +276,41 @@ async def record_view(
     db.add(s)
     await db.flush()
     return {"message": "View recorded", "view_count": s.view_count}
+
+
+@router.delete("/{short_id}", status_code=204)
+async def delete_short(
+    short_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Soft-delete a short (only author or admin can delete)."""
+    s = (await db.execute(select(Short).where(
+        Short.id == short_id, Short.church_id == current_user.church_id
+    ))).scalar_one_or_none()
+    if not s:
+        raise HTTPException(status_code=404, detail="Short not found")
+    if s.author_id != current_user.id and current_user.role not in ("admin", "pastor"):
+        raise HTTPException(status_code=403, detail="Cannot delete this short")
+    s.is_deleted = True
+    db.add(s)
+
+
+@router.post("/{short_id}/share", status_code=200)
+async def share_short(
+    short_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Share a short."""
+    s = (await db.execute(select(Short).where(Short.id == short_id))).scalar_one_or_none()
+    if not s:
+        raise HTTPException(status_code=404, detail="Short not found")
+    
+    s.share_count = (s.share_count or 0) + 1
+    db.add(s)
+    await db.flush()
+    
+    share_url = f"https://app.church.com/s/{short_id}"
+    return {"message": "Short shared", "share_count": s.share_count, "share_url": share_url}
 
 
 async def _enrich(db, s, current_user):

@@ -29,6 +29,8 @@ from app.routers.notifications import router as notifications_router
 from app.routers.sermons import router as sermons_router
 from app.routers.bible import router as bible_router
 from app.routers.scriptures import router as scriptures_router
+from app.routers.social import router as social_router
+from app.routers.search import router as search_router
 
 
 from sqlalchemy import text
@@ -88,6 +90,8 @@ app.include_router(members_router, prefix=API_PREFIX)
 app.include_router(families_router, prefix=API_PREFIX)
 app.include_router(funds_router, prefix=API_PREFIX)
 app.include_router(donations_router, prefix=API_PREFIX)
+app.include_router(social_router, prefix=API_PREFIX)
+app.include_router(search_router, prefix=API_PREFIX)
 app.include_router(pledge_router, prefix=API_PREFIX)
 app.include_router(attendance_router, prefix=API_PREFIX)
 app.include_router(groups_router, prefix=API_PREFIX)

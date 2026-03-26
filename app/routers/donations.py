@@ -186,6 +186,25 @@ async def generate_giving_statement(
         headers={"Content-Disposition": f"attachment; filename=statement_{member.last_name}_{year}.pdf"})
 
 
+@router.get("/payment-methods")
+async def get_payment_methods(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """
+    Placeholder: Retrieve saved payment methods for the authenticated user.
+    In a real app, this would query Stripe using current_user.stripe_customer_id.
+    """
+    if not current_user.stripe_customer_id:
+        return {"payment_methods": []}
+        
+    # Mocking a Stripe response for now
+    return {
+        "payment_methods": [
+            {"id": "pm_1234", "brand": "visa", "last4": "4242", "exp_month": 12, "exp_year": 2026}
+        ]
+    }
+
+
 # --- Pledges ---
 pledge_router = APIRouter(prefix="/pledges", tags=["Pledges"])
 

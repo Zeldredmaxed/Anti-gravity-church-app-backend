@@ -12,6 +12,7 @@ from app.schemas.feed import (
     CommentCreate, CommentResponse,
 )
 from app.utils.security import get_current_user, require_role
+from app.utils.mentions import process_mentions
 
 router = APIRouter(prefix="/feed", tags=["Feed & Social"])
 
@@ -84,6 +85,7 @@ async def create_post(
     db.add(post)
     await db.flush()
     await db.refresh(post)
+    await process_mentions(db, post.content, current_user.id, "post", post.id)
     return _post_response(post, current_user.full_name, False)
 
 
@@ -181,6 +183,27 @@ async def delete_post(
     db.add(p)
 
 
+@router.post("/posts/{post_id}/share", status_code=200)
+async def share_post(
+    post_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Share a post."""
+    p = (await db.execute(select(Post).where(
+        Post.id == post_id, Post.church_id == current_user.church_id
+    ))).scalar_one_or_none()
+    if not p:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    p.shares_count = (p.shares_count or 0) + 1
+    db.add(p)
+    await db.flush()
+    
+    # Mock deep-link URL
+    share_url = f"https://app.church.com/p/{post_id}"
+    return {"message": "Post shared", "shares_count": p.shares_count, "share_url": share_url}
+
+
 # --- Likes ---
 
 @router.post("/posts/{post_id}/like", status_code=201)
@@ -249,6 +272,8 @@ async def add_comment(
     db.add(p)
     await db.flush()
     await db.refresh(comment)
+    
+    await process_mentions(db, comment.content, current_user.id, "post_comment", comment.id)
 
     return CommentResponse(
         id=comment.id, post_id=comment.post_id, author_id=comment.author_id,

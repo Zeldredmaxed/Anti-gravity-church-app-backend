@@ -181,7 +181,39 @@ async def update_profile(
     if data.date_of_birth is not None:
         current_user.date_of_birth = data.date_of_birth
 
+    if data.bio is not None:
+        current_user.bio = data.bio
+    if data.website is not None:
+        current_user.website = data.website
+    if data.avatar_url is not None:
+        current_user.avatar_url = data.avatar_url
+
     db.add(current_user)
     await db.flush()
     await db.refresh(current_user)
     return current_user
+
+
+from pydantic import BaseModel
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_password(
+    data: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Allow a user to update their password securely."""
+    if not verify_password(data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password"
+        )
+    
+    current_user.hashed_password = hash_password(data.new_password)
+    db.add(current_user)
+    await db.commit()
