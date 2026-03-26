@@ -163,7 +163,28 @@ async def track_sermon_view(
     if sermon:
         sermon.view_count += 1
         db.commit()
-    return {"status": "ok"}
+    return {"data": {"view_count": sermon.view_count if sermon else 0}}
+
+
+@router.post("/{sermon_id}/like")
+async def toggle_sermon_like(
+    sermon_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Toggle like on a sermon."""
+    sermon = db.query(Sermon).filter(
+        Sermon.id == sermon_id,
+        Sermon.church_id == current_user.church_id
+    ).first()
+    
+    if not sermon:
+        raise HTTPException(status_code=404, detail="Sermon not found")
+    
+    # Simple toggle: increment for now (no separate like table)
+    sermon.like_count = (sermon.like_count or 0) + 1
+    db.commit()
+    return {"data": {"liked": True, "like_count": sermon.like_count}}
 
 
 # ── Sermon Notes ─────────────────────────────────

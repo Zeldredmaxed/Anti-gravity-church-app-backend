@@ -1,151 +1,207 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+"""Social router — flock (follow), meditations (saved), reports, with frontend-aligned paths."""
+
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from typing import List
 
 from app.database import get_db
 from app.models.user import User
 from app.models.social import FlockMember, Meditation, Report, ReportStatus
+from app.models.church import Church
 from app.schemas.social import (
-    FlockMemberResponse, FlockListResponse, MeditationCreate, MeditationResponse, 
+    FlockMemberResponse, FlockListResponse, MeditationCreate, MeditationResponse,
     ReportCreate, ReportResponse
 )
-from app.schemas.user import UserResponse
 from app.utils.security import get_current_user
 
 router = APIRouter(tags=["Social"])
 
 
-# --- FLOCK MEMBERS ---
+# ══════════════════════════════════════════════════════════════════
+# FLOCK (Follow) System
+# ══════════════════════════════════════════════════════════════════
 
-@router.post("/flock/{user_id}", response_model=FlockMemberResponse, status_code=status.HTTP_201_CREATED)
-async def join_flock(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Join a user's flock."""
+@router.post("/social/flock/{user_id}", status_code=201)
+async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Follow/join a user's flock. Toggle: if already following, unfollow."""
     if current_user.id == user_id:
-        raise HTTPException(status_code=400, detail="You cannot join your own flock.")
-    
-    # Check if user exists
-    target_user = await db.get(User, user_id)
-    if not target_user:
+        raise HTTPException(status_code=400, detail="Cannot follow yourself")
+
+    target = await db.get(User, user_id)
+    if not target:
         raise HTTPException(status_code=404, detail="User not found")
-        
-    # Check if already in flock
-    existing = await db.execute(
+
+    existing = (await db.execute(
         select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user_id)
-    )
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Already in this user's flock")
-        
-    new_member = FlockMember(follower_id=current_user.id, followed_id=user_id)
-    db.add(new_member)
+    )).scalar_one_or_none()
+
+    if existing:
+        # Toggle: unfollow
+        await db.delete(existing)
+        await db.commit()
+        return {"data": {"following": False}}
+
+    db.add(FlockMember(follower_id=current_user.id, followed_id=user_id))
     await db.commit()
-    await db.refresh(new_member)
-    return new_member
+    return {"data": {"following": True}}
 
 
-@router.delete("/flock/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def leave_flock(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Leave a user's flock."""
-    result = await db.execute(
+@router.delete("/social/flock/{user_id}", status_code=204)
+async def unfollow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = (await db.execute(
         select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user_id)
-    )
-    member_record = result.scalar_one_or_none()
-    
-    if not member_record:
-        raise HTTPException(status_code=404, detail="Flock membership not found")
-        
-    await db.delete(member_record)
+    )).scalar_one_or_none()
+    if not result:
+        raise HTTPException(status_code=404, detail="Not following this user")
+    await db.delete(result)
     await db.commit()
 
 
-@router.get("/users/{user_id}/flock", response_model=List[FlockListResponse])
-async def get_flock(user_id: int, db: AsyncSession = Depends(get_db)):
-    """Get users in a specific user's flock."""
+@router.get("/social/flock/stats")
+async def flock_stats(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Get current user's follower/following counts."""
+    followers_count = (await db.execute(
+        select(func.count()).where(FlockMember.followed_id == current_user.id)
+    )).scalar() or 0
+    following_count = (await db.execute(
+        select(func.count()).where(FlockMember.follower_id == current_user.id)
+    )).scalar() or 0
+    return {"data": {"followers_count": followers_count, "following_count": following_count}}
+
+
+@router.get("/social/flock/suggestions")
+async def flock_suggestions(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Suggest users to follow — same church, not yet followed."""
+    already_following = (await db.execute(
+        select(FlockMember.followed_id).where(FlockMember.follower_id == current_user.id)
+    )).scalars().all()
+
+    exclude_ids = set(already_following) | {current_user.id}
+
+    query = select(User).where(User.id.notin_(exclude_ids))
+    if current_user.church_id:
+        query = query.where(User.church_id == current_user.church_id)
+    query = query.limit(20)
+
+    users = (await db.execute(query)).scalars().all()
+
+    items = []
+    for u in users:
+        church = None
+        if u.church_id:
+            church = (await db.execute(select(Church).where(Church.id == u.church_id))).scalar_one_or_none()
+        fc = (await db.execute(select(func.count()).where(FlockMember.followed_id == u.id))).scalar() or 0
+        items.append({
+            "id": u.id,
+            "full_name": u.full_name,
+            "username": u.username,
+            "avatar_url": getattr(u, "avatar_url", None),
+            "church_name": church.name if church else None,
+            "is_following": False,
+            "followers_count": fc,
+        })
+    return {"data": items}
+
+
+@router.get("/social/flock/{user_id}/followers")
+async def get_followers(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
         select(FlockMember, User).join(User, FlockMember.follower_id == User.id).where(FlockMember.followed_id == user_id)
     )
-    return [{"user": user, "created_at": member.created_at} for member, user in result.all()]
+    items = []
+    for member, user in result.all():
+        is_following = (await db.execute(
+            select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user.id)
+        )).scalar_one_or_none() is not None
+        items.append({
+            "id": user.id, "full_name": user.full_name, "username": user.username,
+            "avatar_url": getattr(user, "avatar_url", None), "is_following": is_following,
+        })
+    return {"data": items}
 
 
-@router.get("/users/{user_id}/shepherding", response_model=List[FlockListResponse])
-async def get_shepherding(user_id: int, db: AsyncSession = Depends(get_db)):
-    """Get users a specific user is shepherding."""
+@router.get("/social/shepherding/{user_id}/following")
+async def get_following(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
         select(FlockMember, User).join(User, FlockMember.followed_id == User.id).where(FlockMember.follower_id == user_id)
     )
-    return [{"user": user, "created_at": member.created_at} for member, user in result.all()]
+    items = []
+    for member, user in result.all():
+        is_following = (await db.execute(
+            select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user.id)
+        )).scalar_one_or_none() is not None
+        items.append({
+            "id": user.id, "full_name": user.full_name, "username": user.username,
+            "avatar_url": getattr(user, "avatar_url", None), "is_following": is_following,
+        })
+    return {"data": items}
 
 
-# --- MEDITATIONS ---
+# ══════════════════════════════════════════════════════════════════
+# SAVED ITEMS (Meditations) — /saved/* aliases
+# ══════════════════════════════════════════════════════════════════
 
-@router.post("/meditations", response_model=MeditationResponse, status_code=status.HTTP_201_CREATED)
-async def add_meditation(save_data: MeditationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Add a post or glory clip to meditations."""
-    # Check if already saved
-    existing = await db.execute(
+@router.post("/saved", status_code=201)
+async def save_item(save_data: MeditationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    existing = (await db.execute(
         select(Meditation).where(
-            Meditation.user_id == current_user.id, 
+            Meditation.user_id == current_user.id,
             Meditation.entity_type == save_data.entity_type,
-            Meditation.entity_id == save_data.entity_id
+            Meditation.entity_id == save_data.entity_id,
         )
-    )
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Content already in meditations")
-        
-    new_save = Meditation(
-        user_id=current_user.id,
-        entity_type=save_data.entity_type,
-        entity_id=save_data.entity_id
-    )
-    db.add(new_save)
+    )).scalar_one_or_none()
+    if existing:
+        raise HTTPException(status_code=400, detail="Already saved")
+
+    m = Meditation(user_id=current_user.id, entity_type=save_data.entity_type, entity_id=save_data.entity_id)
+    db.add(m)
     await db.commit()
-    await db.refresh(new_save)
-    return new_save
+    await db.refresh(m)
+    return {"data": {"id": m.id, "item_id": m.entity_id, "item_type": m.entity_type}}
 
 
-@router.delete("/meditations/{entity_type}/{entity_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_meditation(entity_type: str, entity_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Remove a post or glory clip from meditations."""
-    result = await db.execute(
+@router.delete("/saved/{item_id}")
+async def unsave_item(item_id: int, type: str = Query("post"), db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = (await db.execute(
         select(Meditation).where(
-            Meditation.user_id == current_user.id, 
-            Meditation.entity_type == entity_type,
-            Meditation.entity_id == entity_id
+            Meditation.user_id == current_user.id,
+            Meditation.entity_type == type,
+            Meditation.entity_id == item_id,
         )
-    )
-    save_record = result.scalar_one_or_none()
-    
-    if not save_record:
-        raise HTTPException(status_code=404, detail="Meditation not found")
-        
-    await db.delete(save_record)
+    )).scalar_one_or_none()
+    if not result:
+        raise HTTPException(status_code=404, detail="Saved item not found")
+    await db.delete(result)
     await db.commit()
+    return {"message": "Unsaved"}
 
 
-@router.get("/meditations", response_model=List[MeditationResponse])
-async def get_meditations(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """List all meditations for the logged-in user."""
-    result = await db.execute(
+@router.get("/saved")
+async def get_saved(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = (await db.execute(
         select(Meditation).where(Meditation.user_id == current_user.id).order_by(Meditation.created_at.desc())
-    )
-    return result.scalars().all()
+    )).scalars().all()
+    items = [{"id": m.id, "item_id": m.entity_id, "item_type": m.entity_type,
+              "created_at": m.created_at.isoformat() if m.created_at else None} for m in result]
+    return {"data": items}
 
 
-# --- REPORTS ---
+# ══════════════════════════════════════════════════════════════════
+# REPORTS
+# ══════════════════════════════════════════════════════════════════
 
-@router.post("/reports", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/reports", status_code=201)
 async def report_content(report_data: ReportCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Report a post, short, comment, or user."""
     new_report = Report(
         reporter_id=current_user.id,
         entity_type=report_data.entity_type,
         entity_id=report_data.entity_id,
         reason=report_data.reason,
-        status=ReportStatus.PENDING.value
+        status=ReportStatus.PENDING.value,
     )
     db.add(new_report)
     await db.commit()
     await db.refresh(new_report)
-    
-    # Ideally trigger an admin email or notification here
-    return new_report
+    return {"data": {"id": new_report.id, "status": "pending"}}

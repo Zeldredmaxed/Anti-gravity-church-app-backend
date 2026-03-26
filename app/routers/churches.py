@@ -121,3 +121,56 @@ async def list_churches(q: str | None = None, db: AsyncSession = Depends(get_db)
     
     churches = (await db.execute(query)).scalars().all()
     return churches
+
+
+@router.get("/about")
+async def get_church_about(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Get public about info for the current church."""
+    church = (await db.execute(
+        select(Church).where(Church.id == current_user.church_id)
+    )).scalar_one_or_none()
+    if not church:
+        raise HTTPException(status_code=404, detail="Church not found")
+    return {"data": {
+        "id": church.id,
+        "name": church.name,
+        "subdomain": church.subdomain,
+        "description": getattr(church, "description", None),
+        "address": getattr(church, "address", None),
+        "phone": getattr(church, "phone", None),
+        "email": getattr(church, "email", None),
+        "website": getattr(church, "website", None),
+        "logo_url": getattr(church, "logo_url", None),
+        "cover_url": getattr(church, "cover_url", None),
+        "service_times": getattr(church, "service_times", None),
+        "social_links": getattr(church, "social_links", None),
+    }}
+
+
+@router.put("/settings")
+async def update_church_settings(
+    data: dict,
+    current_user: User = Depends(require_role("admin", "pastor")),
+    db: AsyncSession = Depends(get_db)):
+    """Update church feature toggles and settings."""
+    church = (await db.execute(
+        select(Church).where(Church.id == current_user.church_id)
+    )).scalar_one_or_none()
+    if not church:
+        raise HTTPException(status_code=404, detail="Church not found")
+
+    # Apply any matching fields
+    allowed = {"name", "description", "address", "phone", "email", "website",
+               "logo_url", "cover_url", "service_times", "social_links",
+               "features_enabled", "theme_color"}
+    for key, value in data.items():
+        if key in allowed:
+            setattr(church, key, value)
+
+    db.add(church)
+    await db.flush()
+    await db.refresh(church)
+    return {"data": {"message": "Settings updated"}}
+

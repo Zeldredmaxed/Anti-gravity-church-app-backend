@@ -338,3 +338,49 @@ async def get_engagement(
         overall_score=round(overall, 1),
         level=level,
     )
+
+
+@router.get("/search")
+async def search_members_for_compose(
+    q: str = Query(..., min_length=1),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Search members/users for compose-message flow."""
+    from app.models.social import FlockMember
+    from app.models.church import Church
+
+    term = f"%{q}%"
+    users = (await db.execute(
+        select(User).where(
+            or_(User.full_name.ilike(term), User.username.ilike(term))
+        ).limit(20)
+    )).scalars().all()
+
+    items = []
+    for u in users:
+        church = None
+        if u.church_id:
+            church = (await db.execute(select(Church).where(Church.id == u.church_id))).scalar_one_or_none()
+
+        fc = (await db.execute(
+            select(func.count()).where(FlockMember.followed_id == u.id)
+        )).scalar() or 0
+
+        # Post count
+        from app.models.feed import Post
+        pc = (await db.execute(
+            select(func.count()).where(Post.author_id == u.id, Post.is_deleted == False)
+        )).scalar() or 0
+
+        items.append({
+            "id": u.id,
+            "full_name": u.full_name,
+            "username": u.username,
+            "avatar_url": getattr(u, "avatar_url", None),
+            "church_name": church.name if church else None,
+            "followers_count": fc,
+            "post_count": pc,
+        })
+    return {"data": items}
+

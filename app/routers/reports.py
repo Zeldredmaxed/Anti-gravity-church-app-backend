@@ -410,3 +410,51 @@ async def analytics_growth(
         },
         "monthly_growth": list(reversed(monthly)),
     }
+
+
+@router.get("/financial-summary")
+async def financial_summary(
+    period: str = Query("month", regex="^(week|month|quarter|year)$"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin", "pastor"))):
+    """Get financial summary: income, expenses, balance."""
+    from datetime import timezone as tz
+    from datetime import datetime
+
+    today = date.today()
+    cid = current_user.church_id
+
+    if period == "week":
+        start = today - timedelta(weeks=1)
+    elif period == "quarter":
+        start = today - timedelta(days=90)
+    elif period == "year":
+        start = today - timedelta(days=365)
+    else:
+        start = today.replace(day=1)
+
+    # Total income
+    income = (await db.execute(
+        select(func.coalesce(func.sum(Donation.amount), 0)).where(
+            Donation.church_id == cid,
+            Donation.date >= start,
+        )
+    )).scalar() or 0
+
+    # Total expenses
+    expenses = (await db.execute(
+        select(func.coalesce(func.sum(Expense.amount), 0)).where(
+            Expense.church_id == cid,
+            Expense.date >= start,
+        )
+    )).scalar() or 0
+
+    return {"data": {
+        "period": period,
+        "start_date": start.isoformat(),
+        "end_date": today.isoformat(),
+        "total_income": float(income),
+        "total_expenses": float(expenses),
+        "net_balance": float(income) - float(expenses),
+    }}
+

@@ -10,7 +10,9 @@ from datetime import datetime
 class ConversationCreate(BaseModel):
     type: str = "direct"  # direct, group, church_wide
     name: Optional[str] = None
-    participant_user_ids: list[int] = Field(..., min_length=1)
+    participant_user_ids: list[int] = Field(default=[], alias="participant_ids")
+    participant_ids: Optional[list[int]] = None
+    message: Optional[str] = None
 
 
 class ConversationResponse(BaseModel):

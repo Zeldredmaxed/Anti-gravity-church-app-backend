@@ -25,18 +25,24 @@ from app.routers.websocket import router as ws_router
 from app.routers.glory_clips import router as glory_clips_router
 from app.routers.events import router as events_router
 from app.routers.prayers import router as prayers_router
-from app.routers.alerts import router as alerts_router
+from app.routers.alerts import router as alerts_router, notifications_router
 from app.routers.sermons import router as sermons_router
 from app.routers.bible import router as bible_router
 from app.routers.scriptures import router as scriptures_router
 from app.routers.social import router as social_router
 from app.routers.seek import router as seek_router
 from app.routers.store import router as store_router
+from app.routers.shorts import router as shorts_router
+from app.routers.chat import router as chat_router
+from app.routers.payment_methods import router as payment_methods_router
+from app.routers.support import router as support_router
 
 
 from sqlalchemy import text
 from app.database import engine
 import app.models.store  # Ensure Base metadata collects the Product model during migration
+import app.routers.payment_methods  # Ensure PaymentMethod model is collected
+import app.routers.support  # Ensure SupportTicket model is collected
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -119,6 +125,11 @@ app.include_router(alerts_router, prefix=API_PREFIX)
 app.include_router(sermons_router, prefix=API_PREFIX)
 app.include_router(bible_router, prefix=API_PREFIX)
 app.include_router(scriptures_router, prefix=API_PREFIX)
+app.include_router(shorts_router, prefix=API_PREFIX)
+app.include_router(chat_router, prefix=API_PREFIX)
+app.include_router(payment_methods_router, prefix=API_PREFIX)
+app.include_router(support_router, prefix=API_PREFIX)
+app.include_router(notifications_router, prefix=API_PREFIX)
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})
 app.include_router(ws_router)
