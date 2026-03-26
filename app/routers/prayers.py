@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 from app.database import get_db
 from app.models.prayer import PrayerRequest, PrayerResponseEntry
 from app.models.user import User
-from app.models.notification import create_notification
+from app.models.alert import create_alert
 from app.schemas.prayer import (
     PrayerRequestCreate, PrayerRequestUpdate, PrayerRequestResponse,
     PrayerResponseCreate, PrayerResponseSchema, PrayerAnsweredRequest,
@@ -163,7 +163,7 @@ async def pray_for_request(
 
     # Notify author
     if p.author_id != current_user.id:
-        await create_notification(db, p.author_id, "prayer",
+        await create_alert(db, p.author_id, "prayer",
             f"{current_user.full_name} prayed for your request",
             data={"link_type": "prayer", "link_id": prayer_id},
             church_id=p.church_id)
@@ -193,7 +193,7 @@ async def respond_to_prayer(
         db.add(p)
 
     if p.author_id != current_user.id:
-        await create_notification(db, p.author_id, "prayer",
+        await create_alert(db, p.author_id, "prayer",
             f"{current_user.full_name} responded to your prayer request",
             body=data.content[:100] if data.content else None,
             data={"link_type": "prayer", "link_id": prayer_id},

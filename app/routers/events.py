@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from app.database import get_db
 from app.models.event import Event, EventRSVP
 from app.models.user import User
-from app.models.notification import create_notification
+from app.models.alert import create_alert
 from app.schemas.event import (
     EventCreate, EventUpdate, EventResponse,
     RSVPCreate, RSVPResponse,
@@ -153,7 +153,7 @@ async def cancel_event(
         EventRSVP.event_id == event_id, EventRSVP.status == "going"
     ))).scalars().all()
     for r in rsvps:
-        await create_notification(db, r.user_id, "event",
+        await create_alert(db, r.user_id, "event",
             f"Event cancelled: {e.title}",
             data={"link_type": "event", "link_id": event_id},
             church_id=e.church_id)
@@ -207,7 +207,7 @@ async def rsvp_event(
 
         # Notify event creator
         if e.created_by != current_user.id:
-            await create_notification(db, e.created_by, "rsvp",
+            await create_alert(db, e.created_by, "rsvp",
                 f"{current_user.full_name} is {data.status} to {e.title}",
                 data={"link_type": "event", "link_id": event_id},
                 church_id=e.church_id)

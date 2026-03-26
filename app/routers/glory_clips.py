@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models.glory_clip import GloryClip, GloryClipAmen, GloryClipComment, GloryClipView
 from app.models.user import User
 from app.models.church import Church
-from app.models.notification import create_notification
+from app.models.alert import create_alert
 from app.schemas.glory_clip import (
     GloryClipCreate, GloryClipUpdate, GloryClipResponse,
     GloryClipCommentCreate, GloryClipCommentResponse, GloryClipViewRecord,
@@ -166,7 +166,7 @@ async def amen_glory_clip(
 
     # Notify author
     if s.author_id != current_user.id:
-        await create_notification(db, s.author_id, "like",
+        await create_alert(db, s.author_id, "like",
             f"{current_user.full_name} amened your glory clip",
             data={"link_type": "glory_clip", "link_id": glory_clip_id})
 
@@ -208,7 +208,7 @@ async def add_comment(
     db.add(s)
 
     if s.author_id != current_user.id:
-        await create_notification(db, s.author_id, "comment",
+        await create_alert(db, s.author_id, "comment",
             f"{current_user.full_name} commented on your glory clip",
             body=data.content[:100],
             data={"link_type": "glory_clip", "link_id": glory_clip_id})

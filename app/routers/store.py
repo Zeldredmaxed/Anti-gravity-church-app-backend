@@ -7,7 +7,7 @@ from app.database import get_db
 from app.models.user import User
 from app.models.store import Product
 from app.schemas.store import ProductCreate, ProductUpdate, ProductResponse
-from app.utils.auth import get_current_user
+from app.utils.security import get_current_user
 
 router = APIRouter(prefix="/store", tags=["Store"])
 

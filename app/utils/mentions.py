@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from app.models.social import Mention
-from app.models.notification import create_notification
+from app.models.alert import create_alert
 
 async def process_mentions(db: AsyncSession, text: str, author_id: int, entity_type: str, entity_id: int):
     """Parse text for @usernames, resolve users, and create mentions/notifications."""
@@ -37,7 +37,7 @@ async def process_mentions(db: AsyncSession, text: str, author_id: int, entity_t
         author = (await db.execute(select(User).where(User.id == author_id))).scalar_one_or_none()
         author_name = author.username if author else "Someone"
         
-        await create_notification(
+        await create_alert(
             db=db,
             user_id=u.id,
             type="mention",
