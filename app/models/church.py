@@ -29,3 +29,15 @@ class Church(Base):
     # Relationships
     users = relationship("User", back_populates="church", lazy="dynamic")
     members = relationship("Member", back_populates="church", lazy="dynamic")
+
+
+class RegistrationKey(Base):
+    __tablename__ = "registration_keys"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key_string = Column(String(50), unique=True, index=True, nullable=False)
+    is_used = Column(Boolean, default=False, nullable=False)
+    church_id = Column(Integer, nullable=True)  # Set when used
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    used_at = Column(DateTime, nullable=True)
+

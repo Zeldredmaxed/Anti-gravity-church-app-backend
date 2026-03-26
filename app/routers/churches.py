@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models.church import Church
+from datetime import datetime, timezone
+from app.models.church import Church, RegistrationKey
 from app.models.user import User
 from app.schemas.church import ChurchCreate, ChurchUpdate, ChurchResponse, ChurchOnboardRequest
 from app.utils.security import (
@@ -19,6 +20,14 @@ router = APIRouter(prefix="/churches", tags=["Churches (Multi-Tenant)"])
 @router.post("/onboard", status_code=201)
 async def onboard_church(data: ChurchOnboardRequest, db: AsyncSession = Depends(get_db)):
     """Register a new church + its first admin user. Public endpoint for onboarding."""
+    # Validate registration key
+    key_record = (await db.execute(
+        select(RegistrationKey).where(RegistrationKey.key_string == data.registration_key)
+    )).scalar_one_or_none()
+    
+    if not key_record or key_record.is_used:
+        raise HTTPException(status_code=400, detail="Invalid or already used registration key")
+
     # Check subdomain uniqueness
     existing = (await db.execute(
         select(Church).where(Church.subdomain == data.church.subdomain)
@@ -33,11 +42,16 @@ async def onboard_church(data: ChurchOnboardRequest, db: AsyncSession = Depends(
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Create church
     church = Church(**data.church.model_dump())
     db.add(church)
     await db.flush()
     await db.refresh(church)
+
+    # Consume the registration key
+    key_record.is_used = True
+    key_record.church_id = church.id
+    key_record.used_at = datetime.now(timezone.utc)
+    db.add(key_record)
 
     # Create admin user
     admin = User(

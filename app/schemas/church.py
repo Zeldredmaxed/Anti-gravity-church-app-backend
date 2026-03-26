@@ -53,3 +53,4 @@ class ChurchOnboardRequest(BaseModel):
     admin_email: str
     admin_password: str = Field(..., min_length=6)
     admin_name: str
+    registration_key: str = Field(..., min_length=5, description="Paid-user registration invite key")
