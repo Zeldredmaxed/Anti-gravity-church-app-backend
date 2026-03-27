@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../api/client';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'; // Adjust per heroicons
 
 export const Login: React.FC = () => {
@@ -22,7 +23,7 @@ export const Login: React.FC = () => {
       formData.append('username', email);
       formData.append('password', password);
 
-      const data = await fetch('http://localhost:8000/auth/login', {
+      const data = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
