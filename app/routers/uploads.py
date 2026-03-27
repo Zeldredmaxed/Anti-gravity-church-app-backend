@@ -24,7 +24,11 @@ cloudinary.config(
 # Allowed MIME types
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/heic"}
 ALLOWED_VIDEO_TYPES = {"video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/mpeg"}
-ALLOWED_AUDIO_TYPES = {"audio/mpeg", "audio/mp4", "audio/wav", "audio/ogg"}
+ALLOWED_AUDIO_TYPES = {
+    "audio/mpeg", "audio/mp4", "audio/wav", "audio/ogg",
+    "audio/aac", "audio/x-m4a", "audio/m4a", "audio/flac",
+    "audio/x-wav", "audio/webm", "audio/mp3", "audio/x-aac",
+}
 ALL_ALLOWED = ALLOWED_IMAGE_TYPES | ALLOWED_VIDEO_TYPES | ALLOWED_AUDIO_TYPES
 
 # Max file sizes
