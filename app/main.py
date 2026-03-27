@@ -66,6 +66,14 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE sermons ADD COLUMN transcript TEXT;",
         # ── GloryClips table ──
         "ALTER TABLE glory_clips ADD COLUMN thumbnail_url VARCHAR(500);",
+        "ALTER TABLE glory_clips ADD COLUMN duration_seconds INTEGER;",
+        "ALTER TABLE glory_clips ADD COLUMN view_count INTEGER DEFAULT 0;",
+        "ALTER TABLE glory_clips ADD COLUMN amen_count INTEGER DEFAULT 0;",
+        "ALTER TABLE glory_clips ADD COLUMN comment_count INTEGER DEFAULT 0;",
+        "ALTER TABLE glory_clips ADD COLUMN share_count INTEGER DEFAULT 0;",
+        "ALTER TABLE glory_clips ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;",
+        "ALTER TABLE glory_clips ADD COLUMN tags JSON;",
+        "ALTER TABLE glory_clips ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;",
         # ── Posts table (feed) ──
         "ALTER TABLE posts ADD COLUMN amen_count INTEGER DEFAULT 0;",
         "ALTER TABLE posts ADD COLUMN comments_count INTEGER DEFAULT 0;",
