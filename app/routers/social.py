@@ -10,6 +10,7 @@ from app.database import get_db
 from app.models.user import User
 from app.models.social import FlockMember, Meditation, Report, ReportStatus
 from app.models.church import Church
+from app.models.feed import Post
 from app.schemas.social import (
     FlockMemberResponse, FlockListResponse, MeditationCreate, MeditationResponse,
     ReportCreate, ReportResponse
@@ -20,8 +21,57 @@ router = APIRouter(tags=["Social"])
 
 
 # ══════════════════════════════════════════════════════════════════
-# FLOCK (Follow) System
+# FLOCK (Follow) System & Social User Profile
 # ══════════════════════════════════════════════════════════════════
+
+@router.get("/social/user/{user_id}")
+async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Fetch social profile data for a specific user."""
+    target_user = await db.get(User, user_id)
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    church_name = None
+    if target_user.church_id:
+        church = await db.get(Church, target_user.church_id)
+        if church:
+            church_name = church.name
+
+    is_following = False
+    if current_user.id != user_id:
+        existing = (await db.execute(
+            select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user_id)
+        )).scalar_one_or_none()
+        if existing:
+            is_following = True
+            
+    followers_count = (await db.execute(
+        select(func.count()).where(FlockMember.followed_id == user_id)
+    )).scalar() or 0
+    
+    following_count = (await db.execute(
+        select(func.count()).where(FlockMember.follower_id == user_id)
+    )).scalar() or 0
+    
+    post_count = (await db.execute(
+        select(func.count()).where(Post.author_id == user_id, Post.is_deleted == False)
+    )).scalar() or 0
+    
+    return {"data": {
+        "id": str(target_user.id),
+        "full_name": target_user.full_name,
+        "username": getattr(target_user, "username", ""),
+        "avatar_url": getattr(target_user, "avatar_url", None),
+        "church_name": church_name,
+        "bio": getattr(target_user, "testimony_summary", ""),
+        "role": target_user.role,
+        "is_following": is_following,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "post_count": post_count,
+        "created_at": target_user.created_at.isoformat() if target_user.created_at else None
+    }}
+
 
 @router.post("/social/flock/{user_id}", status_code=201)
 async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
