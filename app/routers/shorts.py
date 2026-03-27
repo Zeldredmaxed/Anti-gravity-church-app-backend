@@ -258,10 +258,22 @@ async def delete_short(
             Meditation.entity_id == short_id,
         )
     )
-    # Hard-delete the clip (ORM cascade removes amens, comments, views)
+    # Delete views, comments, amens implicitly via DB CASCADE (or manual) if configured
     await db.delete(clip)
-    await db.flush()
+    await db.commit()
     return Response(status_code=204)
+
+
+@router.get("/debug")
+async def get_debug_clips(db: AsyncSession = Depends(get_db)):
+    """Fetch raw rows from glory_clips to find validation errors."""
+    try:
+        from sqlalchemy import text
+        clips = (await db.execute(text("SELECT id, title, author_id, church_id, category, moderation_status, video_url, thumbnail_url FROM glory_clips"))).all()
+        return {"data": [dict(c._mapping) for c in clips]}
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}
 
 
 # ══════════════════════════════════════════════════════════════════
