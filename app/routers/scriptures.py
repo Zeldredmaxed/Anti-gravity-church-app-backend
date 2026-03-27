@@ -3,8 +3,8 @@
 from datetime import datetime, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, desc, update
 
 from app.database import get_db
 from app.models.user import User
@@ -34,13 +34,14 @@ def _resolve_verses(book: str, chapter: int, verse_start: int, verse_end: Option
 @router.get("/active", response_model=ServiceScriptureResponse)
 async def get_active_scripture(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """Get the current active scripture for the user's church, including resolved text."""
-    scripture = db.query(ServiceScripture).filter(
+    result = await db.execute(select(ServiceScripture).where(
         ServiceScripture.church_id == current_user.church_id,
         ServiceScripture.is_active == True
-    ).first()
+    ))
+    scripture = result.scalar_one_or_none()
     
     if not scripture:
         raise HTTPException(status_code=404, detail="No active scripture set")
@@ -70,12 +71,14 @@ async def list_scriptures(
     limit: int = 20,
     offset: int = 0,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """List pastoral scripture history."""
-    scriptures = db.query(ServiceScripture).filter(
+    query = select(ServiceScripture).where(
         ServiceScripture.church_id == current_user.church_id
-    ).order_by(desc(ServiceScripture.created_at)).offset(offset).limit(limit).all()
+    ).order_by(desc(ServiceScripture.created_at)).offset(offset).limit(limit)
+    
+    scriptures = (await db.execute(query)).scalars().all()
     
     results = []
     for s in scriptures:
@@ -91,17 +94,19 @@ async def list_scriptures(
 async def create_scripture(
     data: ServiceScriptureCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """Set a new active scripture (Pastor/Admin only)."""
     if current_user.role not in ["pastor", "admin"]:
         raise HTTPException(status_code=403, detail="Not authorized")
         
     # Deactivate any currently active scripture
-    db.query(ServiceScripture).filter(
-        ServiceScripture.church_id == current_user.church_id,
-        ServiceScripture.is_active == True
-    ).update({"is_active": False})
+    await db.execute(
+        update(ServiceScripture).where(
+            ServiceScripture.church_id == current_user.church_id,
+            ServiceScripture.is_active == True
+        ).values(is_active=False)
+    )
     
     new_scripture = ServiceScripture(
         **data.model_dump(),
@@ -111,8 +116,8 @@ async def create_scripture(
     )
     
     db.add(new_scripture)
-    db.commit()
-    db.refresh(new_scripture)
+    await db.commit()
+    await db.refresh(new_scripture)
     
     return {
         **new_scripture.__dict__,
@@ -126,34 +131,38 @@ async def update_scripture(
     scripture_id: int,
     data: ServiceScriptureUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """Update an existing scripture (Pastor/Admin only)."""
     if current_user.role not in ["pastor", "admin"]:
         raise HTTPException(status_code=403, detail="Not authorized")
         
-    scripture = db.query(ServiceScripture).filter(
+    result = await db.execute(select(ServiceScripture).where(
         ServiceScripture.id == scripture_id,
         ServiceScripture.church_id == current_user.church_id
-    ).first()
+    ))
+    scripture = result.scalar_one_or_none()
     
     if not scripture:
         raise HTTPException(status_code=404, detail="Scripture not found")
         
     # If they are marking this active, deactivate others
     if data.is_active is True:
-        db.query(ServiceScripture).filter(
-            ServiceScripture.church_id == current_user.church_id,
-            ServiceScripture.is_active == True,
-            ServiceScripture.id != scripture_id
-        ).update({"is_active": False})
+        await db.execute(
+            update(ServiceScripture).where(
+                ServiceScripture.church_id == current_user.church_id,
+                ServiceScripture.is_active == True,
+                ServiceScripture.id != scripture_id
+            ).values(is_active=False)
+        )
         
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(scripture, key, value)
         
-    db.commit()
-    db.refresh(scripture)
+    db.add(scripture)
+    await db.commit()
+    await db.refresh(scripture)
     
     return {
         **scripture.__dict__,
@@ -166,16 +175,17 @@ async def update_scripture(
 async def delete_scripture(
     scripture_id: int,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     if current_user.role not in ["pastor", "admin"]:
         raise HTTPException(status_code=403, detail="Not authorized")
         
-    scripture = db.query(ServiceScripture).filter(
+    result = await db.execute(select(ServiceScripture).where(
         ServiceScripture.id == scripture_id,
         ServiceScripture.church_id == current_user.church_id
-    ).first()
+    ))
+    scripture = result.scalar_one_or_none()
     
     if scripture:
-        db.delete(scripture)
-        db.commit()
+        await db.delete(scripture)
+        await db.commit()
