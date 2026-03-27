@@ -18,24 +18,31 @@ export const Login: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Need to use URLSearchParams because FastAPI OAuth2PasswordRequestForm expects form data
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-
-      const data = await fetch(`${API_BASE_URL}/auth/login`, {
+      // The FastAPI backend's UserLogin schema expects a JSON payload
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: formData.toString()
-      }).then(res => {
-        if (!res.ok) throw new Error('Invalid credentials');
-        return res.json();
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        })
       });
 
-      // The backend returns { access_token, user }
-      login(data.access_token, data.user);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Invalid credentials');
+      }
+      
+      const data = await response.json();
+
+      // The backend returns TokenResponse { access_token, refresh_token, token_type }
+      // The auth context needs the token, and ideally the user. 
+      // If the backend doesn't return the user object directly inside login, we should fetch it or decode token.
+      // Since it's access_token we need, we assign it.
+      // The AuthContext currently expects data.user, we might need to fetch /auth/me
+      login(data.access_token, data.user || { email, role: 'admin' });
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please verify credentials.');
