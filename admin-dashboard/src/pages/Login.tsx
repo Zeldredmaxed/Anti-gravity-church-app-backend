@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../api/client';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'; // Adjust per heroicons
 
 export const Login: React.FC = () => {
