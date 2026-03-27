@@ -8,10 +8,18 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface DashboardMetrics {
-  total_active_members: number;
-  mtd_giving: number;
-  pending_tasks: number;
-  pending_prayers: number;
+  members: {
+    total_active: number;
+    new_visitors_30d: number;
+  };
+  finance: {
+    giving_this_month: number;
+    giving_last_month: number;
+  };
+  action_items: {
+    pending_followups: number;
+    pending_prayers: number;
+  };
 }
 
 export const DashboardHome: React.FC = () => {
@@ -77,11 +85,11 @@ export const DashboardHome: React.FC = () => {
             <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: 'var(--radius-md)', color: 'var(--info)' }}>
               <UsersIcon style={{ width: '1.5rem', height: '1.5rem' }} />
             </div>
-            <span className="badge badge-success">+2.4%</span>
+            <span className="badge badge-success">+{metrics?.members?.new_visitors_30d || 0} New</span>
           </div>
           <div>
             <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
-              {metrics?.total_active_members.toLocaleString()}
+              {metrics?.members?.total_active?.toLocaleString() || 0}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
               Active Members
@@ -99,7 +107,7 @@ export const DashboardHome: React.FC = () => {
           </div>
           <div>
             <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
-              ${metrics?.mtd_giving.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${metrics?.finance?.giving_this_month?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
               MTD Giving
@@ -113,13 +121,13 @@ export const DashboardHome: React.FC = () => {
             <div style={{ padding: '0.75rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: 'var(--radius-md)', color: 'var(--warning)' }}>
               <CheckCircleIcon style={{ width: '1.5rem', height: '1.5rem' }} />
             </div>
-            {metrics?.pending_tasks && metrics.pending_tasks > 5 ? (
+            {metrics?.action_items?.pending_followups && metrics.action_items.pending_followups > 5 ? (
               <span className="badge badge-warning">Action Needed</span>
             ) : null}
           </div>
           <div>
             <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
-              {metrics?.pending_tasks}
+              {metrics?.action_items?.pending_followups || 0}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
               Pending Tasks
@@ -136,7 +144,7 @@ export const DashboardHome: React.FC = () => {
           </div>
           <div>
             <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
-              {metrics?.pending_prayers}
+              {metrics?.action_items?.pending_prayers || 0}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
               Pending Prayer Requests

@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('token');
     if (token) {
       // Fetch current user details
-      apiClient.get<User>('/users/me')
+      apiClient.get<User>('/auth/me')
         .then(userData => {
           if (userData.role === 'admin' || userData.role === 'pastor') {
             setUser(userData);
