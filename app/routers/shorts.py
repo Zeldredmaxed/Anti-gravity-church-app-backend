@@ -111,6 +111,26 @@ async def get_my_church_shorts(
     return {"data": items}
 
 
+def _generate_thumbnail_url(video_url: str) -> str | None:
+    """Derive a thumbnail URL from a Cloudinary video URL (first frame).
+
+    Cloudinary URLs look like:
+      https://res.cloudinary.com/{cloud}/video/upload/v123/folder/file.mp4
+
+    We insert 'so_0' (start-offset 0s) transformation and swap extension to .jpg
+    to get:
+      https://res.cloudinary.com/{cloud}/video/upload/so_0/v123/folder/file.jpg
+    """
+    if not video_url or "res.cloudinary.com" not in video_url:
+        return None
+    import re
+    # Insert so_0 transformation after /upload/
+    thumb = re.sub(r"/upload/", "/upload/so_0,w_480,h_854,c_fill/", video_url, count=1)
+    # Swap video extension to jpg
+    thumb = re.sub(r"\.(mp4|mov|webm|avi|mpeg)(\?.*)?$", ".jpg", thumb, flags=re.IGNORECASE)
+    return thumb
+
+
 # ── POST /shorts ──────────────────────────────────────────────────
 @router.post("", status_code=201)
 async def create_short(
@@ -118,13 +138,16 @@ async def create_short(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    # Auto-generate thumbnail from first frame if not provided
+    thumbnail = data.thumbnail_url or _generate_thumbnail_url(data.video_url)
+
     clip = GloryClip(
         author_id=current_user.id,
         church_id=current_user.church_id,
         title=data.title,
         description=data.description,
         video_url=data.video_url,
-        thumbnail_url=data.thumbnail_url,
+        thumbnail_url=thumbnail,
         duration_seconds=data.duration_seconds,
         category=data.category,
         tags=data.tags or [],
