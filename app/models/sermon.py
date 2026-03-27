@@ -27,6 +27,7 @@ class Sermon(Base):
     youtube_video_id = Column(String(50), nullable=True, index=True)
     thumbnail_url = Column(String(500), nullable=True)
     duration_seconds = Column(Integer, nullable=True)
+    transcript = Column(Text, nullable=True)
 
     # Live
     is_live = Column(Boolean, default=False, index=True)

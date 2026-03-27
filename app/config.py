@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # Integrations
     YOUTUBE_API_KEY: str = ""
+    OPENAI_API_KEY: str = ""
 
     # Security
     SECRET_KEY: str = "dev-secret-key-change-in-production"

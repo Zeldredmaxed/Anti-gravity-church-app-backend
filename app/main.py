@@ -62,6 +62,10 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
         "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
         "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);",
+        # ── Sermons table ──
+        "ALTER TABLE sermons ADD COLUMN transcript TEXT;",
+        # ── GloryClips table ──
+        "ALTER TABLE glory_clips ADD COLUMN thumbnail_url VARCHAR(500);",
         # ── Posts table (feed) ──
         "ALTER TABLE posts ADD COLUMN amen_count INTEGER DEFAULT 0;",
         "ALTER TABLE posts ADD COLUMN comments_count INTEGER DEFAULT 0;",
@@ -142,9 +146,11 @@ app.include_router(payment_methods_router, prefix=API_PREFIX)
 app.include_router(support_router, prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(uploads_router, prefix=API_PREFIX)
+from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})
 app.include_router(ws_router)
+app.include_router(assistant_router, prefix=API_PREFIX)
 
 
 @app.get("/", tags=["Health"])

@@ -63,6 +63,27 @@ async def get_live_sermon(
         
     return {**sermon.__dict__, "uploader_name": sermon.uploader.full_name if sermon.uploader else None}
 
+@router.get("/search-transcript", response_model=list[SermonResponse])
+async def search_transcript(
+    q: str,
+    limit: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Full-text search across all sermon transcripts."""
+    sermons = db.query(Sermon).filter(
+        Sermon.church_id == current_user.church_id,
+        Sermon.is_published == True,
+        Sermon.is_deleted == False,
+        Sermon.transcript.ilike(f"%{q}%")
+    ).order_by(desc(Sermon.recorded_date)).limit(limit).all()
+    
+    return [
+        {**s.__dict__, "uploader_name": s.uploader.full_name if s.uploader else None}
+        for s in sermons
+    ]
+
+
 
 @router.get("/{sermon_id}", response_model=SermonResponse)
 async def get_sermon(

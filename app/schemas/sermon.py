@@ -17,6 +17,7 @@ class SermonCreate(BaseModel):
     youtube_video_id: Optional[str] = None
     thumbnail_url: Optional[str] = None
     duration_seconds: Optional[int] = None
+    transcript: Optional[str] = None
     recorded_date: Optional[date] = None
     tags: list[str] = []
     is_published: bool = True
@@ -33,6 +34,7 @@ class SermonUpdate(BaseModel):
     youtube_video_id: Optional[str] = None
     thumbnail_url: Optional[str] = None
     duration_seconds: Optional[int] = None
+    transcript: Optional[str] = None
     recorded_date: Optional[date] = None
     tags: Optional[list[str]] = None
     is_published: Optional[bool] = None
@@ -52,6 +54,7 @@ class SermonResponse(BaseModel):
     youtube_video_id: Optional[str] = None
     thumbnail_url: Optional[str] = None
     duration_seconds: Optional[int] = None
+    transcript: Optional[str] = None
     recorded_date: Optional[date] = None
     is_live: bool
     view_count: int
