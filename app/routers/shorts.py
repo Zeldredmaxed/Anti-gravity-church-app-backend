@@ -265,14 +265,48 @@ async def delete_short(
 
 
 @router.get("/debug")
-async def get_debug_clips(db: AsyncSession = Depends(get_db)):
-    """Fetch raw rows from glory_clips to find validation errors."""
+async def debug_shorts(db: AsyncSession = Depends(get_db)):
+    """Fetch raw db rows to see what is breaking pydantic."""
+    from sqlalchemy import text
+    import traceback
+    
     try:
-        from sqlalchemy import text
-        clips = (await db.execute(text("SELECT id, title, author_id, church_id, category, moderation_status, video_url, thumbnail_url FROM glory_clips"))).all()
-        return {"data": [dict(c._mapping) for c in clips]}
+        from app.models.glory_clip import GloryClip, GloryClipView
+        from sqlalchemy import select, func
+        from datetime import datetime, timezone, timedelta
+        
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        # Test 1: Fetch all glory_clips
+        query = select(GloryClip).where(
+            GloryClip.is_deleted == False,
+            GloryClip.moderation_status == "approved",
+            GloryClip.created_at >= seven_days_ago,
+        )
+        glory_clips = (await db.execute(query)).scalars().all()
+        
+        errors = []
+        for s in glory_clips:
+            try:
+                completion_count = (await db.execute(
+                    select(func.count()).where(
+                        GloryClipView.glory_clip_id == s.id, GloryClipView.completed == True)
+                )).scalar() or 0
+                
+                # Test the enrichment
+                from app.models.user import User
+                from app.models.church import Church
+                author = (await db.execute(select(User).where(User.id == s.author_id))).scalar_one_or_none()
+                church = (await db.execute(select(Church).where(Church.id == s.church_id))).scalar_one_or_none()
+            except Exception as e:
+                errors.append(f"Error on clip {s.id}: {str(e)}\n{traceback.format_exc()}")
+        
+        if errors:
+            return {"status": "error", "tracebacks": errors}
+            
+        res = await db.execute(text("SELECT id, title, author_id, church_id, category, moderation_status, video_url, thumbnail_url FROM glory_clips"))
+        rows = res.mappings().all()
+        return {"data": [dict(r) for r in rows]}
     except Exception as e:
-        import traceback
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
