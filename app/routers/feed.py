@@ -1,12 +1,12 @@
 """Feed router: posts, likes, comments — aligned with frontend audit."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 
 from app.database import get_db
 from app.models.feed import Post, PostAmen, PostComment
-from app.models.social import FlockMember
+from app.models.social import FlockMember, Meditation
 from app.models.user import User
 from app.schemas.feed import (
     PostCreate, PostUpdate, PostResponse, PostDetailResponse,
@@ -42,6 +42,36 @@ def _post_response(p, author_name=None, author_avatar=None, is_amened=False):
         "created_at": p.created_at.isoformat() if p.created_at else None,
         "updated_at": p.updated_at.isoformat() if p.updated_at else None,
     }
+
+
+# ── GET /feed/me ──────────────────────────────────────────────────
+@router.get("/me")
+async def get_my_posts(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return all posts created by the authenticated user, newest first."""
+    query = (
+        select(Post)
+        .where(Post.author_id == current_user.id, Post.is_deleted == False)
+        .order_by(Post.created_at.desc())
+        .offset(offset).limit(limit)
+    )
+    posts = (await db.execute(query)).scalars().all()
+    items = []
+    for p in posts:
+        is_amened = (await db.execute(select(PostAmen).where(
+            PostAmen.post_id == p.id, PostAmen.user_id == current_user.id
+        ))).scalar_one_or_none() is not None
+        items.append(_post_response(
+            p,
+            current_user.full_name,
+            getattr(current_user, "avatar_url", None),
+            is_amened,
+        ))
+    return {"data": items}
 
 
 # ── GET /feed ──────────────────────────────────────────────────────
@@ -229,8 +259,18 @@ async def delete_post(
         raise HTTPException(status_code=404, detail="Post not found")
     if p.author_id != current_user.id and current_user.role not in ("admin", "pastor"):
         raise HTTPException(status_code=403, detail="Cannot delete this post")
-    p.is_deleted = True
-    db.add(p)
+
+    # Cascade: remove saved/bookmarked items referencing this post
+    await db.execute(
+        delete(Meditation).where(
+            Meditation.entity_type == "post",
+            Meditation.entity_id == post_id,
+        )
+    )
+    # Hard-delete the post (ORM cascade removes amens, comments)
+    await db.delete(p)
+    await db.flush()
+    return Response(status_code=204)
 
 
 # ── POST /feed/{post_id}/share ────────────────────────────────────

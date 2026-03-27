@@ -1,13 +1,14 @@
 """Shorts router — maps /shorts/* paths to GloryClips logic for frontend compatibility."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 
 from app.database import get_db
 from app.models.glory_clip import GloryClip, GloryClipAmen, GloryClipComment, GloryClipView
 from app.models.user import User
 from app.models.church import Church
+from app.models.social import Meditation
 from app.schemas.glory_clip import GloryClipCreate, GloryClipCommentCreate
 from app.utils.security import get_current_user
 
@@ -47,6 +48,26 @@ async def _enrich(db, clip, current_user):
         church.name if church else None,
         is_amened,
     )
+
+
+# ── GET /shorts/me ────────────────────────────────────────────────
+@router.get("/me")
+async def get_my_shorts(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return all shorts created by the authenticated user, newest first."""
+    query = (
+        select(GloryClip)
+        .where(GloryClip.author_id == current_user.id, GloryClip.is_deleted == False)
+        .order_by(GloryClip.created_at.desc())
+        .offset(offset).limit(limit)
+    )
+    clips = (await db.execute(query)).scalars().all()
+    items = [await _enrich(db, c, current_user) for c in clips]
+    return {"data": items}
 
 
 # ── GET /shorts/trending ──────────────────────────────────────────
@@ -206,8 +227,18 @@ async def delete_short(
         raise HTTPException(status_code=404, detail="Short not found")
     if clip.author_id != current_user.id and current_user.role not in ("admin", "pastor"):
         raise HTTPException(status_code=403, detail="Cannot delete this short")
-    clip.is_deleted = True
-    db.add(clip)
+
+    # Cascade: remove saved/bookmarked items referencing this short
+    await db.execute(
+        delete(Meditation).where(
+            Meditation.entity_type.in_(["short", "glory_clip"]),
+            Meditation.entity_id == short_id,
+        )
+    )
+    # Hard-delete the clip (ORM cascade removes amens, comments, views)
+    await db.delete(clip)
+    await db.flush()
+    return Response(status_code=204)
 
 
 # ══════════════════════════════════════════════════════════════════
