@@ -37,6 +37,7 @@ from app.routers.chat import router as chat_router
 from app.routers.payment_methods import router as payment_methods_router
 from app.routers.support import router as support_router
 from app.routers.uploads import router as uploads_router
+from app.routers.music import router as music_router
 
 
 from sqlalchemy import text
@@ -44,6 +45,7 @@ from app.database import engine
 import app.models.store  # Ensure Base metadata collects the Product model during migration
 import app.routers.payment_methods  # Ensure PaymentMethod model is collected
 import app.routers.support  # Ensure SupportTicket model is collected
+import app.models.music  # Ensure music models are collected
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -166,6 +168,7 @@ app.include_router(payment_methods_router, prefix=API_PREFIX)
 app.include_router(support_router, prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(uploads_router, prefix=API_PREFIX)
+app.include_router(music_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})

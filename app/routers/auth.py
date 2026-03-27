@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.database import get_db
 from app.models.user import User, AuditLog, UserRole
@@ -32,7 +33,11 @@ async def _track_login(db: AsyncSession, user_id: int):
     if existing_day:
         return  # Already counted for today
 
-    db.add(UserLoginDay(user_id=user_id, login_date=today))
+    try:
+        async with db.begin_nested():
+            db.add(UserLoginDay(user_id=user_id, login_date=today))
+    except IntegrityError:
+        return  # Race condition matched, another request inserted first
 
     # Update streak record
     streak = (await db.execute(select(UserStreak).where(
@@ -55,6 +60,8 @@ async def _track_login(db: AsyncSession, user_id: int):
             streak.longest_streak = streak.current_streak
         streak.last_login_date = today
         db.add(streak)
+
+    await db.flush()
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
@@ -266,6 +273,8 @@ async def get_my_streak(
     db: AsyncSession = Depends(get_db),
 ):
     """Return the authenticated user's login streak stats."""
+    await _track_login(db, current_user.id)
+    
     streak = (await db.execute(select(UserStreak).where(
         UserStreak.user_id == current_user.id
     ))).scalar_one_or_none()

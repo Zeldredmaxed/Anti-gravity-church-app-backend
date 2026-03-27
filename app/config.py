@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> List[str]:
         return json.loads(self.CORS_ORIGINS)
 
+    # SMTP (email delivery for song downloads)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+
     # Church Info (White Label)
     CHURCH_NAME: str = "New Birth Praise and Worship Center"
     CHURCH_ADDRESS: str = ""

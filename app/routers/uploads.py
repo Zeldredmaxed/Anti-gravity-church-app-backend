@@ -29,7 +29,7 @@ ALL_ALLOWED = ALLOWED_IMAGE_TYPES | ALLOWED_VIDEO_TYPES | ALLOWED_AUDIO_TYPES
 
 # Max file sizes
 MAX_IMAGE_SIZE = 10 * 1024 * 1024   # 10 MB
-MAX_VIDEO_SIZE = 100 * 1024 * 1024  # 100 MB
+MAX_VIDEO_SIZE = 300 * 1024 * 1024  # 300 MB
 MAX_AUDIO_SIZE = 20 * 1024 * 1024   # 20 MB
 
 
@@ -100,14 +100,24 @@ async def upload_file(
     # Upload to Cloudinary
     resource = _resource_type(content_type)
     try:
-        result = cloudinary.uploader.upload(
-            content,
-            resource_type=resource,
-            folder=folder or "church-media",
-            use_filename=True,
-            unique_filename=True,
-            overwrite=False,
-        )
+        if resource == "video":
+            result = cloudinary.uploader.upload_large(
+                content,
+                resource_type=resource,
+                folder=folder or "church-media",
+                use_filename=True,
+                unique_filename=True,
+                overwrite=False,
+            )
+        else:
+            result = cloudinary.uploader.upload(
+                content,
+                resource_type=resource,
+                folder=folder or "church-media",
+                use_filename=True,
+                unique_filename=True,
+                overwrite=False,
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
@@ -161,14 +171,24 @@ async def upload_multiple_files(
 
         resource = _resource_type(content_type)
         try:
-            result = cloudinary.uploader.upload(
-                content,
-                resource_type=resource,
-                folder=folder or "church-media",
-                use_filename=True,
-                unique_filename=True,
-                overwrite=False,
-            )
+            if resource == "video":
+                result = cloudinary.uploader.upload_large(
+                    content,
+                    resource_type=resource,
+                    folder=folder or "church-media",
+                    use_filename=True,
+                    unique_filename=True,
+                    overwrite=False,
+                )
+            else:
+                result = cloudinary.uploader.upload(
+                    content,
+                    resource_type=resource,
+                    folder=folder or "church-media",
+                    use_filename=True,
+                    unique_filename=True,
+                    overwrite=False,
+                )
             results.append({
                 "url": result["secure_url"],
                 "public_id": result["public_id"],
