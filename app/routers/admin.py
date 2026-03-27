@@ -10,8 +10,14 @@ import secrets
 from app.database import get_db
 from app.models.user import User, AuditLog
 from app.models.church import RegistrationKey
+from app.models.member import Member
+from app.models.donation import Donation
+from app.models.task import MinistryTask, TaskStatus
+from app.models.prayer import PrayerRequest
+
 from app.schemas.user import UserResponse, UserRegister, UserRoleUpdate, AuditLogResponse
 from app.utils.security import hash_password, get_current_user, require_role
+from datetime import datetime, timezone, timedelta
 from app.dependencies import PaginationParams
 from app.config import settings
 
@@ -95,4 +101,81 @@ async def get_settings(current_user: User = Depends(require_role("admin", "pasto
         "church_phone": settings.CHURCH_PHONE,
         "church_email": settings.CHURCH_EMAIL,
         "church_website": settings.CHURCH_WEBSITE,
+    }
+
+
+@router.get("/dashboard/metrics")
+async def get_dashboard_metrics(
+    current_user: User = Depends(require_role("admin", "pastor")),
+    db: AsyncSession = Depends(get_db)
+):
+    """Aggregate top-level metrics for the ChMS Admin Home Screen."""
+    now = datetime.now(timezone.utc)
+    thirty_days_ago = now - timedelta(days=30)
+    first_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    if now.month == 1:
+        first_of_last_month = now.replace(year=now.year-1, month=12, day=1, hour=0, minute=0, second=0, microsecond=0)
+    else:
+        first_of_last_month = now.replace(month=now.month-1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # 1. Members
+    total_members = (await db.execute(
+        select(func.count(Member.id)).where(Member.church_id == current_user.church_id, Member.is_deleted == False)
+    )).scalar() or 0
+    
+    new_visitors = (await db.execute(
+        select(func.count(Member.id)).where(
+            Member.church_id == current_user.church_id, 
+            Member.membership_status == "visitor",
+            Member.created_at >= thirty_days_ago
+        )
+    )).scalar() or 0
+
+    # 2. Finance
+    this_month_giving = (await db.execute(
+        select(func.sum(Donation.amount)).where(
+            Donation.church_id == current_user.church_id,
+            Donation.status == "succeeded",
+            Donation.donation_date >= first_of_month
+        )
+    )).scalar() or 0.0
+
+    last_month_giving = (await db.execute(
+        select(func.sum(Donation.amount)).where(
+            Donation.church_id == current_user.church_id,
+            Donation.status == "succeeded",
+            Donation.donation_date >= first_of_last_month,
+            Donation.donation_date < first_of_month
+        )
+    )).scalar() or 0.0
+
+    # 3. Action Items
+    pending_tasks = (await db.execute(
+        select(func.count(MinistryTask.id)).where(
+            MinistryTask.church_id == current_user.church_id,
+            MinistryTask.status == TaskStatus.PENDING.value
+        )
+    )).scalar() or 0
+    
+    pending_prayers = (await db.execute(
+        select(func.count(PrayerRequest.id)).where(
+            PrayerRequest.church_id == current_user.church_id,
+            PrayerRequest.status == "pending"
+        )
+    )).scalar() or 0
+
+    return {
+        "members": {
+            "total_active": total_members,
+            "new_visitors_30d": new_visitors
+        },
+        "finance": {
+            "giving_this_month": round(this_month_giving, 2),
+            "giving_last_month": round(last_month_giving, 2)
+        },
+        "action_items": {
+            "pending_followups": pending_tasks,
+            "pending_prayers": pending_prayers
+        }
     }

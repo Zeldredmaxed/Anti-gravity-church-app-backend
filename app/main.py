@@ -38,8 +38,13 @@ from app.routers.payment_methods import router as payment_methods_router
 from app.routers.support import router as support_router
 from app.routers.uploads import router as uploads_router
 from app.routers.music import router as music_router
-
-
+from app.routers.automations import router as automations_router
+from app.routers.assets import router as assets_router
+from app.routers.checkin import router as checkin_router
+from app.routers.communications import router as communications_router
+from app.routers.campuses import router as campuses_router
+from app.routers.discipleship import router as discipleship_router
+from app.routers.tasks import router as tasks_router
 from sqlalchemy import text
 from app.database import engine
 import app.models.store  # Ensure Base metadata collects the Product model during migration
@@ -108,7 +113,15 @@ async def lifespan(app: FastAPI):
             pass # Ignore if column already exists or bio doesn't exist
     print("Completed automated schema checks.")
 
+    # Start background tasks
+    import asyncio
+    from app.services.automation_runner import automation_task_runner
+    runner_task = asyncio.create_task(automation_task_runner())
+
     yield
+    
+    # Cancel background tasks
+    runner_task.cancel()
 
 
 app = FastAPI(
@@ -169,6 +182,13 @@ app.include_router(support_router, prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(uploads_router, prefix=API_PREFIX)
 app.include_router(music_router, prefix=API_PREFIX)
+app.include_router(automations_router, prefix=API_PREFIX)
+app.include_router(assets_router, prefix=API_PREFIX)
+app.include_router(checkin_router, prefix=API_PREFIX)
+app.include_router(communications_router, prefix=API_PREFIX)
+app.include_router(campuses_router, prefix=API_PREFIX)
+app.include_router(discipleship_router, prefix=API_PREFIX)
+app.include_router(tasks_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})

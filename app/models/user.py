@@ -13,6 +13,8 @@ class UserRole(str, enum.Enum):
     ADMIN = "admin"
     PASTOR = "pastor"
     STAFF = "staff"
+    MINISTRY_LEADER = "ministry_leader"
+    FINANCE_TEAM = "finance_team"
     VOLUNTEER = "volunteer"
     MEMBER = "member"
 

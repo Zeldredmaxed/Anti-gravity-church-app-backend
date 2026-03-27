@@ -29,12 +29,13 @@ class Service(Base):
     service_type = Column(String(30), default=ServiceType.SUNDAY_MORNING.value, nullable=False)
     day_of_week = Column(String(15), nullable=True)
     start_time = Column(String(10), nullable=True)
-    campus = Column(String(100), nullable=True)
+    campus_id = Column(Integer, ForeignKey("campuses.id"), nullable=True, index=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     attendance_records = relationship("AttendanceRecord", back_populates="service", lazy="dynamic")
+    campus = relationship("Campus")
 
 
 class AttendanceRecord(Base):

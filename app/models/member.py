@@ -26,6 +26,13 @@ class BaptismType(str, enum.Enum):
     POURING = "pouring"
 
 
+class HealthStatus(str, enum.Enum):
+    AT_RISK = "at_risk"
+    INCONSISTENT = "inconsistent"
+    ENGAGED = "engaged"
+    NEW = "new"
+
+
 class NoteType(str, enum.Enum):
     GENERAL = "general"
     PRAYER_REQUEST = "prayer_request"
@@ -40,6 +47,7 @@ class Member(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     church_id = Column(Integer, ForeignKey("churches.id"), nullable=False, index=True)
+    campus_id = Column(Integer, ForeignKey("campuses.id"), nullable=True, index=True)
 
     # Personal Info
     first_name = Column(String(100), nullable=False, index=True)
@@ -73,8 +81,15 @@ class Member(Base):
     baptism_pastor = Column(String(255), nullable=True)
 
     # Spiritual Milestones
+    salvation_status = Column(String(50), nullable=True)
     salvation_date = Column(Date, nullable=True)
+    completed_membership_class = Column(Boolean, default=False)
+    membership_class_date = Column(Date, nullable=True)
     spiritual_gifts = Column(JSON, nullable=True)
+    
+    # Health Metrics
+    health_score = Column(Integer, nullable=True)  # 0-100 score
+    health_status = Column(String(20), nullable=True) # e.g. from HealthStatus enum
 
     # Background Check
     background_check_status = Column(String(50), nullable=True)
@@ -102,6 +117,7 @@ class Member(Base):
     church = relationship("Church", back_populates="members")
     family = relationship("Family", back_populates="members")
     notes = relationship("MemberNote", back_populates="member", lazy="dynamic")
+    campus = relationship("Campus", back_populates="members")
     donations = relationship("Donation", back_populates="donor", lazy="dynamic")
     attendance_records = relationship("AttendanceRecord", back_populates="member", lazy="dynamic")
     pledges = relationship("Pledge", back_populates="member", lazy="dynamic")

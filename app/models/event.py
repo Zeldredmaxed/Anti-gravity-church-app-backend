@@ -32,6 +32,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     church_id = Column(Integer, ForeignKey("churches.id"), nullable=False, index=True)
+    campus_id = Column(Integer, ForeignKey("campuses.id"), nullable=True, index=True)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     event_type = Column(String(30), default=EventType.SERVICE.value, nullable=False)
@@ -54,6 +55,7 @@ class Event(Base):
     # Relationships
     creator = relationship("User")
     rsvps = relationship("EventRSVP", back_populates="event", cascade="all, delete-orphan")
+    campus = relationship("Campus")
 
 
 class EventRSVP(Base):

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\Administrator\Newbirth Anti gravity\test_init.py", line 5, in <module>
+    import app.main
+  File "C:\Users\Administrator\Newbirth Anti gravity\app\main.py", line 47, in <module>
+    from app.routers.tasks import router as tasks_router
+  File "C:\Users\Administrator\Newbirth Anti gravity\app\routers\tasks.py", line 16, in <module>
+    from app.services.alerts import create_alert
+ModuleNotFoundError: No module named 'app.services.alerts'

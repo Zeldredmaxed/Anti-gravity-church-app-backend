@@ -243,3 +243,29 @@ async def get_attendees(
             guests_count=r.guests_count, notes=r.notes,
             created_at=r.created_at))
     return items
+
+
+# --- Volunteers ---
+
+from app.models.volunteer import VolunteerSchedule
+from app.schemas.volunteer import VolunteerScheduleResponse
+
+@router.get("/{event_id}/volunteers", response_model=list[VolunteerScheduleResponse])
+async def get_event_volunteers(
+    event_id: int,
+    current_user: User = Depends(require_role("admin", "pastor", "staff", "ministry_leader")),
+    db: AsyncSession = Depends(get_db)):
+    
+    # Check event exists
+    e = (await db.execute(select(Event).where(
+        Event.id == event_id, Event.church_id == current_user.church_id
+    ))).scalar_one_or_none()
+    
+    if not e:
+        raise HTTPException(status_code=404, detail="Event not found")
+        
+    query = select(VolunteerSchedule).where(VolunteerSchedule.event_id == event_id)
+    schedules = (await db.execute(query)).scalars().all()
+    
+    return schedules
+

@@ -4,7 +4,7 @@ import enum
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, Integer, String, Boolean, DateTime, Text,
-    ForeignKey
+    ForeignKey, JSON
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -43,12 +43,18 @@ class PrayerRequest(Base):
     prayed_count = Column(Integer, default=0)
     visibility = Column(String(20), default=PrayerVisibility.CHURCH_ONLY.value, nullable=False)
     is_deleted = Column(Boolean, default=False)
+    
+    # Leader Care
+    assigned_leader_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    follow_up_log = Column(JSON, nullable=True) # Array of objects {"date", "note", "leader_id"}
+    
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    author = relationship("User")
+    author = relationship("User", foreign_keys=[author_id])
+    assigned_leader = relationship("User", foreign_keys=[assigned_leader_id])
     responses = relationship("PrayerResponseEntry", back_populates="prayer_request",
                               cascade="all, delete-orphan")
 

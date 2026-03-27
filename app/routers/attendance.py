@@ -191,16 +191,62 @@ async def first_time_guests(days: int = Query(30, ge=1, le=90),
 
 
 # --- Group Attendance ---
-@router.post("/groups", status_code=201)
+@router.post("/group/check-in", status_code=201)
 async def record_group_attendance(data: GroupAttendanceCreate,
     current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     recorded = 0
+    # verify group exists
+    from app.models.group import Group
+    g = (await db.execute(select(Group).where(Group.id == data.group_id, Group.church_id == current_user.church_id))).scalar_one_or_none()
+    if not g:
+        raise HTTPException(status_code=404, detail="Group not found")
+        
+    # Prevent duplicate records
     for mid in data.member_ids:
-        ga = GroupAttendance(group_id=data.group_id, member_id=mid,
-                             date=data.date, recorded_by=current_user.id)
-        db.add(ga); recorded += 1
-    await db.flush()
+        existing = (await db.execute(select(GroupAttendance).where(
+            GroupAttendance.group_id == data.group_id,
+            GroupAttendance.member_id == mid,
+            GroupAttendance.date == data.date
+        ))).scalar_one_or_none()
+        if not existing:
+            ga = GroupAttendance(group_id=data.group_id, member_id=mid,
+                                church_id=current_user.church_id,
+                                date=data.date, recorded_by=current_user.id)
+            db.add(ga); recorded += 1
+    await db.commit()
     return {"recorded": recorded, "group_id": data.group_id, "date": data.date.isoformat()}
+
+
+@router.get("/group/{group_id}/metrics")
+async def get_group_metrics(group_id: int, 
+    current_user: User = Depends(require_role("admin", "pastor", "ministry_leader")),
+    db: AsyncSession = Depends(get_db)):
+    
+    # 1. Total unique attendees across all time
+    unique_attendees = (await db.execute(
+        select(func.count(func.distinct(GroupAttendance.member_id)))
+        .where(GroupAttendance.group_id == group_id)
+    )).scalar() or 0
+    
+    # 2. Average attendance per session (last 12 sessions)
+    sessions = (await db.execute(
+        select(func.count(GroupAttendance.id))
+        .where(GroupAttendance.group_id == group_id)
+        .group_by(GroupAttendance.date)
+        .order_by(GroupAttendance.date.desc())
+        .limit(12)
+    )).scalars().all()
+    avg_attendance = sum(sessions) / len(sessions) if sessions else 0
+    
+    return {
+        "group_id": group_id,
+        "metrics": {
+            "total_unique_attendees": unique_attendees,
+            "average_session_attendance": round(avg_attendance, 1),
+            "total_sessions_recorded": len(sessions)
+        }
+    }
+
 
 
 # ═══════════════════════════════════════════════════════════════════

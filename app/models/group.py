@@ -42,7 +42,7 @@ class Group(Base):
     meeting_location = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     max_capacity = Column(Integer, nullable=True)
-    campus = Column(String(100), nullable=True)
+    campus_id = Column(Integer, ForeignKey("campuses.id"), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -53,6 +53,7 @@ class Group(Base):
     # Relationships
     memberships = relationship("GroupMembership", back_populates="group", lazy="selectin")
     attendance_records = relationship("GroupAttendance", back_populates="group", lazy="dynamic")
+    campus = relationship("Campus")
 
 
 class GroupMembership(Base):

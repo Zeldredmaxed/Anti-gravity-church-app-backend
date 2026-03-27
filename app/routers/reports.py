@@ -359,7 +359,60 @@ async def analytics_giving_trends(
             ) if previous else None,
         })
 
-    return {"year": year, "monthly_trends": months}
+    summary = {"year": year, "monthly_trends": months}
+    return summary
+
+
+@router.get("/tax-statements")
+async def get_tax_statements(
+    year: int = Query(None, description="Year to generate statements for"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin", "pastor", "staff", "finance_team")),
+):
+    """
+    Generate downloadable yearly CSV tax receipts for active donors.
+    """
+    target_year = year or (date.today().year - 1)
+    
+    start_date = date(target_year, 1, 1)
+    end_date = date(target_year, 12, 31)
+
+    # Fetch all donations in the year
+    query = select(Donation, Member).join(Member).where(
+        Donation.church_id == current_user.church_id,
+        Donation.date >= start_date,
+        Donation.date <= end_date,
+        Donation.donor_id.isnot(None)
+    )
+    result = await db.execute(query)
+    records = result.all()
+
+    # Aggregate by donor
+    donor_totals = {}
+    for donation, member in records:
+        if member.id not in donor_totals:
+            donor_totals[member.id] = {
+                "name": f"{member.first_name} {member.last_name}",
+                "email": member.email or "",
+                "address": f"{member.address or ''} {member.city or ''} {member.state or ''} {member.zip_code or ''}".strip(),
+                "total": Decimal("0.0")
+            }
+        donor_totals[member.id]["total"] += donation.amount
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Donor ID", "Name", "Email", "Address", f"Total Amount ({target_year})", "Tax Deductible"])
+    
+    for donor_id, data in donor_totals.items():
+        writer.writerow([donor_id, data["name"], data["email"], data["address"], format(data["total"], ".2f"), "Yes"])
+        
+    output.seek(0)
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=tax_statements_{target_year}.csv"}
+    )
 
 
 @router.get("/analytics/growth")

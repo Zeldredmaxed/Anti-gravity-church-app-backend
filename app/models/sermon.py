@@ -43,6 +43,10 @@ class Sermon(Base):
     is_published = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
 
+    # Worship / Planning
+    worship_setlist = Column(JSON, default=list) # Array of songs
+    volunteer_schedule_id = Column(Integer, ForeignKey("volunteer_schedules.id"), nullable=True)
+
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
