@@ -119,16 +119,30 @@ async def create_post(
     if data.post_type == "announcement" and current_user.role not in ("admin", "pastor"):
         raise HTTPException(status_code=403, detail="Only pastors can create announcements")
 
-    post = Post(
-        church_id=current_user.church_id, author_id=current_user.id,
-        content=data.content, media_urls=data.media_urls or [],
-        post_type=data.post_type, visibility=data.visibility,
-    )
-    db.add(post)
-    await db.flush()
-    await db.refresh(post)
-    await process_mentions(db, post.content, current_user.id, "post", post.id)
-    return {"data": _post_response(post, current_user.full_name, getattr(current_user, "avatar_url", None), False)}
+    # Guard against null church_id
+    if not current_user.church_id:
+        raise HTTPException(status_code=400, detail="You must join a church before posting")
+
+    try:
+        post = Post(
+            church_id=current_user.church_id, author_id=current_user.id,
+            content=data.content or "", media_urls=data.media_urls or [],
+            post_type=data.post_type, visibility=data.visibility,
+        )
+        db.add(post)
+        await db.flush()
+        await db.refresh(post)
+
+        if post.content:
+            await process_mentions(db, post.content, current_user.id, "post", post.id)
+
+        return {"data": _post_response(post, current_user.full_name, getattr(current_user, "avatar_url", None), False)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to create post: {str(e)}")
 
 
 # ── Also keep POST /feed/posts for backward compat ──────────────
