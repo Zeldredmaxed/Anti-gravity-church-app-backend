@@ -229,8 +229,8 @@ async def update_profile(
     if data.date_of_birth is not None:
         current_user.date_of_birth = data.date_of_birth
 
-    if data.bio is not None:
-        current_user.bio = data.bio
+    if data.testimony_summary is not None:
+        current_user.testimony_summary = data.testimony_summary
     if data.website is not None:
         current_user.website = data.website
     if data.avatar_url is not None:
