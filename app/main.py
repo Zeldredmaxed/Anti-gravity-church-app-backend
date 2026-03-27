@@ -62,6 +62,18 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
         "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
         "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);",
+        # ── Churches table ──
+        "ALTER TABLE churches ADD COLUMN description TEXT;",
+        "ALTER TABLE churches ADD COLUMN logo_url VARCHAR(500);",
+        "ALTER TABLE churches ADD COLUMN address VARCHAR(500);",
+        "ALTER TABLE churches ADD COLUMN phone VARCHAR(20);",
+        "ALTER TABLE churches ADD COLUMN email VARCHAR(255);",
+        "ALTER TABLE churches ADD COLUMN website VARCHAR(255);",
+        "ALTER TABLE churches ADD COLUMN pastor_name VARCHAR(255);",
+        "ALTER TABLE churches ADD COLUMN youtube_channel_id VARCHAR(50);",
+        "ALTER TABLE churches ADD COLUMN latitude FLOAT;",
+        "ALTER TABLE churches ADD COLUMN longitude FLOAT;",
+        "ALTER TABLE churches ADD COLUMN settings JSON;",,
         # ── Sermons table ──
         "ALTER TABLE sermons ADD COLUMN transcript TEXT;",
         # ── GloryClips table ──

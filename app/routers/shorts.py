@@ -295,8 +295,11 @@ async def debug_shorts(db: AsyncSession = Depends(get_db)):
                 # Test the enrichment
                 from app.models.user import User
                 from app.models.church import Church
-                author = (await db.execute(select(User).where(User.id == s.author_id))).scalar_one_or_none()
-                church = (await db.execute(select(Church).where(Church.id == s.church_id))).scalar_one_or_none()
+                from app.routers.glory_clips import _enrich
+                
+                # We attempt to enrich which creates the GloryClipResponse!
+                test_user = (await db.execute(select(User).limit(1))).scalar_one_or_none()
+                res_obj = await _enrich(db, s, test_user)
             except Exception as e:
                 errors.append(f"Error on clip {s.id}: {str(e)}\n{traceback.format_exc()}")
         
