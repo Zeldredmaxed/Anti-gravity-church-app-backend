@@ -209,3 +209,39 @@ async def upload_multiple_files(
             results.append({"error": f"Failed '{file.filename}': {str(e)}"})
 
     return {"data": results}
+
+
+@router.get("/sign")
+async def get_upload_signature(
+    resource_type: str = "image",
+    folder: str = "church-media",
+    current_user: User = Depends(get_current_user),
+):
+    """Return a signed upload credential for direct Cloudinary uploads.
+
+    The client can use these to upload directly to Cloudinary via their
+    upload API, completely bypassing the backend as a file proxy.
+    """
+    import time
+    timestamp = int(time.time())
+
+    # Build parameters to sign
+    params = {
+        "timestamp": timestamp,
+        "folder": folder,
+    }
+
+    # Generate signature
+    signature = cloudinary.utils.api_sign_request(
+        params,
+        os.environ.get("CLOUDINARY_API_SECRET", ""),
+    )
+
+    return {
+        "cloud_name": os.environ.get("CLOUDINARY_CLOUD_NAME", ""),
+        "api_key": os.environ.get("CLOUDINARY_API_KEY", ""),
+        "timestamp": timestamp,
+        "signature": signature,
+        "folder": folder,
+        "resource_type": resource_type,
+    }
