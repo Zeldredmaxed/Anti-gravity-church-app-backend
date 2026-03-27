@@ -15,7 +15,7 @@ from app.utils.security import get_current_user
 router = APIRouter(prefix="/shorts", tags=["Shorts (Glory Clips)"])
 
 
-def _short_response(s, author_name=None, church_name=None, is_amened=False):
+def _short_response(s, author_name=None, church_name=None, is_amened=False, author_avatar=None):
     return {
         "id": s.id,
         "title": s.title,
@@ -24,6 +24,7 @@ def _short_response(s, author_name=None, church_name=None, is_amened=False):
         "thumbnail_url": s.thumbnail_url,
         "author_id": s.author_id,
         "author_name": author_name,
+        "author_avatar": author_avatar,
         "church_name": church_name,
         "church_id": s.church_id,
         "like_count": s.amen_count or 0,
@@ -47,6 +48,7 @@ async def _enrich(db, clip, current_user):
         author.full_name if author else None,
         church.name if church else None,
         is_amened,
+        getattr(author, "avatar_url", None) if author else None,
     )
 
 

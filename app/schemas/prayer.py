@@ -27,6 +27,7 @@ class PrayerRequestResponse(BaseModel):
     church_id: int
     author_id: Optional[int] = None  # Hidden if anonymous
     author_name: Optional[str] = None
+    author_avatar: Optional[str] = None
     title: str
     description: Optional[str] = None
     category: str
@@ -50,8 +51,9 @@ class PrayerResponseCreate(BaseModel):
 
 class PrayerResponseSchema(BaseModel):
     id: int
-    responder_id: Optional[int] = None
-    responder_name: Optional[str] = None
+    author_id: Optional[int] = None
+    author_name: Optional[str] = None
+    author_avatar: Optional[str] = None
     content: Optional[str] = None
     is_prayed: bool = True
     created_at: datetime

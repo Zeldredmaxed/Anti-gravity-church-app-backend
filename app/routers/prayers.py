@@ -17,11 +17,12 @@ from app.utils.security import get_current_user, require_role
 router = APIRouter(prefix="/prayers", tags=["Prayer Requests"])
 
 
-def _prayer_response(p, author_name=None, responses=None, is_prayed_by_me=False):
+def _prayer_response(p, author_name=None, responses=None, is_prayed_by_me=False, author_avatar=None):
     return PrayerRequestResponse(
         id=p.id, church_id=p.church_id,
         author_id=None if p.is_anonymous else p.author_id,
         author_name=None if p.is_anonymous else author_name,
+        author_avatar=None if p.is_anonymous else author_avatar,
         title=p.title, description=p.description, category=p.category,
         is_anonymous=p.is_anonymous, is_urgent=p.is_urgent,
         is_answered=p.is_answered, answered_testimony=p.answered_testimony,
@@ -73,7 +74,12 @@ async def prayer_wall(
     items = []
     for p in prayers:
         author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-        items.append(_prayer_response(p, author.full_name if author else None, is_prayed_by_me=(p.id in my_prayers)))
+        items.append(_prayer_response(
+            p, 
+            author.full_name if author else None, 
+            is_prayed_by_me=(p.id in my_prayers), 
+            author_avatar=getattr(author, "avatar_url", None) if author else None
+        ))
     return items
 
 
@@ -92,7 +98,8 @@ async def submit_prayer(
     await db.refresh(prayer)
     return _prayer_response(prayer,
         None if data.is_anonymous else current_user.full_name,
-        is_prayed_by_me=False)
+        is_prayed_by_me=False,
+        author_avatar=None if data.is_anonymous else getattr(current_user, "avatar_url", None))
 
 
 @router.get("/{prayer_id}", response_model=PrayerRequestResponse)
@@ -119,8 +126,9 @@ async def get_prayer(
     for r in resp_rows:
         responder = (await db.execute(select(User).where(User.id == r.responder_id))).scalar_one_or_none()
         responses.append(PrayerResponseSchema(
-            id=r.id, responder_id=r.responder_id,
-            responder_name=responder.full_name if responder else None,
+            id=r.id, author_id=r.responder_id,
+            author_name=responder.full_name if responder else None,
+            author_avatar=getattr(responder, "avatar_url", None) if responder else None,
             content=r.content, is_prayed=r.is_prayed,
             created_at=r.created_at))
 
@@ -130,7 +138,13 @@ async def get_prayer(
         PrayerResponseEntry.is_prayed == True
     ))).scalar_one_or_none() is not None
 
-    return _prayer_response(p, author.full_name if author else None, responses, is_prayed_by_me=is_prayed)
+    return _prayer_response(
+        p, 
+        author.full_name if author else None, 
+        responses, 
+        is_prayed_by_me=is_prayed,
+        author_avatar=getattr(author, "avatar_url", None) if author else None
+    )
 
 
 @router.post("/{prayer_id}/pray")
@@ -209,8 +223,9 @@ async def respond_to_prayer(
     await db.flush()
     await db.refresh(resp)
     return PrayerResponseSchema(
-        id=resp.id, responder_id=resp.responder_id,
-        responder_name=current_user.full_name,
+        id=resp.id, author_id=resp.responder_id,
+        author_name=current_user.full_name,
+        author_avatar=getattr(current_user, "avatar_url", None),
         content=resp.content, is_prayed=resp.is_prayed,
         created_at=resp.created_at)
 
