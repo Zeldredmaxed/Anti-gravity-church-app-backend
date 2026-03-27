@@ -50,8 +50,9 @@ async def lifespan(app: FastAPI):
     """Initialize database on startup."""
     await init_db()
     
-    # Run critical one-time migration for church_id 
+    # Run critical one-time migrations
     migrations = [
+        # ── Users table ──
         "ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;",
         "ALTER TABLE users ADD COLUMN username VARCHAR(50);",
         "ALTER TABLE users ADD COLUMN date_of_birth TIMESTAMP WITH TIME ZONE;",
@@ -60,7 +61,16 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE users RENAME COLUMN bio TO testimony_summary;",
         "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
         "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
-        "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);"
+        "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);",
+        # ── Posts table (feed) ──
+        "ALTER TABLE posts ADD COLUMN amen_count INTEGER DEFAULT 0;",
+        "ALTER TABLE posts ADD COLUMN comments_count INTEGER DEFAULT 0;",
+        "ALTER TABLE posts ADD COLUMN shares_count INTEGER DEFAULT 0;",
+        "ALTER TABLE posts ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE;",
+        "ALTER TABLE posts ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;",
+        "ALTER TABLE posts ADD COLUMN media_urls JSON;",
+        "ALTER TABLE posts ADD COLUMN post_type VARCHAR(30) DEFAULT 'text';",
+        "ALTER TABLE posts ADD COLUMN visibility VARCHAR(20) DEFAULT 'members_only';",
     ]
     
     for query in migrations:
