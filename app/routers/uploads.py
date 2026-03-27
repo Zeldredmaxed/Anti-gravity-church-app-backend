@@ -63,6 +63,7 @@ def _media_category(content_type: str) -> str:
 
 
 @router.post("")
+@router.post("/")
 async def upload_file(
     file: UploadFile = File(...),
     category: Optional[str] = Form(None),
