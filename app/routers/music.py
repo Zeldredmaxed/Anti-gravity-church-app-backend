@@ -53,7 +53,145 @@ async def _get_artist_name(db: AsyncSession, artist_id: int) -> str:
     return artist.artist_name if artist else "Unknown Artist"
 
 
-# ── Radio Queue ─────────────────────────────────────────────────────
+# ── Server-Side Radio Station ───────────────────────────────────────
+# The station plays continuously on the server's timeline.
+# Every client that "tunes in" gets the current song + how far into it
+# we are, so they join mid-song — just like real radio.
+
+DEFAULT_SONG_DURATION = 210  # 3:30 fallback if duration not stored
+
+
+class RadioStation:
+    """Global singleton that tracks what the radio is playing right now."""
+
+    def __init__(self):
+        self.queue: list[dict] = []       # list of song dicts
+        self.queue_index: int = 0
+        self.song_started_at: datetime | None = None
+        self.last_listener_at: datetime | None = None
+        self.is_live: bool = False
+
+    def _current_song_duration(self) -> int:
+        if not self.queue:
+            return DEFAULT_SONG_DURATION
+        song = self.queue[self.queue_index % len(self.queue)]
+        return song.get("duration_seconds") or DEFAULT_SONG_DURATION
+
+    def advance_if_needed(self) -> None:
+        """Auto-advance past any songs whose time has elapsed."""
+        if not self.is_live or not self.queue or not self.song_started_at:
+            return
+
+        now = datetime.now(timezone.utc)
+        elapsed = (now - self.song_started_at).total_seconds()
+        dur = self._current_song_duration()
+
+        # Keep advancing while elapsed > current song duration
+        while elapsed >= dur and self.queue:
+            self.queue_index = (self.queue_index + 1) % len(self.queue)
+            self.song_started_at = self.song_started_at + timedelta(seconds=dur)
+            elapsed = (now - self.song_started_at).total_seconds()
+            dur = self._current_song_duration()
+
+    def now_playing(self) -> dict | None:
+        """Return the current song + elapsed seconds."""
+        if not self.is_live or not self.queue:
+            return None
+
+        self.advance_if_needed()
+
+        song = self.queue[self.queue_index % len(self.queue)]
+        elapsed = 0.0
+        if self.song_started_at:
+            elapsed = (datetime.now(timezone.utc) - self.song_started_at).total_seconds()
+
+        return {
+            "song": song,
+            "elapsed_seconds": round(elapsed, 1),
+            "queue_position": self.queue_index,
+            "queue_length": len(self.queue),
+            "is_live": True,
+        }
+
+    async def ensure_live(self, db: AsyncSession) -> None:
+        """Start the station if it's not running, or refresh queue if empty."""
+        now = datetime.now(timezone.utc)
+        self.last_listener_at = now
+
+        # Check 5-min idle timeout
+        if self.is_live and self.queue:
+            return  # Already running
+
+        # Load songs from DB and build queue
+        result = await db.execute(
+            select(Song).where(Song.is_approved == True, Song.is_active == True)
+        )
+        songs = list(result.scalars().all())
+        if not songs:
+            self.is_live = False
+            return
+
+        random.shuffle(songs)
+
+        # Build enriched queue with artist names
+        enriched = []
+        for s in songs:
+            artist = (await db.execute(
+                select(ArtistProfile).where(ArtistProfile.id == s.artist_id)
+            )).scalar_one_or_none()
+            enriched.append({
+                "id": s.id,
+                "artist_id": s.artist_id,
+                "artist_name": artist.artist_name if artist else "Unknown Artist",
+                "title": s.title,
+                "genre": s.genre,
+                "audio_url": s.audio_url,
+                "cover_url": s.cover_url,
+                "duration_seconds": s.duration_seconds,
+                "play_count": s.play_count,
+                "donation_count": s.donation_count,
+            })
+
+        self.queue = enriched
+        self.queue_index = 0
+        self.song_started_at = now
+        self.is_live = True
+
+
+# Global singleton instance — shared across all requests
+_station = RadioStation()
+
+
+@router.get("/radio/now-playing")
+async def radio_now_playing(
+    _=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Tune in to the live radio station.
+
+    Returns the currently playing song and how many seconds have elapsed,
+    so the client can seek to the correct position — joining mid-song
+    just like real radio.
+    """
+    await _station.ensure_live(db)
+
+    data = _station.now_playing()
+    if not data:
+        return {"data": None, "message": "No songs available. Upload some music!"}
+
+    return {"data": data}
+
+
+@router.post("/radio/heartbeat")
+async def radio_heartbeat(
+    _=Depends(get_current_user),
+):
+    """Client sends this every ~60s to keep the station alive.
+    If no heartbeats for 5 minutes, the station pauses.
+    """
+    _station.last_listener_at = datetime.now(timezone.utc)
+    return {"status": "ok"}
+
 
 @router.get("/radio")
 async def get_radio_queue(
@@ -61,7 +199,7 @@ async def get_radio_queue(
     _=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Return a shuffled queue of approved songs for radio playback."""
+    """Legacy endpoint — return a shuffled queue of approved songs."""
     result = await db.execute(
         select(Song).where(Song.is_approved == True, Song.is_active == True)
     )
