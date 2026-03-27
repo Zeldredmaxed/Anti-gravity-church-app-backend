@@ -12,7 +12,7 @@ from app.database import get_db
 from app.models.user import User
 from app.models.music import Song, ArtistProfile, MusicDonation, SkipSubscription
 from app.schemas.music import (
-    SongCreate, SongResponse,
+    SongCreate, SongUpdate, SongResponse,
     ArtistRegister, ArtistProfileResponse,
     MusicDonationCreate, MusicDonationResponse,
     SkipPremiumStatus,
@@ -145,6 +145,41 @@ async def upload_song(
     return {"data": _song_resp(song, artist.artist_name)}
 
 
+@router.put("/songs/{song_id}")
+async def update_song(
+    song_id: int,
+    data: SongUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Edit a song's title, genre, or cover art. Only the artist who uploaded it can edit."""
+    song = (await db.execute(select(Song).where(Song.id == song_id))).scalar_one_or_none()
+    if not song:
+        raise HTTPException(status_code=404, detail="Song not found")
+
+    # Verify ownership
+    artist = (await db.execute(
+        select(ArtistProfile).where(
+            ArtistProfile.id == song.artist_id,
+            ArtistProfile.user_id == current_user.id,
+        )
+    )).scalar_one_or_none()
+    if not artist:
+        raise HTTPException(status_code=403, detail="You can only edit your own songs")
+
+    if data.title is not None:
+        song.title = data.title
+    if data.genre is not None:
+        song.genre = data.genre
+    if data.cover_url is not None:
+        song.cover_url = data.cover_url
+
+    db.add(song)
+    await db.flush()
+    await db.refresh(song)
+    return {"data": _song_resp(song, artist.artist_name)}
+
+
 @router.post("/songs/{song_id}/play")
 async def record_play(
     song_id: int,
@@ -224,6 +259,26 @@ async def get_my_artist_profile(
         "song_count": song_count,
         "created_at": artist.created_at,
     }}
+
+
+@router.get("/artist/me/songs")
+async def get_my_songs(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all songs by the current artist."""
+    artist = (await db.execute(
+        select(ArtistProfile).where(ArtistProfile.user_id == current_user.id)
+    )).scalar_one_or_none()
+    if not artist:
+        raise HTTPException(status_code=403, detail="You are not registered as an artist")
+
+    songs = (await db.execute(
+        select(Song).where(Song.artist_id == artist.id)
+        .order_by(desc(Song.created_at))
+    )).scalars().all()
+
+    return {"data": [_song_resp(s, artist.artist_name) for s in songs]}
 
 
 @router.get("/artist/{artist_id}")

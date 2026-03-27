@@ -35,6 +35,11 @@ class SongCreate(BaseModel):
     cover_url: str  # Required — must upload cover art
     duration_seconds: Optional[int] = None
 
+class SongUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    genre: Optional[str] = None
+    cover_url: Optional[str] = None
+
 class SongResponse(BaseModel):
     id: int
     artist_id: int
