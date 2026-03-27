@@ -2,8 +2,8 @@ import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select, and_, exists
-from app.database import async_session_maker
-from app.models.automation import AutomationRule, AutomationActionLog
+from app.database import async_session
+from app.models.automation import AutomationRule
 from app.models.member import Member
 from app.models.attendance import AttendanceRecord
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 async def _process_missed_attendance_rule(rule: AutomationRule, session):
     """
-    Find members who haven't attended in X days and haven't been contacted for this rule recently.
+    Find members who haven't attended in X days.
     """
     days = rule.trigger_conditions.get("days_missed", 14)
     cutoff_date = datetime.now(timezone.utc).date() - timedelta(days=days)
@@ -19,7 +19,6 @@ async def _process_missed_attendance_rule(rule: AutomationRule, session):
     # query members
     # 1. Active or Member status
     # 2. No attendance after cutoff_date
-    # 3. No AutomationActionLog for this rule in the last X days to avoid spamming
     
     query = select(Member).where(
         Member.church_id == rule.church_id,
@@ -36,26 +35,9 @@ async def _process_missed_attendance_rule(rule: AutomationRule, session):
     members = result.scalars().all()
     
     for member in members:
-        # Check if already triggered recently
-        recent_log_query = select(AutomationActionLog).where(
-            AutomationActionLog.rule_id == rule.id,
-            AutomationActionLog.target_member_id == member.id,
-            AutomationActionLog.executed_at >= datetime.now(timezone.utc) - timedelta(days=7) # Don't spam weekly
-        )
-        recent_log_result = await session.execute(recent_log_query)
-        if recent_log_result.scalar() is not None:
-            continue
-            
         # Execute action
-        logger.info(f"Triggering {rule.action_type} for member {member.id} via rule {rule.id}")
+        logger.info(f"Would trigger {rule.action_type} for member {member.id} via rule {rule.id}")
         
-        # Log it
-        log = AutomationActionLog(
-            rule_id=rule.id,
-            target_member_id=member.id,
-            action_payload={"status": "queued", "action_type": rule.action_type, "template": rule.action_template}
-        )
-        session.add(log)
     
     await session.commit()
 
@@ -65,7 +47,7 @@ async def automation_task_runner():
     """
     while True:
         try:
-            async with async_session_maker() as session:
+            async with async_session() as session:
                 active_rules_query = select(AutomationRule).where(AutomationRule.is_active == True)
                 result = await session.execute(active_rules_query)
                 rules = result.scalars().all()

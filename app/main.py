@@ -109,8 +109,10 @@ async def lifespan(app: FastAPI):
             async with engine.begin() as conn:
                 await conn.execute(text(query))
         except Exception as e:
-            print(f"Migration skipped/failed for '{query[:30]}...': {e}")
-            pass # Ignore if column already exists or bio doesn't exist
+            e_str = str(e).lower()
+            # Ignore harmless expected errors for duplicate columns or non-existent sequences
+            if "already exists" not in e_str and "does not exist" not in e_str:
+                print(f"Migration skipped/failed for '{query[:30]}...': {e}")
     print("Completed automated schema checks.")
 
     # Start background tasks
