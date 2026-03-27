@@ -1,13 +1,16 @@
-"""Attendance tracking router: check-in/out, trends, absentees, guests."""
+"""Attendance tracking router: check-in/out, trends, absentees, guests, Sunday geo-check-in."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from typing import Optional
 from datetime import date, datetime, timezone, timedelta
+import math
 
 from app.database import get_db
 from app.models.attendance import Service, AttendanceRecord, GroupAttendance
+from app.models.sunday_checkin import SundayCheckIn
+from app.models.church import Church
 from app.models.member import Member
 from app.models.user import User
 from app.schemas.attendance import (
@@ -17,8 +20,27 @@ from app.schemas.attendance import (
 )
 from app.utils.security import get_current_user, require_role
 from app.dependencies import PaginationParams
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
+
+
+# ── Haversine distance (miles) ────────────────────────────────────
+def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate distance between two lat/lng points in miles."""
+    R = 3958.8  # Earth radius in miles
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) ** 2 +
+         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+         math.sin(dlon / 2) ** 2)
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+# ── Pydantic schema for Sunday check-in ──────────────────────────
+class SundayCheckInRequest(BaseModel):
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
 
 
 # --- Services ---
@@ -179,3 +201,158 @@ async def record_group_attendance(data: GroupAttendanceCreate,
         db.add(ga); recorded += 1
     await db.flush()
     return {"recorded": recorded, "group_id": data.group_id, "date": data.date.isoformat()}
+
+
+# ═══════════════════════════════════════════════════════════════════
+# GEO-BASED SUNDAY ATTENDANCE
+# ═══════════════════════════════════════════════════════════════════
+
+MAX_CHECKIN_DISTANCE_MILES = 0.5  # Half mile radius
+
+
+@router.post("/sunday-checkin", status_code=201)
+async def sunday_checkin(
+    data: SundayCheckInRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Geo-verify Sunday church attendance.
+
+    The frontend should call this on Sundays around 12:15 PM.
+    The backend checks if the user is within 0.5 miles of their church.
+    """
+    if not current_user.church_id:
+        raise HTTPException(status_code=400, detail="You must belong to a church to check in")
+
+    church = (await db.execute(
+        select(Church).where(Church.id == current_user.church_id)
+    )).scalar_one_or_none()
+    if not church:
+        raise HTTPException(status_code=404, detail="Church not found")
+    if church.latitude is None or church.longitude is None:
+        raise HTTPException(status_code=400, detail="Church location has not been set by the pastor")
+
+    # Calculate distance
+    distance = _haversine_miles(data.latitude, data.longitude, church.latitude, church.longitude)
+    if distance > MAX_CHECKIN_DISTANCE_MILES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"You are {distance:.2f} miles from church. Must be within {MAX_CHECKIN_DISTANCE_MILES} miles to check in."
+        )
+
+    today = date.today()
+
+    # Prevent duplicate check-in for same day
+    existing = (await db.execute(select(SundayCheckIn).where(
+        SundayCheckIn.user_id == current_user.id,
+        SundayCheckIn.check_in_date == today,
+    ))).scalar_one_or_none()
+    if existing:
+        return {"data": {"message": "Already checked in today", "distance_miles": round(distance, 3)}}
+
+    checkin = SundayCheckIn(
+        user_id=current_user.id,
+        church_id=current_user.church_id,
+        check_in_date=today,
+        latitude=data.latitude,
+        longitude=data.longitude,
+        distance_miles=round(distance, 4),
+        year=today.year,
+    )
+    db.add(checkin)
+    await db.flush()
+
+    # Get updated year count
+    year_count = (await db.execute(select(func.count()).where(
+        SundayCheckIn.user_id == current_user.id,
+        SundayCheckIn.year == today.year,
+    ))).scalar() or 0
+
+    return {"data": {
+        "message": "Church attendance recorded!",
+        "distance_miles": round(distance, 3),
+        "sundays_this_year": year_count,
+    }}
+
+
+@router.get("/my-sundays")
+async def my_sundays(
+    year: int = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return the authenticated user's Sunday attendance history and year stats."""
+    target_year = year or date.today().year
+
+    # This year's check-ins
+    checkins = (await db.execute(
+        select(SundayCheckIn)
+        .where(SundayCheckIn.user_id == current_user.id, SundayCheckIn.year == target_year)
+        .order_by(SundayCheckIn.check_in_date.desc())
+    )).scalars().all()
+
+    # Last year's total for comparison
+    last_year_count = (await db.execute(select(func.count()).where(
+        SundayCheckIn.user_id == current_user.id,
+        SundayCheckIn.year == target_year - 1,
+    ))).scalar() or 0
+
+    # All-time best year
+    best_year_row = (await db.execute(
+        select(SundayCheckIn.year, func.count().label("cnt"))
+        .where(SundayCheckIn.user_id == current_user.id)
+        .group_by(SundayCheckIn.year)
+        .order_by(func.count().desc())
+        .limit(1)
+    )).first()
+
+    return {"data": {
+        "year": target_year,
+        "sundays_attended": len(checkins),
+        "last_year_total": last_year_count,
+        "best_year": best_year_row[0] if best_year_row else None,
+        "best_year_count": best_year_row[1] if best_year_row else 0,
+        "on_track_to_beat_last_year": len(checkins) > last_year_count,
+        "dates": [c.check_in_date.isoformat() for c in checkins],
+    }}
+
+
+@router.get("/sunday-stats/{user_id}")
+async def sunday_stats_for_user(
+    user_id: int,
+    year: int = Query(None),
+    current_user: User = Depends(require_role("admin", "pastor")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Pastor view — see any member's Sunday attendance stats."""
+    target_year = year or date.today().year
+
+    user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    count = (await db.execute(select(func.count()).where(
+        SundayCheckIn.user_id == user_id,
+        SundayCheckIn.year == target_year,
+    ))).scalar() or 0
+
+    last_year_count = (await db.execute(select(func.count()).where(
+        SundayCheckIn.user_id == user_id,
+        SundayCheckIn.year == target_year - 1,
+    ))).scalar() or 0
+
+    dates = (await db.execute(
+        select(SundayCheckIn.check_in_date)
+        .where(SundayCheckIn.user_id == user_id, SundayCheckIn.year == target_year)
+        .order_by(SundayCheckIn.check_in_date.desc())
+    )).scalars().all()
+
+    return {"data": {
+        "user_id": user_id,
+        "user_name": user.full_name,
+        "year": target_year,
+        "sundays_attended": count,
+        "last_year_total": last_year_count,
+        "on_track": count > last_year_count,
+        "dates": [d.isoformat() for d in dates],
+    }}

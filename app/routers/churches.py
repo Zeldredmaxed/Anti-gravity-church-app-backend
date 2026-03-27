@@ -164,7 +164,7 @@ async def update_church_settings(
     # Apply any matching fields
     allowed = {"name", "description", "address", "phone", "email", "website",
                "logo_url", "cover_url", "service_times", "social_links",
-               "features_enabled", "theme_color"}
+               "features_enabled", "theme_color", "latitude", "longitude"}
     for key, value in data.items():
         if key in allowed:
             setattr(church, key, value)

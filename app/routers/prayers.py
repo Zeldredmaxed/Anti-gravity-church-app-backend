@@ -133,12 +133,12 @@ async def get_prayer(
     return _prayer_response(p, author.full_name if author else None, responses, is_prayed_by_me=is_prayed)
 
 
-@router.post("/{prayer_id}/pray", status_code=201)
-async def pray_for_request(
+@router.post("/{prayer_id}/pray")
+async def toggle_pray(
     prayer_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
-    """Increment 'I prayed for this' counter."""
+    """Toggle 'I prayed for this' — pray if not already, unpray if already prayed."""
     p = (await db.execute(select(PrayerRequest).where(
         PrayerRequest.id == prayer_id, PrayerRequest.is_deleted == False
     ))).scalar_one_or_none()
@@ -151,25 +151,32 @@ async def pray_for_request(
         PrayerResponseEntry.responder_id == current_user.id,
         PrayerResponseEntry.content.is_(None),
     ))).scalar_one_or_none()
+
     if existing:
-        raise HTTPException(status_code=400, detail="Already prayed for this")
+        # Unpray — remove record, decrement count
+        await db.delete(existing)
+        p.prayed_count = max((p.prayed_count or 1) - 1, 0)
+        db.add(p)
+        await db.flush()
+        return {"data": {"has_prayed": False, "pray_count": p.prayed_count}}
+    else:
+        # Pray — create record, increment count
+        resp = PrayerResponseEntry(
+            prayer_request_id=prayer_id, responder_id=current_user.id,
+            is_prayed=True)
+        db.add(resp)
+        p.prayed_count = (p.prayed_count or 0) + 1
+        db.add(p)
 
-    resp = PrayerResponseEntry(
-        prayer_request_id=prayer_id, responder_id=current_user.id,
-        is_prayed=True)
-    db.add(resp)
-    p.prayed_count = (p.prayed_count or 0) + 1
-    db.add(p)
+        # Notify author
+        if p.author_id != current_user.id:
+            await create_alert(db, p.author_id, "prayer",
+                f"{current_user.full_name} prayed for your request",
+                data={"link_type": "prayer", "link_id": prayer_id},
+                church_id=p.church_id)
 
-    # Notify author
-    if p.author_id != current_user.id:
-        await create_alert(db, p.author_id, "prayer",
-            f"{current_user.full_name} prayed for your request",
-            data={"link_type": "prayer", "link_id": prayer_id},
-            church_id=p.church_id)
-
-    await db.flush()
-    return {"message": "Prayer recorded", "prayed_count": p.prayed_count}
+        await db.flush()
+        return {"data": {"has_prayed": True, "pray_count": p.prayed_count}}
 
 
 @router.post("/{prayer_id}/respond", response_model=PrayerResponseSchema, status_code=201)

@@ -1,7 +1,7 @@
 """Church (tenant) model — the multi-tenancy anchor."""
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, JSON, Float
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -20,6 +20,8 @@ class Church(Base):
     website = Column(String(255), nullable=True)
     pastor_name = Column(String(255), nullable=True)
     youtube_channel_id = Column(String(50), nullable=True)
+    latitude = Column(Float, nullable=True)   # Pastor-set church location
+    longitude = Column(Float, nullable=True)  # for geo-based attendance
     settings = Column(JSON, default=dict)  # Church-specific config
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

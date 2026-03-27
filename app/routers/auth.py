@@ -1,11 +1,13 @@
 """Auth router: registration, login, token refresh, profile — multi-tenant."""
 
+from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
 from app.models.user import User, AuditLog, UserRole
+from app.models.login_streak import UserLoginDay, UserStreak
 from app.schemas.user import (
     UserRegister, UserLogin, TokenResponse, TokenRefresh,
     UserResponse, UserUpdate, UserRoleUpdate,
@@ -17,6 +19,42 @@ from app.utils.security import (
 from app.schemas.user import JoinChurchRequest
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+async def _track_login(db: AsyncSession, user_id: int):
+    """Record today's login and update the streak."""
+    today = date.today()
+
+    # Upsert the daily record (skip if already logged in today)
+    existing_day = (await db.execute(select(UserLoginDay).where(
+        UserLoginDay.user_id == user_id, UserLoginDay.login_date == today
+    ))).scalar_one_or_none()
+    if existing_day:
+        return  # Already counted for today
+
+    db.add(UserLoginDay(user_id=user_id, login_date=today))
+
+    # Update streak record
+    streak = (await db.execute(select(UserStreak).where(
+        UserStreak.user_id == user_id
+    ))).scalar_one_or_none()
+
+    if not streak:
+        db.add(UserStreak(
+            user_id=user_id, current_streak=1, longest_streak=1,
+            total_logins=1, last_login_date=today,
+        ))
+    else:
+        streak.total_logins += 1
+        yesterday = today - timedelta(days=1)
+        if streak.last_login_date == yesterday:
+            streak.current_streak += 1
+        elif streak.last_login_date != today:
+            streak.current_streak = 1  # Streak broken
+        if streak.current_streak > streak.longest_streak:
+            streak.longest_streak = streak.current_streak
+        streak.last_login_date = today
+        db.add(streak)
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
@@ -121,6 +159,9 @@ async def login(
     )
     db.add(audit)
 
+    # Track login streak
+    await _track_login(db, user.id)
+
     token_data = {"sub": str(user.id), "church_id": user.church_id, "role": user.role}
     return TokenResponse(
         access_token=create_access_token(token_data),
@@ -217,3 +258,26 @@ async def change_password(
     current_user.hashed_password = hash_password(data.new_password)
     db.add(current_user)
     await db.commit()
+
+
+@router.get("/streak")
+async def get_my_streak(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return the authenticated user's login streak stats."""
+    streak = (await db.execute(select(UserStreak).where(
+        UserStreak.user_id == current_user.id
+    ))).scalar_one_or_none()
+
+    if not streak:
+        return {"data": {
+            "current_streak": 0, "longest_streak": 0,
+            "total_logins": 0, "last_login_date": None,
+        }}
+    return {"data": {
+        "current_streak": streak.current_streak,
+        "longest_streak": streak.longest_streak,
+        "total_logins": streak.total_logins,
+        "last_login_date": streak.last_login_date.isoformat() if streak.last_login_date else None,
+    }}
