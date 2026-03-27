@@ -93,6 +93,15 @@ class RadioStation:
             elapsed = (now - self.song_started_at).total_seconds()
             dur = self._current_song_duration()
 
+    def force_advance(self) -> None:
+        """Client-triggered advance when a song finishes on device."""
+        if not self.is_live or not self.queue:
+            return
+        
+        # Advance the index and reset the started_at timestamp to now
+        self.queue_index = (self.queue_index + 1) % len(self.queue)
+        self.song_started_at = datetime.now(timezone.utc)
+
     def now_playing(self) -> dict | None:
         """Return the current song + elapsed seconds."""
         if not self.is_live or not self.queue:
@@ -191,6 +200,17 @@ async def radio_heartbeat(
     """
     _station.last_listener_at = datetime.now(timezone.utc)
     return {"status": "ok"}
+
+
+@router.post("/radio/advance")
+async def radio_advance(
+    _=Depends(get_current_user),
+):
+    """Client calls this when the audio finishes playing on the device.
+    Forces the server to move to the next song immediately.
+    """
+    _station.force_advance()
+    return {"status": "advanced"}
 
 
 @router.get("/radio")
