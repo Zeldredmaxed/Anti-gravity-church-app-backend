@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE churches ADD COLUMN youtube_channel_id VARCHAR(50);",
         "ALTER TABLE churches ADD COLUMN latitude FLOAT;",
         "ALTER TABLE churches ADD COLUMN longitude FLOAT;",
-        "ALTER TABLE churches ADD COLUMN settings JSON;",,
+        "ALTER TABLE churches ADD COLUMN settings JSON;",
         # ── Sermons table ──
         "ALTER TABLE sermons ADD COLUMN transcript TEXT;",
         # ── GloryClips table ──
