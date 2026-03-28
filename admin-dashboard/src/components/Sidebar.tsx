@@ -1,22 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  Squares2X2Icon, 
-  UsersIcon, 
-  BanknotesIcon,
-  CalendarIcon,
-  ChatBubbleLeftRightIcon,
-  Cog6ToothIcon
-} from '@heroicons/react/24/outline'; // Need to install @heroicons/react
+  LayoutDashboard, 
+  Users, 
+  HeartHandshake,
+  Calendar,
+  Grid,
+  Heart,
+  UserCheck,
+  Settings,
+  CreditCard 
+} from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Squares2X2Icon },
-    { name: 'Members', href: '/members', icon: UsersIcon },
-    { name: 'Giving', href: '/giving', icon: BanknotesIcon },
-    { name: 'Events', href: '/events', icon: CalendarIcon },
-    { name: 'Communications', href: '/communications', icon: ChatBubbleLeftRightIcon },
-    { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Members', href: '/people', icon: Users },
+    { name: 'Attendance', href: '/attendance', icon: UserCheck },
+    { name: 'Giving', href: '/giving', icon: CreditCard },
+    { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Groups', href: '/groups', icon: Grid },
+    { name: 'Care', href: '/care', icon: Heart },
+    { name: 'Volunteers', href: '/volunteers', icon: HeartHandshake },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   return (
@@ -32,6 +38,7 @@ export const Sidebar: React.FC = () => {
       padding: '2rem 1rem',
       display: 'flex',
       flexDirection: 'column',
+      zIndex: 100,
     }}>
       <div style={{ marginBottom: '3rem', padding: '0 1rem' }}>
         <h2 style={{ 
@@ -46,7 +53,7 @@ export const Sidebar: React.FC = () => {
         </h2>
       </div>
 
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
         {navigation.map((item) => (
           <NavLink
             key={item.name}
@@ -65,7 +72,7 @@ export const Sidebar: React.FC = () => {
               border: isActive ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid transparent',
             })}
           >
-            <item.icon style={{ width: '1.5rem', height: '1.5rem' }} />
+            <item.icon size={20} />
             {item.name}
           </NavLink>
         ))}

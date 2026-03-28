@@ -1,24 +1,34 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
-import { Login } from './pages/Login';
-import { DashboardHome } from './pages/DashboardHome';
+import { DashboardView } from './pages/DashboardView';
+import { MembersView } from './pages/MembersView';
+import { GivingView } from './pages/GivingView';
+import { AttendanceView } from './pages/AttendanceView';
+import { EventsView } from './pages/EventsView';
+import { GroupsView } from './pages/GroupsView';
+import { CareView } from './pages/CareView';
+import { VolunteersView } from './pages/VolunteersView';
+import { SettingsView } from './pages/SettingsView';
+import { ProfileView } from './pages/ProfileView';
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<DashboardHome />} />
-            {/* Future routes: /members, /giving, /events, /communications, /settings */}
-            <Route path="*" element={<div style={{ padding: '2rem' }}>Module Coming Soon</div>} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<DashboardView />} />
+          <Route path="people" element={<MembersView />} />
+          <Route path="giving" element={<GivingView />} />
+          <Route path="attendance" element={<AttendanceView />} />
+          <Route path="events" element={<EventsView />} />
+          <Route path="groups" element={<GroupsView />} />
+          <Route path="care" element={<CareView />} />
+          <Route path="volunteers" element={<VolunteersView />} />
+          <Route path="settings" element={<SettingsView />} />
+          <Route path="profile" element={<ProfileView />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;

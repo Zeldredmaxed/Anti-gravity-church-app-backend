@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaithWorks CRM Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --accent-gray: #8a8d91;
+            --card-radius: 20px;
+            --dark-card-bg: #2d2e30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 30px;
+            background-attachment: fixed;
+        }
+
+        /* === Typography === */
+        h1 { font-size: 28px; font-weight: 600; margin-bottom: 5px; }
+        h2 { font-size: 20px; font-weight: 500; }
+        h3 { font-size: 16px; font-weight: 500; margin-bottom: 15px; }
+        .text-muted { color: var(--text-muted); }
+        .large-stat { font-size: 36px; font-weight: 600; margin: 10px 0; }
+
+        /* === Reusable Classes === */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .flex { display: flex; }
+        .flex-col { display: flex; flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-10 { gap: 10px; }
+        .gap-15 { gap: 15px; }
+        .gap-20 { gap: 20px; }
+
+        /* === Header === */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+        
+        .nav-pills {
+            display: flex;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 30px;
+            padding: 5px;
+            gap: 5px;
+        }
+        .nav-pill {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .nav-pill.active {
+            background: #333;
+            color: white;
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 15px; position: relative;}
+        .icon-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex; justify-content: center; align-items: center;
+            border: none; cursor: pointer;
+            position: relative;
+        }
+        .notification-dot {
+            position: absolute; top: 10px; right: 10px;
+            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
+        }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+
+        /* Mock Dropdowns */
+        .dropdown {
+            position: absolute;
+            top: 50px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 150px;
+            z-index: 10;
+        }
+        .dropdown.left { right: 60px; }
+        .dropdown.right { right: 0; }
+        .dropdown-item {
+            padding: 8px 15px; font-size: 13px; cursor: pointer;
+        }
+        .dropdown-item:hover { background: #f5f5f5; }
+
+        /* === Hero & Quick Actions === */
+        .hero { margin-bottom: 30px; }
+        .quick-actions { margin-top: 20px; display: flex; gap: 15px; }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-yellow { background: var(--accent-yellow); color: #333; }
+        .btn-gray { background: var(--accent-gray); color: white; }
+        .btn-white { background: white; color: #333; }
+
+        /* === Main Grid Layout === */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2.5fr 1.2fr 3fr 2fr;
+            gap: 20px;
+        }
+
+        /* === Column 1: Bars & Insights === */
+        .progress-section { margin-bottom: 20px; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+        .progress-track { width: 100%; height: 12px; background: rgba(255,255,255,0.7); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; }
+        .fill-yellow { background: var(--accent-yellow); width: 25%; }
+        .fill-dark { background: #333; width: 78%; }
+        .fill-striped { 
+            width: 65%;
+            background: repeating-linear-gradient(-45deg, #333, #333 4px, transparent 4px, transparent 8px);
+        }
+
+        .ai-insights ul { list-style: none; padding: 0; margin-top: 15px; }
+        .ai-insights li { font-size: 13px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+        .ai-insights li::before { content: "•"; color: #333; font-weight: bold; }
+        .insight-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-dark { background: #333; color: white; padding: 10px; border-radius: 12px; font-size: 12px; flex: 1; text-align: center; cursor: pointer; border: none;}
+        .btn-dark span { display: block; font-size: 10px; color: #aaa; margin-top: 3px;}
+
+        /* === Column 2: Donut & Avatars === */
+        .donut-wrapper { display: flex; justify-content: center; align-items: center; padding: 20px 0; }
+        .donut-chart {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#b0b3b8 10%, rgba(255,255,255,0.5) 0);
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .donut-inner {
+            width: 90px; height: 90px;
+            background: #fdf6ec; /* matches roughly the background behind it */
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 24px; font-weight: bold;
+        }
+
+        .avatar-list { display: flex; flex-direction: column; gap: 15px; align-items: center;}
+        .avatar-row { display: flex; gap: 10px; }
+        .avatar-small { width: 32px; height: 32px; border-radius: 50%; background: #ccc; }
+        .avatar-yellow { background: var(--accent-yellow); }
+        .letters { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; font-size: 12px; font-weight: bold; color: #555;}
+
+        /* === Column 3: Top Stats & Calendar === */
+        .top-stats-container { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-card { flex: 1; position: relative; }
+        .stat-icon-bottom { position: absolute; bottom: 20px; left: 24px; color: #666; font-size: 18px;}
+        .stat-trend { position: absolute; top: 24px; right: 24px; color: #2e7d32; font-size: 18px; display: flex; flex-direction: column; align-items: center;}
+
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-add-event { background: #333; color: white; border: none; padding: 6px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; }
+        
+        .calendar-grid { display: flex; }
+        .time-col { width: 60px; font-size: 12px; color: #666; display: flex; flex-direction: column; gap: 40px; padding-top: 40px;}
+        .days-col { flex: 1; }
+        .days-header { display: flex; justify-content: space-between; font-size: 13px; text-align: center; margin-bottom: 20px; color: #555;}
+        .day { flex: 1; }
+        
+        .calendar-body { position: relative; height: 200px; border-left: 1px dashed rgba(0,0,0,0.1); }
+        .event {
+            position: absolute;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex; align-items: center; gap: 8px;
+            right: 10px;
+        }
+        .event-white { background: white; top: 10px; left: 10px; width: 80%; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
+        .event-dark { background: #333; color: white; top: 50px; left: 60px; width: 70%; }
+        .event-light { background: rgba(255,255,255,0.7); top: 120px; left: 140px; width: 40%; }
+        .event-outline { background: white; border: 1px solid #ddd; top: 170px; left: 140px; width: 40%; }
+
+        /* === Column 4: Sidebar === */
+        .sidebar-stat { margin-bottom: 20px; position: relative;}
+        
+        .action-center { background: var(--dark-card-bg); color: white; border: none; }
+        .action-center h3 { color: white; margin-bottom: 20px; font-size: 18px;}
+        .action-list { display: flex; flex-direction: column; gap: 15px; }
+        .action-item { display: flex; align-items: center; gap: 15px; }
+        .action-icon { 
+            width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); 
+            display: flex; justify-content: center; align-items: center; color: #ccc;
+        }
+        .action-text { flex: 1; }
+        .action-title { font-size: 14px; font-weight: 500; margin-bottom: 2px;}
+        .action-time { font-size: 12px; color: #999; }
+        .check-icon { color: var(--accent-yellow); font-size: 14px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-church"></i> FaithWorks CRM
+        </div>
+        <div class="nav-pills">
+            <div class="nav-pill active">Dashboard</div>
+            <div class="nav-pill">People</div>
+            <div class="nav-pill">Giving</div>
+            <div class="nav-pill">Services</div>
+            <div class="nav-pill">Groups</div>
+            <div class="nav-pill">Settings</div>
+            <div class="nav-pill">Help</div>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="icon-btn">
+                <i class="fa-regular fa-envelope"></i>
+                <div class="notification-dot"></div>
+            </button>
+            <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar">
+            
+            <div class="dropdown left">
+                <div class="dropdown-item">New members <i class="fa-solid fa-chevron-down" style="float:right; margin-top:3px; font-size:10px;"></i></div>
+                <div class="dropdown-item">Prayer alerts</div>
+                <div class="dropdown-item">Attendance alerts</div>
+            </div>
+            <div class="dropdown right">
+                <div class="dropdown-item">View Profile</div>
+                <div class="dropdown-item">Settings</div>
+                <div class="dropdown-item">Logout</div>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Welcome back, Pastor David</h1>
+        <h2 class="text-muted">Church Dashboard (Command Center)</h2>
+        
+        <div class="quick-actions">
+            <button class="btn btn-yellow"><i class="fa-solid fa-user-plus"></i> Add Member</button>
+            <button class="btn btn-gray"><i class="fa-solid fa-user-check"></i> Log Attendance</button>
+            <button class="btn btn-white"><i class="fa-regular fa-envelope"></i> Send Message</button>
+        </div>
+    </section>
+
+    <main class="dashboard-grid">
+        
+        <div class="flex-col gap-20">
+            <div class="glass-card">
+                <div class="progress-section">
+                    <div class="progress-header"><span>Visitors</span><span>45</span></div>
+                    <div class="progress-track"><div class="progress-fill fill-yellow"></div></div>
+                    <div style="font-size:10px; margin-top:3px;">25%</div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-header"><span>Members</span><span>1,532</span></div>
+                    <div class="progress-track"><div class="progress-fill fill-dark"></div></div>
+                    <div style="font-size:10px; margin-top:3px;">78%</div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-header"><span>Attendance %</span><span>65%</span></div>
+                    <div class="progress-track"><div class="progress-fill fill-striped"></div></div>
+                </div>
+            </div>
+
+            <div class="glass-card ai-insights">
+                <h3>AI Insights <img src="https://i.pravatar.cc/150?img=5" style="width:24px; height:24px; border-radius:50%; float:right;"></h3>
+                <ul>
+                    <li>3 long-term visitors are ready for next steps.</li>
+                    <li>Upcoming event: Youth Camp - planning complete.</li>
+                    <li>Prayer request trend: 5 new requests this week.</li>
+                </ul>
+                <div class="insight-buttons">
+                    <button class="btn-dark">"View Members" <span>opens filtered Members page</span></button>
+                    <button class="btn-dark">"Send Follow-Up" <span>opens communication modal</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-col gap-20">
+            <div class="glass-card">
+                <h3>Goal Output</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart">
+                        <div class="donut-inner">10%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card" style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
+                <div class="avatar-list">
+                    <div class="avatar-row">
+                        <img src="https://i.pravatar.cc/150?img=1" class="avatar-small">
+                        <img src="https://i.pravatar.cc/150?img=2" class="avatar-small">
+                    </div>
+                    <div style="width: 80%; height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0;"></div>
+                    <div style="width: 80%; height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0;"></div>
+                    <div style="width: 80%; height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0;"></div>
+                    <div class="avatar-row" style="margin-top: 10px;">
+                        <img src="https://i.pravatar.cc/150?img=3" class="avatar-small">
+                        <img src="https://i.pravatar.cc/150?img=4" class="avatar-small">
+                        <div class="avatar-small avatar-yellow"></div>
+                    </div>
+                    <div class="letters"><span>S</span><span>W</span><span>T</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-col gap-20">
+            <div class="top-stats-container">
+                <div class="glass-card stat-card">
+                    <h3>Total Members</h3>
+                    <div class="large-stat">1,532</div>
+                    <i class="fa-solid fa-users stat-icon-bottom"></i>
+                </div>
+                <div class="glass-card stat-card">
+                    <h3>Weekly Attendance</h3>
+                    <div class="large-stat">845</div>
+                    <i class="fa-solid fa-users stat-icon-bottom"></i>
+                    <div class="stat-trend"><i class="fa-solid fa-arrow-up"></i></div>
+                </div>
+            </div>
+
+            <div class="glass-card" style="flex: 1;">
+                <div class="calendar-header">
+                    <h3>Calendar - September 2024</h3>
+                    <button class="btn-add-event">+ Add Event</button>
+                </div>
+                
+                <div class="calendar-grid">
+                    <div class="time-col">
+                        <span>8:00 AM</span>
+                        <span>9:00 AM</span>
+                        <span>12:30 PM</span>
+                        <span>12:00 PM</span>
+                    </div>
+                    <div class="days-col">
+                        <div class="days-header">
+                            <div class="day">Mon<br>22</div>
+                            <div class="day">Mon<br>23</div>
+                            <div class="day">Tue<br>23</div>
+                            <div class="day">Wed<br>24</div>
+                            <div class="day">Thu<br>25</div>
+                            <div class="day">Fri<br>26</div>
+                            <div class="day">Sat<br>27</div>
+                        </div>
+                        <div class="calendar-body">
+                            <div class="event event-white"><i class="fa-regular fa-clipboard"></i> Morning Service Prep</div>
+                            <div class="event event-dark"><i class="fa-solid fa-cross"></i> Sunday Service</div>
+                            <div class="event event-light"><i class="fa-solid fa-mug-hot"></i> Youth Group <img src="https://i.pravatar.cc/150?img=8" style="width:16px;height:16px;border-radius:50%;margin-left:5px;"></div>
+                            <div class="event event-outline"><i class="fa-solid fa-book-open"></i> Mid-week Study</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-col gap-20">
+            <div class="glass-card sidebar-stat">
+                <h3>Monthly Giving</h3>
+                <div class="large-stat">$18,750</div>
+                <div class="stat-trend"><i class="fa-solid fa-sack-dollar" style="color:#333; font-size:24px;"></i> <i class="fa-solid fa-arrow-up" style="position:absolute; top:0; right:-15px;"></i></div>
+            </div>
+            
+            <div class="glass-card sidebar-stat">
+                <h3>Pending Actions</h3>
+                <div class="large-stat">12</div>
+                <i class="fa-solid fa-gavel stat-icon-bottom" style="right:24px; left:auto; bottom:24px; font-size: 24px; color:#333;"></i>
+            </div>
+
+            <div class="glass-card action-center">
+                <h3>Action Center</h3>
+                <div class="action-list">
+                    <div class="action-item">
+                        <div class="action-icon"><i class="fa-solid fa-hands-praying"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Prayer Request</div>
+                            <div class="action-time">Sep 13, 08:30</div>
+                        </div>
+                        <i class="fa-solid fa-circle-check check-icon"></i>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-icon"><i class="fa-regular fa-user"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Missed Attendance</div>
+                            <div class="action-time">Sep 13, 10:30</div>
+                        </div>
+                        <i class="fa-solid fa-circle-check check-icon"></i>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-icon"><i class="fa-solid fa-droplet"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Baptism Candidates</div>
+                            <div class="action-time">Sep 13, 13:00</div>
+                        </div>
+                        <i class="fa-solid fa-circle-check check-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

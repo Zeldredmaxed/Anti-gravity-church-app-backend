@@ -45,6 +45,8 @@ from app.routers.communications import router as communications_router
 from app.routers.campuses import router as campuses_router
 from app.routers.discipleship import router as discipleship_router
 from app.routers.tasks import router as tasks_router
+from app.routers.volunteers import router as volunteers_router
+from app.routers.care import router as care_router
 from sqlalchemy import text
 from app.database import engine
 import app.models.store  # Ensure Base metadata collects the Product model during migration
@@ -191,6 +193,8 @@ app.include_router(communications_router, prefix=API_PREFIX)
 app.include_router(campuses_router, prefix=API_PREFIX)
 app.include_router(discipleship_router, prefix=API_PREFIX)
 app.include_router(tasks_router, prefix=API_PREFIX)
+app.include_router(volunteers_router, prefix=API_PREFIX)
+app.include_router(care_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})

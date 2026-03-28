@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clexia - System Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === Variables & Theming === */
+        :root {
+            /* Backgrounds */
+            --bg-page: linear-gradient(135deg, #f7f1e8 0%, #ebe0d0 100%);
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --card-solid: #fcf9f5;
+            
+            /* Text Colors */
+            --text-main: #1a1a1a;
+            --text-muted: #665c55;
+            
+            /* Accents */
+            --accent-gold: #d1a551;
+            --accent-gold-hover: #c49642;
+            --accent-dark: #121212;
+            
+            /* Shadows & Radii */
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-pill: 40px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        body {
+            background: var(--bg-page);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Full width layout */
+        }
+
+        /* === Reusable Glass Card === */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* === Header === */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 4vw;
+            position: relative;
+            z-index: 50;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 6px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--glass-border);
+        }
+
+        .nav-item {
+            padding: 8px 20px;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active {
+            background: var(--accent-dark);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+
+        .icon-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--glass-border);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; position: relative;
+        }
+
+        .notification-dot {
+            position: absolute; top: -2px; right: -2px;
+            background: var(--accent-gold); color: white;
+            width: 10px; height: 10px; border-radius: 50%;
+        }
+
+        .profile-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.6);
+            padding: 6px 16px 6px 6px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--glass-border);
+            font-size: 14px; font-weight: 500; cursor: pointer;
+        }
+        .profile-btn img {
+            width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+        }
+
+        /* Dropdowns (Absolute Positioned based on design) */
+        .notif-dropdown {
+            position: absolute; top: 55px; right: 140px;
+            background: rgba(252, 249, 245, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            width: 240px; box-shadow: var(--shadow-lg);
+            padding: 8px 0; z-index: 100;
+        }
+        .notif-dropdown .item {
+            padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .notif-dropdown .item:last-child { border: none; }
+        .notif-dropdown .title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+        .notif-dropdown .desc { font-size: 11px; color: var(--text-muted); }
+
+        .profile-dropdown {
+            position: absolute; top: 55px; right: 0;
+            background: rgba(252, 249, 245, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            width: 160px; box-shadow: var(--shadow-lg);
+            padding: 8px 0; z-index: 100;
+        }
+        .profile-dropdown .item {
+            padding: 10px 16px; font-size: 13px; font-weight: 500; cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .profile-dropdown .item:hover { background: rgba(0,0,0,0.03); }
+
+        /* === Main Content Area === */
+        main {
+            padding: 0 4vw 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+        }
+
+        .page-title {
+            font-size: 32px; font-weight: 500; margin-bottom: 8px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        /* --- Left Column --- */
+        .left-col {
+            display: flex; flex-direction: column; gap: 24px;
+        }
+
+        .user-profile-card { padding: 24px; position: relative; }
+        .edit-icon-top { position: absolute; top: 20px; right: 20px; color: var(--text-muted); cursor: pointer; }
+        .card-header { font-size: 16px; font-weight: 500; margin-bottom: 20px;}
+        
+        .profile-main { display: flex; gap: 16px; margin-bottom: 24px;}
+        .profile-main img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover;}
+        .profile-info h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px;}
+        .profile-info p { font-size: 13px; color: var(--text-muted); margin-bottom: 8px;}
+        .upload-link { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: underline;}
+
+        .profile-details { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 13px;}
+        .profile-details .label { color: var(--text-muted); }
+        .profile-details .value { font-weight: 500; }
+
+        .activity-log-card { padding: 24px; }
+        .timeline { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; position: relative;}
+        .timeline::before {
+            content: ''; position: absolute; left: 14px; top: 10px; bottom: 10px;
+            width: 1px; background: rgba(0,0,0,0.1); z-index: 1;
+        }
+        .timeline-item { display: flex; gap: 16px; position: relative; z-index: 2;}
+        .tl-icon {
+            width: 28px; height: 28px; background: #fff; border: 1px solid var(--glass-border);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; color: var(--text-muted);
+        }
+        .tl-content { flex: 1; font-size: 12px; line-height: 1.4; font-weight: 500;}
+        .tl-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+        /* --- Right Column --- */
+        .right-col { display: flex; flex-direction: column; gap: 24px; }
+        .top-row-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px;}
+
+        .church-details-card { padding: 24px; display: flex; flex-direction: column;}
+        .cd-info { font-size: 13px; line-height: 1.6; margin-bottom: 24px;}
+        .cd-info .label { color: var(--text-muted); width: 80px; display: inline-block;}
+        .cd-info .value { font-weight: 500; }
+        .btn-gold {
+            background: var(--accent-gold); color: white; border: none; border-radius: 20px;
+            padding: 10px 24px; font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; width: 100%;
+        }
+
+        .ministries-card { padding: 24px; position: relative;}
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;}
+        .stat-box h3 { font-size: 24px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;}
+        .stat-box h3 i { font-size: 16px; color: var(--text-muted);}
+        .stat-box p { font-size: 12px; color: var(--text-muted); line-height: 1.3;}
+        
+        .mock-circle-chart {
+            position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
+            width: 180px; height: 180px; border-radius: 50%;
+            border: 20px solid var(--accent-gold);
+            border-left-color: transparent; border-bottom-color: transparent;
+            transform: translateY(-50%) rotate(45deg); opacity: 0.8;
+        }
+        .mock-circle-chart::after {
+            content: '45'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 32px; font-weight: 500; color: var(--text-main);
+        }
+
+        /* --- Roles & Permissions --- */
+        .roles-card { padding: 24px; flex: 1; display: flex; flex-direction: column;}
+        .roles-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+        .btn-outline-gold {
+            background: transparent; border: 1px solid var(--accent-gold); color: var(--text-main);
+            padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; background: rgba(209, 165, 81, 0.1);
+        }
+
+        .role-list { display: flex; flex-direction: column; gap: 12px; }
+        .role-row {
+            background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border);
+            padding: 16px 20px; border-radius: 16px; display: flex; align-items: center;
+        }
+        .role-title {
+            width: 200px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 12px;
+        }
+        .role-title i { color: var(--text-muted); font-size: 16px;}
+        
+        .role-perms { flex: 1; display: flex; justify-content: space-between; padding-right: 20px;}
+        .perm-item { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .perm-label { font-size: 12px; font-weight: 500; text-align: center; line-height: 1.2;}
+        .perm-sub { font-size: 10px; color: var(--text-muted); }
+
+        /* Custom Toggle Switch */
+        .toggle {
+            width: 44px; height: 24px; background: rgba(0,0,0,0.1); border-radius: 12px;
+            position: relative; cursor: pointer;
+        }
+        .toggle::after {
+            content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+            background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .toggle.on { background: var(--accent-gold); }
+        .toggle.on::after { left: 22px; }
+
+        .role-actions { display: flex; gap: 12px; color: var(--text-muted); }
+        .role-actions i { cursor: pointer; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 50%; font-size: 12px;}
+
+        /* === New Role Modal (Floating over the UI) === */
+        .modal-overlay {
+            position: absolute; top: 200px; right: 15%;
+            background: rgba(252, 249, 245, 0.95);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; width: 340px; padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5);
+            z-index: 200;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+        .modal-header h2 { font-size: 18px; font-weight: 500;}
+        
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px;}
+        .form-group label { font-size: 12px; font-weight: 500;}
+        .form-input {
+            background: white; border: 1px solid var(--glass-border);
+            padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none;
+        }
+
+        .checkbox-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+        }
+        .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; font-weight: 500; line-height: 1.3;}
+        .custom-check {
+            width: 16px; height: 16px; border: 1px solid #ccc; border-radius: 4px;
+            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+        }
+        .custom-check.checked { background: var(--accent-gold); border-color: var(--accent-gold); }
+        .custom-check.checked::after { content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px;}
+
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px;}
+        .btn-cancel {
+            flex: 1; background: transparent; border: 1px solid var(--text-muted); color: var(--text-main);
+            border-radius: 20px; padding: 10px; font-size: 13px; font-weight: 500; cursor: pointer;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Clexia</div>
+        
+        <nav class="main-nav">
+            <div class="nav-item">Dashboard</div>
+            <div class="nav-item">People</div>
+            <div class="nav-item">Ministries</div>
+            <div class="nav-item">Finances</div>
+            <div class="nav-item">Calendar</div>
+            <div class="nav-item">Reports</div>
+            <div class="nav-item active">Settings</div>
+        </nav>
+        
+        <div class="header-actions">
+            <div class="icon-btn"><i class="fa-solid fa-gear"></i></div>
+            <div class="icon-btn">
+                <i class="fa-regular fa-bell"></i>
+                <div class="notification-dot"></div>
+            </div>
+            
+            <div class="profile-btn">
+                <img src="https://i.pravatar.cc/150?img=11" alt="David Chen">
+                David Chen <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+            </div>
+
+            <div class="notif-dropdown">
+                <div class="item">
+                    <div class="title">Dummy notifications <i class="fa-solid fa-chevron-down" style="float:right; font-size:10px;"></i></div>
+                    <div class="desc">dummy eanon notification....</div>
+                </div>
+                <div class="item">
+                    <div class="title">Dummy notifications 4...</div>
+                    <div class="desc">dummy cammy notification...</div>
+                </div>
+            </div>
+
+            <div class="profile-dropdown">
+                <div class="item"><i class="fa-regular fa-user"></i> View Profile</div>
+                <div class="item"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">System Settings</h1>
+
+        <div class="dashboard-grid">
+            
+            <div class="left-col">
+                <div class="glass-card user-profile-card">
+                    <i class="fa-solid fa-pencil edit-icon-top"></i>
+                    <h3 class="card-header">User Profile</h3>
+                    
+                    <div class="profile-main">
+                        <img src="https://i.pravatar.cc/150?img=11" alt="David Chen">
+                        <div class="profile-info">
+                            <h2>David Chen</h2>
+                            <p>Senior Pastor</p>
+                            <div class="upload-link"><i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Image</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="label">Email</div>
+                        <div class="value">d.chen@gracech.org</div>
+                        
+                        <div class="label">Phone</div>
+                        <div class="value">(013) 456-7889</div>
+                        
+                        <div class="label">Subscription Plan</div>
+                        <div class="value">Premium</div>
+                    </div>
+                </div>
+
+                <div class="glass-card activity-log-card">
+                    <h3 class="card-header" style="margin-bottom: 0;">Recent Activity Log</h3>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="tl-icon"><i class="fa-regular fa-user"></i></div>
+                            <div class="tl-content">Pastor Chen added role<br>'Sunday School Lead'</div>
+                            <div class="tl-time">5m ago</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon"><i class="fa-solid fa-gear"></i></div>
+                            <div class="tl-content">System updated to<br>v2.5.1</div>
+                            <div class="tl-time">5m ago</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon"><i class="fa-regular fa-user"></i></div>
+                            <div class="tl-content">Pastor Chen added role<br>'Sunday School Lead'</div>
+                            <div class="tl-time">3m ago</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+                            <div class="tl-content">System updated to v2.5.1</div>
+                            <div class="tl-time">2m ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                
+                <div class="top-row-cards">
+                    <div class="glass-card church-details-card">
+                        <h3 class="card-header">Church Details</h3>
+                        <div class="cd-info">
+                            <div><span class="label">Church Name</span> <span class="value">Grace Community Church</span></div>
+                            <div style="margin-top: 8px;"><span class="label">Address</span> <span class="value">123 Faith Lane, Springfield, IL</span></div>
+                            <div style="margin-top: 8px;"><span class="label">Website</span></div>
+                        </div>
+                        <button class="btn-gold" style="margin-top: auto;">Edit details</button>
+                    </div>
+
+                    <div class="glass-card ministries-card" style="overflow: hidden;">
+                        <h3 class="card-header">Ministries at a Glance</h3>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <h3><i class="fa-solid fa-people-group"></i> 18</h3>
+                                <p>Active<br>Ministries</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3><i class="fa-solid fa-user-plus"></i> 45</h3>
+                                <p>Registered<br>Families</p>
+                            </div>
+                            <div class="stat-box" style="grid-column: span 2; margin-top: 10px;">
+                                <h3><i class="fa-regular fa-clock"></i> 110h/wk</h3>
+                                <p>Volunteer Hours</p>
+                            </div>
+                        </div>
+                        <div class="mock-circle-chart"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card roles-card">
+                    <div class="roles-header">
+                        <h3 class="card-header" style="margin: 0;">Roles & Permissions</h3>
+                        <button class="btn-outline-gold"><i class="fa-solid fa-plus"></i> Add Role</button>
+                    </div>
+
+                    <div class="role-list">
+                        <div class="role-row">
+                            <div class="role-title">
+                                <i class="fa-solid fa-key"></i> Administrator
+                            </div>
+                            <div class="role-perms">
+                                <div class="perm-item">
+                                    <span class="perm-label">Global Settings<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                                <div class="perm-item">
+                                    <span class="perm-label">Manage Users<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                                <div class="perm-item">
+                                    <span class="perm-label">View Finances<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                            </div>
+                            <div class="role-actions">
+                                <i class="fa-solid fa-pencil"></i>
+                                <i class="fa-regular fa-trash-can"></i>
+                            </div>
+                        </div>
+
+                        <div class="role-row">
+                            <div class="role-title">
+                                <i class="fa-regular fa-heart"></i> Ministry Leader
+                            </div>
+                            <div class="role-perms">
+                                <div class="perm-item">
+                                    <span class="perm-label">Manage Ministries<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle"></div>
+                                </div>
+                                <div class="perm-item">
+                                    <span class="perm-label">Create Events<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                                <div class="perm-item">
+                                    <span class="perm-label">Run Own Reports<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                            </div>
+                            <div class="role-actions">
+                                <i class="fa-solid fa-pencil"></i>
+                                <i class="fa-regular fa-trash-can"></i>
+                            </div>
+                        </div>
+
+                        <div class="role-row">
+                            <div class="role-title">
+                                <i class="fa-solid fa-user-group"></i> Member
+                            </div>
+                            <div class="role-perms">
+                                <div class="perm-item">
+                                    <span class="perm-label">Register for Events<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                                <div class="perm-item">
+                                    <span class="perm-label">View Directory<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                                <div class="perm-item">
+                                    <span class="perm-label">Manage Own Profile<br><span class="perm-sub">Click to toggle</span></span>
+                                    <div class="toggle on"></div>
+                                </div>
+                            </div>
+                            <div class="role-actions">
+                                <i class="fa-solid fa-pencil"></i>
+                                <i class="fa-regular fa-trash-can"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-overlay">
+                <div class="modal-header">
+                    <h2>New Role</h2>
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+
+                <div class="form-group">
+                    <label>Role Name</label>
+                    <input type="text" class="form-input" value="Sunday School Lead">
+                </div>
+
+                <div class="checkbox-grid">
+                    <div class="check-item">
+                        <div class="custom-check checked"></div>
+                        <span>Manage SS Roster<br>Plans</span>
+                    </div>
+                    <div class="check-item">
+                        <div class="custom-check checked"></div>
+                        <span>Create SS Lesson<br>Plans</span>
+                    </div>
+                    <div class="check-item">
+                        <div class="custom-check checked"></div>
+                        <span>View Global Finances</span>
+                    </div>
+                    <div class="check-item">
+                        <div class="custom-check"></div>
+                        <span>Communicate with<br>Parents</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Description</label>
+                    <input type="text" class="form-input" value="Assign specific abilities to this role.">
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-gold" style="flex: 1.5;">Create Role</button>
+                    <button class="btn-cancel">Cancel</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

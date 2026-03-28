@@ -1,0 +1,281 @@
+Traceback (most recent call last):
+  File "C:\Users\Administrator\Newbirth Anti gravity\test_lifespan.py", line 6, in main
+    async with app.router.lifespan_context(app):
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Python\Python310\lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+  File "C:\Python\Python310\lib\contextlib.py", line 199, in __aenter__
+    return await anext(self.gen)
+  File "C:\Users\Administrator\Newbirth Anti gravity\app\main.py", line 118, in lifespan
+    from app.services.automation_runner import automation_task_runner
+  File "C:\Users\Administrator\Newbirth Anti gravity\app\services\automation_runner.py", line 5, in <module>
+    from app.database import async_session_maker
+ImportError: cannot import name 'async_session_maker' from 'app.database' (C:\Users\Administrator\Newbirth Anti gravity\app\database.py)
+Migration skipped/failed for 'ALTER TABLE users ALTER COLUMN...': (sqlite3.OperationalError) near "ALTER": syntax error
+[SQL: ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN u...': (sqlite3.OperationalError) duplicate column name: username
+[SQL: ALTER TABLE users ADD COLUMN username VARCHAR(50);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN d...': (sqlite3.OperationalError) duplicate column name: date_of_birth
+[SQL: ALTER TABLE users ADD COLUMN date_of_birth TIMESTAMP WITH TIME ZONE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN s...': (sqlite3.OperationalError) duplicate column name: stripe_customer_id
+[SQL: ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN t...': (sqlite3.OperationalError) duplicate column name: testimony_summary
+[SQL: ALTER TABLE users ADD COLUMN testimony_summary TEXT;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users RENAME COLUM...': (sqlite3.OperationalError) no such column: "bio"
+[SQL: ALTER TABLE users RENAME COLUMN bio TO testimony_summary;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN i...': (sqlite3.OperationalError) duplicate column name: is_anointed
+[SQL: ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN w...': (sqlite3.OperationalError) duplicate column name: website
+[SQL: ALTER TABLE users ADD COLUMN website VARCHAR(255);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE users ADD COLUMN a...': (sqlite3.OperationalError) duplicate column name: avatar_url
+[SQL: ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: description
+[SQL: ALTER TABLE churches ADD COLUMN description TEXT;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: logo_url
+[SQL: ALTER TABLE churches ADD COLUMN logo_url VARCHAR(500);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: address
+[SQL: ALTER TABLE churches ADD COLUMN address VARCHAR(500);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: phone
+[SQL: ALTER TABLE churches ADD COLUMN phone VARCHAR(20);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: email
+[SQL: ALTER TABLE churches ADD COLUMN email VARCHAR(255);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: website
+[SQL: ALTER TABLE churches ADD COLUMN website VARCHAR(255);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: pastor_name
+[SQL: ALTER TABLE churches ADD COLUMN pastor_name VARCHAR(255);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: youtube_channel_id
+[SQL: ALTER TABLE churches ADD COLUMN youtube_channel_id VARCHAR(50);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: latitude
+[SQL: ALTER TABLE churches ADD COLUMN latitude FLOAT;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: longitude
+[SQL: ALTER TABLE churches ADD COLUMN longitude FLOAT;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE churches ADD COLUM...': (sqlite3.OperationalError) duplicate column name: settings
+[SQL: ALTER TABLE churches ADD COLUMN settings JSON;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE sermons ADD COLUMN...': (sqlite3.OperationalError) duplicate column name: transcript
+[SQL: ALTER TABLE sermons ADD COLUMN transcript TEXT;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: thumbnail_url
+[SQL: ALTER TABLE glory_clips ADD COLUMN thumbnail_url VARCHAR(500);]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: duration_seconds
+[SQL: ALTER TABLE glory_clips ADD COLUMN duration_seconds INTEGER;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: view_count
+[SQL: ALTER TABLE glory_clips ADD COLUMN view_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: amen_count
+[SQL: ALTER TABLE glory_clips ADD COLUMN amen_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: comment_count
+[SQL: ALTER TABLE glory_clips ADD COLUMN comment_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: share_count
+[SQL: ALTER TABLE glory_clips ADD COLUMN share_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: is_featured
+[SQL: ALTER TABLE glory_clips ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: tags
+[SQL: ALTER TABLE glory_clips ADD COLUMN tags JSON;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE glory_clips ADD CO...': (sqlite3.OperationalError) duplicate column name: is_deleted
+[SQL: ALTER TABLE glory_clips ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN a...': (sqlite3.OperationalError) duplicate column name: amen_count
+[SQL: ALTER TABLE posts ADD COLUMN amen_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN c...': (sqlite3.OperationalError) duplicate column name: comments_count
+[SQL: ALTER TABLE posts ADD COLUMN comments_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN s...': (sqlite3.OperationalError) duplicate column name: shares_count
+[SQL: ALTER TABLE posts ADD COLUMN shares_count INTEGER DEFAULT 0;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN i...': (sqlite3.OperationalError) duplicate column name: is_pinned
+[SQL: ALTER TABLE posts ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN i...': (sqlite3.OperationalError) duplicate column name: is_deleted
+[SQL: ALTER TABLE posts ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN m...': (sqlite3.OperationalError) duplicate column name: media_urls
+[SQL: ALTER TABLE posts ADD COLUMN media_urls JSON;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN p...': (sqlite3.OperationalError) duplicate column name: post_type
+[SQL: ALTER TABLE posts ADD COLUMN post_type VARCHAR(30) DEFAULT 'text';]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'ALTER TABLE posts ADD COLUMN v...': (sqlite3.OperationalError) duplicate column name: visibility
+[SQL: ALTER TABLE posts ADD COLUMN visibility VARCHAR(20) DEFAULT 'members_only';]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Completed automated schema checks.

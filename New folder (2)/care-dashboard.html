@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crextio - Care & Prayer Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === Variables & Base Styles === */
+        :root {
+            --app-bg-grad: linear-gradient(135deg, #f4f0ec 0%, #f0e4d0 100%);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            
+            --text-dark: #1f2937;
+            --text-muted: #4b5563;
+            --accent-dark: #2c2c2c;
+            --accent-yellow: #fcd34d;
+            --accent-yellow-hover: #fbbf24;
+            
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 8px;
+            --radius-pill: 30px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+        }
+
+        body {
+            background: var(--app-bg-grad);
+            min-height: 100vh;
+            /* Removed flex centering and padding to allow edge-to-edge layout */
+        }
+
+        /* === Main App Container === */
+        .app-window {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            /* Removed max-width, border-radius, box-shadow, and borders */
+        }
+
+        /* === Reusable Glass Class === */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+        }
+
+        /* === Header === */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 500;
+            padding: 8px 24px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 4px;
+            background: rgba(255,255,255,0.4);
+            padding: 6px;
+            border-radius: 40px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .nav-item {
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .nav-item.active { background: var(--accent-dark); color: white; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--glass-border);
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+        }
+
+        .icon-circle {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--glass-border);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; position: relative;
+        }
+        
+        .badge {
+            position: absolute; top: -4px; right: -4px;
+            background: #ef4444; color: white; font-size: 10px; font-weight: bold;
+            width: 16px; height: 16px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 16px 6px 6px; border-radius: 30px;
+            background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border);
+            font-size: 14px; font-weight: 500; cursor: pointer;
+        }
+        .user-profile img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+        /* Notification Dropdown */
+        .notif-dropdown {
+            position: absolute; top: 75px; right: 40px;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 8px 0;
+            z-index: 100;
+        }
+        .notif-item { padding: 12px 16px; font-size: 12px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer;}
+        .notif-item:hover { background: rgba(0,0,0,0.03); }
+        .notif-icon { color: var(--text-muted); margin-top: 2px;}
+        .notif-text { display: flex; flex-direction: column; gap: 2px; flex: 1;}
+        .notif-text strong { font-weight: 500; color: var(--text-dark);}
+        .notif-text span { color: var(--text-muted); font-size: 11px;}
+        .notif-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; margin-top: 6px;}
+
+        /* === Main Layout === */
+        main {
+            padding: 0 40px 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* === Top Section (Stats & Title) === */
+        .top-section {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .welcome-area { flex: 1; }
+        .page-title { font-size: 32px; font-weight: 500; margin-bottom: 20px;}
+        
+        .kpi-row { display: flex; gap: 40px; }
+        .kpi-item { display: flex; flex-direction: column; gap: 4px; }
+        .kpi-value { font-size: 36px; font-weight: 400; display: flex; align-items: center; gap: 8px;}
+        .kpi-value i { font-size: 18px; color: var(--text-muted);}
+        .kpi-label { font-size: 13px; color: var(--text-muted); }
+
+        .action-area {
+            display: flex; flex-direction: column; align-items: flex-end; gap: 16px; position: relative;
+        }
+
+        .btn-add {
+            background: var(--accent-yellow); padding: 12px 24px; border-radius: var(--radius-pill);
+            font-size: 14px; font-weight: 500; border: none; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(252, 211, 77, 0.4);
+        }
+        
+        .search-row { display: flex; gap: 12px; }
+        .search-box {
+            background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border);
+            padding: 10px 16px; border-radius: var(--radius-pill); width: 300px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .search-box input { border: none; background: transparent; outline: none; font-size: 13px; width: 100%;}
+        .search-box i { color: var(--text-muted); }
+
+        .btn-filter {
+            background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border);
+            padding: 10px 16px; border-radius: var(--radius-pill);
+            font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Filter Dropdown */
+        .filter-dropdown {
+            position: absolute; top: 110px; right: 0;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            width: 120px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 8px 0; z-index: 20;
+        }
+        .filter-item { padding: 10px 16px; font-size: 13px; cursor: pointer; }
+        .filter-item:hover { background: rgba(0,0,0,0.05); }
+
+        /* === Two Column Layout === */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 24px;
+            flex: 1;
+        }
+
+        /* === Left Column: Table Area === */
+        .table-container { display: flex; flex-direction: column; }
+        .table-header-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;}
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+        th { font-size: 12px; font-weight: 600; color: var(--text-dark); padding: 0 16px 12px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        td { padding: 16px; font-size: 13px; vertical-align: middle; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+        
+        tr:last-child td { border-bottom: none; }
+
+        /* Highlighted Row */
+        tr.active-row td {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        tr.active-row td:first-child { border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-left: 1px solid var(--glass-border); }
+        tr.active-row td:last-child { border-top-right-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); border-right: 1px solid var(--glass-border); }
+        tr.active-row td { border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); box-shadow: 0 4px 15px rgba(0,0,0,0.05);}
+
+        .user-cell { display: flex; align-items: center; gap: 10px; font-weight: 500;}
+        .user-cell img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+
+        .type-cell { display: flex; align-items: center; gap: 10px; }
+        .type-cell i { font-size: 18px; width: 20px; text-align: center;}
+        .type-text { display: flex; flex-direction: column; line-height: 1.2;}
+
+        .summary-cell { max-width: 250px; font-size: 12px; line-height: 1.4; color: var(--text-muted);}
+
+        .leader-cell { display: flex; align-items: center; gap: 10px; }
+        .leader-cell img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+        .leader-info { display: flex; flex-direction: column; line-height: 1.2;}
+        .leader-info span:last-child { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; cursor:pointer;}
+
+        .status-badge {
+            padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase;
+            display: inline-block; background: var(--accent-dark); color: white; letter-spacing: 0.5px;
+        }
+        .status-badge.new { color: var(--accent-yellow); }
+        .status-badge.progress { color: #facc15; }
+        .status-badge.needs { color: #ef4444; }
+
+        .action-cell { display: flex; gap: 8px; align-items: center;}
+        .btn-dropdown {
+            background: transparent; border: 1px solid rgba(0,0,0,0.1); padding: 6px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;
+        }
+        .btn-icon {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);
+            display: flex; justify-content: center; align-items: center; cursor: pointer; background: transparent;
+        }
+
+        .pagination { display: flex; justify-content: center; align-items: center; margin-top: auto; padding-top: 20px; gap: 16px;}
+        .pagination i { cursor: pointer; color: var(--text-muted); font-size: 12px;}
+        .page-num {
+            width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;
+            font-size: 13px; font-weight: 500; border-radius: 50%; cursor: pointer;
+        }
+        .page-num.active { background: var(--accent-dark); color: white; }
+
+        /* === Right Column: Detail Sidebar === */
+        .detail-sidebar {
+            background: rgba(255,255,255,0.3); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg); padding: 24px; display: flex; flex-direction: column;
+        }
+
+        .detail-header { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px;}
+        
+        .profile-card { display: flex; align-items: center; gap: 12px; margin-bottom: 20px;}
+        .profile-card img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+        .profile-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px;}
+        .profile-info p { font-size: 12px; color: var(--text-muted); }
+
+        .detail-grid { display: grid; grid-template-columns: 70px 1fr; gap: 8px; font-size: 12px; margin-bottom: 24px; line-height: 1.4;}
+        .detail-label { color: var(--text-muted); font-weight: 500;}
+        
+        .follow-up-section h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px;}
+        
+        .plan-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;}
+        .plan-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.5); padding: 10px 12px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; cursor: pointer; position: relative;
+        }
+        .plan-item.active { background: rgba(255,255,255,0.8); border: 1px solid var(--glass-border); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+        .plan-left { display: flex; align-items: center; gap: 10px; }
+        .plan-date { font-size: 12px; font-weight: 600;}
+        
+        .custom-check {
+            width: 16px; height: 16px; border: 1px solid #ccc; border-radius: 4px;
+            display: flex; justify-content: center; align-items: center; background: white;
+        }
+        .plan-item.active .custom-check { border-color: var(--accent-dark); }
+        .plan-item.active .custom-check::after { content: '\f00c'; font-family: 'FontAwesome'; font-size: 10px; color: var(--accent-dark); }
+
+        .quick-actions h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px;}
+        .action-list { display: flex; flex-direction: column; gap: 8px;}
+        .btn-quick {
+            background: white; border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px;
+            font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        /* Mock Hand Cursor Image */
+        .mock-cursor { position: absolute; width: 16px; height: auto; z-index: 200; pointer-events: none; bottom: 4px; right: 20px;}
+
+    </style>
+</head>
+<body>
+
+    <div class="app-window">
+        
+        <div class="notif-dropdown">
+            <div class="notif-item">
+                <i class="fa-regular fa-bell notif-icon"></i>
+                <div class="notif-text">
+                    <strong>Recent alerts</strong>
+                    <span>Elder Sarah Chen, Sep 10, 10:30am</span>
+                </div>
+                <i class="fa-solid fa-chevron-down" style="font-size:10px; color:#999; margin-top:2px;"></i>
+            </div>
+            <hr style="border:0; border-bottom:1px solid #eee;">
+            <div class="notif-item">
+                <div style="position:relative;">
+                    <i class="fa-regular fa-envelope notif-icon"></i>
+                    <div class="notif-dot" style="position:absolute; top:-2px; right:-2px;"></div>
+                </div>
+                <div class="notif-text">
+                    <strong>Send a Message - request</strong>
+                    <span>Sep 20, 10:30am</span>
+                </div>
+                <i class="fa-solid fa-chevron-down" style="font-size:10px; color:#999; margin-top:2px;"></i>
+            </div>
+        </div>
+
+        <header>
+            <div class="logo">Crextio</div>
+            
+            <nav class="main-nav">
+                <div class="nav-item">Dashboard</div>
+                <div class="nav-item">People</div>
+                <div class="nav-item">Hiring</div>
+                <div class="nav-item">Devices</div>
+                <div class="nav-item">Apps</div>
+                <div class="nav-item active">Care & Prayer</div>
+                <div class="nav-item">Events</div>
+            </nav>
+            
+            <div class="header-actions">
+                <div class="icon-btn"><i class="fa-solid fa-gear"></i> Setting</div>
+                <div class="icon-circle">
+                    <i class="fa-regular fa-bell"></i>
+                    <div class="badge">3</div>
+                </div>
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?img=9" alt="Nixtio">
+                    Nixtio
+                </div>
+            </div>
+        </header>
+
+        <main>
+            
+            <div class="top-section">
+                <div class="welcome-area">
+                    <h1 class="page-title">Welcome in, Nixtio</h1>
+                    <div class="kpi-row">
+                        <div class="kpi-item">
+                            <div class="kpi-value"><i class="fa-solid fa-user-group"></i> 78</div>
+                            <div class="kpi-label">Total Prayer Requests</div>
+                        </div>
+                        <div class="kpi-item">
+                            <div class="kpi-value"><i class="fa-solid fa-user-clock"></i> 56</div>
+                            <div class="kpi-label">Active Care Cases</div>
+                        </div>
+                        <div class="kpi-item">
+                            <div class="kpi-value"><i class="fa-regular fa-folder-open"></i> 203</div>
+                            <div class="kpi-label">Follow-Up Tasks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-add"><i class="fa-solid fa-plus"></i> Add Prayer Request</button>
+                    
+                    <div class="search-row">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Search requests, members, or leaders...">
+                        </div>
+                        <button class="btn-filter"><i class="fa-solid fa-bars-staggered"></i> Filters <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></button>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <div class="filter-item">Type</div>
+                        <div class="filter-item">Status</div>
+                        <div class="filter-item">Leader</div>
+                        <div class="filter-item">Date</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                
+                <div class="table-container">
+                    <div class="table-header-title">ACTIVE PRAYER & CARE REQUESTS (48 Total)</div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Requester</th>
+                                <th>Request Type</th>
+                                <th>Date Submitted</th>
+                                <th>Summary</th>
+                                <th>Assigned Leader</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="active-row">
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/150?img=5" alt="Alice">
+                                        Alice Green
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="type-cell">
+                                        <i class="fa-solid fa-cross"></i>
+                                        <div class="type-text"><span>Prayer</span><span>Healing</span></div>
+                                    </div>
+                                </td>
+                                <td>Sep 20, 2024</td>
+                                <td><div class="summary-cell">For speedy recovery after knee surgery her surgery on Sept 22.</div></td>
+                                <td>
+                                    <div class="leader-cell">
+                                        <img src="https://i.pravatar.cc/150?img=9" alt="Sarah">
+                                        <div class="leader-info">
+                                            <span>Elder Sarah Chen</span>
+                                            <span>Assign Leader <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><div class="status-badge new">NEW</div></td>
+                                <td>
+                                    <div class="action-cell">
+                                        <button class="btn-dropdown">Assign <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></button>
+                                        <button class="btn-icon"><i class="fa-regular fa-file-lines"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/150?img=11" alt="Robert">
+                                        Robert Blake
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="type-cell">
+                                        <i class="fa-solid fa-heart" style="color: #4b5563;"></i>
+                                        <div class="type-text"><span>Care</span><span>Hospital Visit</span></div>
+                                    </div>
+                                </td>
+                                <td>Sep 18, 2024</td>
+                                <td><div class="summary-cell">Visiting Elder in St. Jude hospital. Family visiting from out of town.</div></td>
+                                <td>
+                                    <div class="leader-cell">
+                                        <img src="https://i.pravatar.cc/150?img=12" alt="John">
+                                        <div class="leader-info">
+                                            <span>Pastor John Doe</span>
+                                            <span>Assign Leader <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><div class="status-badge progress">IN-PROGRESS</div></td>
+                                <td>
+                                    <div class="action-cell">
+                                        <button class="btn-dropdown">Assign <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></button>
+                                        <button class="btn-icon"><i class="fa-regular fa-file-lines"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/150?img=1" alt="Maria">
+                                        Maria
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="type-cell">
+                                        <i class="fa-solid fa-cross"></i>
+                                        <div class="type-text"><span>Prayer</span><span>Financial</span></div>
+                                    </div>
+                                </td>
+                                <td>Sep 21, 2024</td>
+                                <td><div class="summary-cell">Seeking financial guidance and job after knee surgery on Sept 22.</div></td>
+                                <td><div class="leader-info"><span style="color:#666;">(Unassigned)</span></div></td>
+                                <td><div class="status-badge needs">NEEDS LEADER</div></td>
+                                <td>
+                                    <div class="action-cell">
+                                        <button class="btn-dropdown">Assign <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></button>
+                                        <button class="btn-icon"><i class="fa-regular fa-file-lines"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/150?img=5" alt="Alice">
+                                        Alice Green
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="type-cell">
+                                        <i class="fa-solid fa-cross"></i>
+                                        <div class="type-text"><span>Prayer</span><span>Healing</span></div>
+                                    </div>
+                                </td>
+                                <td>Sep 21, 2024</td>
+                                <td><div class="summary-cell">Seeking financial guidance and job after knee surgery on Sept 22.</div></td>
+                                <td><div class="leader-info"><span style="color:#666;">(Unassigned)</span></div></td>
+                                <td><div class="status-badge needs">NEEDS LEADER</div></td>
+                                <td>
+                                    <div class="action-cell">
+                                        <button class="btn-dropdown">Assign <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></button>
+                                        <button class="btn-icon"><i class="fa-regular fa-file-lines"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/150?img=11" alt="Robert">
+                                        Robert Blake
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="type-cell">
+                                        <i class="fa-solid fa-heart" style="color: #4b5563;"></i>
+                                        <div class="type-text"><span>Care</span><span>Hospital Visit</span></div>
+                                    </div>
+                                </td>
+                                <td>Sep 21, 2024</td>
+                                <td><div class="summary-cell">Seeking financial guidance and job after knee surgery on Sept 22.</div></td>
+                                <td><div class="leader-info"><span style="color:#666;">(Unassigned)</span></div></td>
+                                <td><div class="status-badge needs">NEEDS LEADER</div></td>
+                                <td>
+                                    <div class="action-cell">
+                                        <button class="btn-dropdown">Assign <i class="fa-solid fa-chevron-down" style="font-size:8px;"></i></button>
+                                        <button class="btn-icon"><i class="fa-regular fa-file-lines"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pagination">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <div class="page-num active">1</div>
+                        <div class="page-num">2</div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                </div>
+
+                <div class="detail-sidebar">
+                    <div class="detail-header">REQUEST DETAILS & QUICK FOLLOW-UP</div>
+                    
+                    <div class="profile-card">
+                        <img src="https://i.pravatar.cc/150?img=5" alt="Alice">
+                        <div class="profile-info">
+                            <h3>Alice Green</h3>
+                            <p>Member since 2018</p>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid">
+                        <div class="detail-label">Type</div>
+                        <div>Prayer (Healing)</div>
+                        
+                        <div class="detail-label">Summary</div>
+                        <div>Prayer for speedy recovery after knee surgery on Sept 22. Family visiting from out of town.</div>
+                        
+                        <div class="detail-label">Submitted</div>
+                        <div>Sep 20, 10:30am</div>
+                    </div>
+
+                    <div class="follow-up-section">
+                        <h4>Current Follow-Up Plan</h4>
+                        
+                        <div class="plan-list">
+                            <div class="plan-item active">
+                                <div class="plan-left">
+                                    <div class="custom-check"></div>
+                                    <span>Send a Message of Encouragement</span>
+                                </div>
+                                <span class="plan-date">Sep 21</span>
+                                <img src="https://cdn-icons-png.flaticon.com/512/833/833314.png" class="mock-cursor" alt="cursor">
+                            </div>
+                            <div class="plan-item">
+                                <div class="plan-left">
+                                    <div class="custom-check"></div>
+                                    <span>Schedule Phone Call</span>
+                                </div>
+                                <span class="plan-date">Sep 23</span>
+                            </div>
+                            <div class="plan-item">
+                                <div class="plan-left">
+                                    <div class="custom-check"></div>
+                                    <span>Mark as Handled</span>
+                                </div>
+                                <span class="plan-date">Sep 25</span>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+                            <h4>Quick Follow-up Actions</h4>
+                            <div class="action-list">
+                                <button class="btn-quick"><i class="fa-regular fa-envelope"></i> Send SMS</button>
+                                <button class="btn-quick"><i class="fa-solid fa-phone"></i> Log Call</button>
+                                <button class="btn-quick"><i class="fa-regular fa-calendar"></i> Schedule Visit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

@@ -1,54 +1,46 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+import axios from 'axios';
 
-class ApiError extends Error {
-  status: number;
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-  }
-}
+// Create an Axios instance with base configuration
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('token');
-  
-  const headers = new Headers(options.headers || {});
-  headers.set('Content-Type', 'application/json');
-  
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('token');
-      // Force redirect to login if token is expired/invalid
-      window.location.href = '/login';
+// Add a request interceptor to inject the auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    // Attempt to get token from localStorage
+    const token = localStorage.getItem('token');
+    
+    // For local dev/testing without auth, we can mock or bypass if needed,
+    // but typically we append the real token if it exists.
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    const errorData = await response.json().catch(() => ({ detail: 'API request failed' }));
-    throw new ApiError(response.status, errorData.detail || 'API request failed');
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
+);
 
-  if (response.status !== 204) {
-    return response.json();
+// Add a response interceptor to handle global errors (e.g. 401 Unauthorized)
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized access, like redirecting to login or clearing local storage
+      console.error("Unauthorized! Redirecting to login...");
+      // localStorage.removeItem('token');
+      // window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
-}
+);
 
-// Typed API Client
-export const apiClient = {
-  get: <T>(endpoint: string) => fetchWithAuth(endpoint, { method: 'GET' }) as Promise<T>,
-  post: <T>(endpoint: string, data?: any) => fetchWithAuth(endpoint, { 
-    method: 'POST', 
-    body: data ? JSON.stringify(data) : undefined 
-  }) as Promise<T>,
-  put: <T>(endpoint: string, data?: any) => fetchWithAuth(endpoint, { 
-    method: 'PUT', 
-    body: data ? JSON.stringify(data) : undefined 
-  }) as Promise<T>,
-  delete: <T>(endpoint: string) => fetchWithAuth(endpoint, { method: 'DELETE' }) as Promise<T>,
-};
+export default apiClient;

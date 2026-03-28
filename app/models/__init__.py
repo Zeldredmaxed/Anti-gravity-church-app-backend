@@ -24,3 +24,4 @@ from app.models.campus import Campus  # noqa: F401
 from app.models.discipleship import DiscipleshipStep, MemberDiscipleshipProgress  # noqa: F401
 from app.models.store import Product # noqa: F401
 from app.models.task import MinistryTask  # noqa: F401
+from app.models.care import CareCase  # noqa: F401
