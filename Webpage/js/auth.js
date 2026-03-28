@@ -19,7 +19,7 @@ const ShepherdAuth = (() => {
     function logout() {
         ShepherdAPI.clearTokens();
         _cachedUser = null;
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
     }
 
     async function getCurrentUser(forceRefresh = false) {
@@ -68,7 +68,7 @@ const ShepherdAuth = (() => {
      */
     function requireAuth() {
         if (!isLoggedIn()) {
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
             return false;
         }
         return true;

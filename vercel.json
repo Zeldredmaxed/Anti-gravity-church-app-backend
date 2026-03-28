@@ -2,8 +2,5 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/(.*)", "destination": "/Webpage/$1" }
-  ],
-  "redirects": [
-    { "source": "/", "destination": "/login.html", "permanent": false }
   ]
 }

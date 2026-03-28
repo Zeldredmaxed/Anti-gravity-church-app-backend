@@ -4,7 +4,7 @@
  */
 const ShepherdAPI = (() => {
     // ── Config ──
-    const API_BASE = window.SHEPHERD_API_BASE || 'http://localhost:8000/api/v1';
+    const API_BASE = window.SHEPHERD_API_BASE || 'https://anti-gravity-church-app-backend-production.up.railway.app/api/v1';
 
     // ── Token helpers ──
     function getToken() { return localStorage.getItem('shepherd_access_token'); }
@@ -42,8 +42,8 @@ const ShepherdAPI = (() => {
             if (refreshed) return request(method, path, body, true);
             // Refresh failed — redirect to login
             clearTokens();
-            if (!window.location.pathname.includes('login')) {
-                window.location.href = 'login.html';
+            if (!window.location.pathname.includes('index')) {
+                window.location.href = 'index.html';
             }
             throw new Error('Session expired');
         }
