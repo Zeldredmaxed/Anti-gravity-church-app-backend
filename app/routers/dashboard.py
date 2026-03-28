@@ -180,7 +180,7 @@ async def get_giving_chart(
 
     result = await db.execute(
         select(
-            func.to_char(Donation.date, 'YYYY-MM').label("month"),
+            func.strftime('%Y-%m', Donation.date).label("month"),
             func.sum(Donation.amount).label("total"),
         )
         .where(
@@ -188,8 +188,8 @@ async def get_giving_chart(
             Donation.date >= cutoff,
             Donation.status == "completed",
         )
-        .group_by(func.to_char(Donation.date, 'YYYY-MM'))
-        .order_by(func.to_char(Donation.date, 'YYYY-MM'))
+        .group_by(func.strftime('%Y-%m', Donation.date))
+        .order_by(func.strftime('%Y-%m', Donation.date))
     )
 
     return [ChartPoint(date=row.month, value=float(row.total or 0)) for row in result.all()]
@@ -207,15 +207,15 @@ async def get_attendance_chart(
 
     result = await db.execute(
         select(
-            func.to_char(AttendanceRecord.date, 'IYYY-IW').label("week"),
+            func.strftime('%Y-%W', AttendanceRecord.date).label("week"),
             func.count(AttendanceRecord.id).label("count"),
         )
         .where(
             AttendanceRecord.church_id == church_id,
             AttendanceRecord.date >= cutoff,
         )
-        .group_by(func.to_char(AttendanceRecord.date, 'IYYY-IW'))
-        .order_by(func.to_char(AttendanceRecord.date, 'IYYY-IW'))
+        .group_by(func.strftime('%Y-%W', AttendanceRecord.date))
+        .order_by(func.strftime('%Y-%W', AttendanceRecord.date))
     )
 
     return [ChartPoint(date=row.week, value=float(row.count or 0)) for row in result.all()]
@@ -233,15 +233,15 @@ async def get_member_growth(
 
     result = await db.execute(
         select(
-            func.to_char(Member.created_at, 'YYYY-MM').label("month"),
+            func.strftime('%Y-%m', Member.created_at).label("month"),
             func.count(Member.id).label("count"),
         )
         .where(
             Member.church_id == church_id,
             Member.created_at >= cutoff,
         )
-        .group_by(func.to_char(Member.created_at, 'YYYY-MM'))
-        .order_by(func.to_char(Member.created_at, 'YYYY-MM'))
+        .group_by(func.strftime('%Y-%m', Member.created_at))
+        .order_by(func.strftime('%Y-%m', Member.created_at))
     )
 
     return [ChartPoint(date=row.month, value=float(row.count or 0)) for row in result.all()]

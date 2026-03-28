@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shepherd - Command Palette</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --dark-card-bg: #2d2e30;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; overflow: hidden; /* Prevents scrolling when modal is open */ }
+
+        /* Mock Background (To show the overlay effect) */
+        .mock-background {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: 30px; filter: blur(8px); opacity: 0.6; pointer-events: none;
+        }
+        .mock-header { height: 60px; background: rgba(255,255,255,0.4); border-radius: 20px; margin-bottom: 30px;}
+        .mock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;}
+        .mock-card { height: 120px; background: rgba(255,255,255,0.4); border-radius: 20px;}
+
+        /* === COMMAND PALETTE OVERLAY === */
+        .palette-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: flex-start; padding-top: 12vh; z-index: 9999;
+        }
+
+        .palette-container {
+            width: 100%; max-width: 640px;
+            background: rgba(253, 250, 246, 0.95); /* Very slight warm off-white */
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* Search Input Area */
+        .palette-header {
+            display: flex; align-items: center; padding: 20px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            position: relative;
+        }
+        
+        .palette-header i.fa-magnifying-glass {
+            font-size: 20px; color: var(--text-muted); margin-right: 16px;
+        }
+        
+        .palette-header input {
+            flex: 1; border: none; background: transparent; outline: none;
+            font-size: 20px; font-weight: 500; color: var(--text-dark);
+        }
+        
+        .palette-header input::placeholder { color: #9ca3af; font-weight: 400; }
+        
+        .esc-hint {
+            font-size: 11px; font-weight: 600; color: var(--text-muted);
+            background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Results Area */
+        .palette-body {
+            max-height: 400px; overflow-y: auto; padding: 12px 0;
+        }
+        
+        /* Custom Scrollbar for the palette */
+        .palette-body::-webkit-scrollbar { width: 6px; }
+        .palette-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+        .results-group { margin-bottom: 16px; }
+        .results-group:last-child { margin-bottom: 0; }
+        
+        .group-label {
+            font-size: 11px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0 24px; margin-bottom: 8px;
+        }
+
+        .result-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 24px; cursor: pointer; transition: 0.1s ease;
+        }
+        
+        /* The active/selected state */
+        .result-item.selected {
+            background: rgba(220, 179, 74, 0.15);
+            border-left: 4px solid var(--accent-yellow);
+            padding-left: 20px; /* offset the border */
+        }
+
+        .result-left { display: flex; align-items: center; gap: 12px; }
+        
+        .result-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.04); color: var(--text-muted); font-size: 14px;
+        }
+        .result-item.selected .result-icon { background: white; color: var(--text-dark); box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        
+        .result-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        
+        .result-text { display: flex; flex-direction: column; }
+        .result-title { font-size: 14px; font-weight: 500; color: var(--text-dark); }
+        .result-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px;}
+        
+        .result-hint {
+            font-size: 11px; color: var(--text-muted); font-weight: 500; display: none;
+        }
+        .result-item.selected .result-hint { display: block; }
+        .result-item.selected .result-hint i { font-size: 10px; margin-left: 4px;}
+
+        /* === AI ASSISTANT SPECIAL STYLING === */
+        .ai-group .group-label { color: #854d0e; display: flex; align-items: center; gap: 6px;}
+        .ai-result { background: rgba(255,255,255,0.8); margin: 0 12px; border-radius: 12px; border: 1px solid rgba(220, 179, 74, 0.4); padding: 12px; }
+        .ai-icon { background: var(--dark-card-bg); color: var(--accent-yellow); border-radius: 8px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;}
+
+        /* Footer Hints */
+        .palette-footer {
+            padding: 12px 24px; border-top: 1px solid rgba(0,0,0,0.08);
+            display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.02);
+        }
+        .footer-hint { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; font-weight: 500;}
+        .footer-hint kbd { background: white; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; border-bottom-width: 2px; font-family: monospace;}
+
+    </style>
+</head>
+<body>
+
+    <div class="mock-background">
+        <div class="mock-header"></div>
+        <div class="mock-grid">
+            <div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div>
+        </div>
+    </div>
+
+    <div class="palette-overlay">
+        <div class="palette-container">
+            
+            <div class="palette-header">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" value="Show me members who haven't attended in" autofocus>
+                <div class="esc-hint">ESC</div>
+            </div>
+
+            <div class="palette-body">
+                
+                <div class="results-group ai-group">
+                    <div class="group-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Pastor AI Assistant</div>
+                    <div class="result-item ai-result selected">
+                        <div class="result-left">
+                            <div class="ai-icon"><i class="fa-solid fa-robot"></i></div>
+                            <div class="result-text">
+                                <div class="result-title">Run query: "Show members who haven't attended in 30 days"</div>
+                                <div class="result-subtitle">This will generate a custom absentee report.</div>
+                            </div>
+                        </div>
+                        <div class="result-hint">Press Enter <i class="fa-solid fa-arrow-turn-down fa-rotate-90"></i></div>
+                    </div>
+                </div>
+
+                <div class="results-group">
+                    <div class="group-label">Quick Actions</div>
+                    
+                    <div class="result-item">
+                        <div class="result-left">
+                            <div class="result-icon"><i class="fa-solid fa-user-plus"></i></div>
+                            <div class="result-text">
+                                <div class="result-title">Add New Member</div>
+                                <div class="result-subtitle">Create a new profile in the database</div>
+                            </div>
+                        </div>
+                        <div class="result-hint">Press Enter <i class="fa-solid fa-arrow-turn-down fa-rotate-90"></i></div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-left">
+                            <div class="result-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                            <div class="result-text">
+                                <div class="result-title">Record Donation</div>
+                                <div class="result-subtitle">Log a tithe, offering, or pledge</div>
+                            </div>
+                        </div>
+                        <div class="result-hint">Press Enter <i class="fa-solid fa-arrow-turn-down fa-rotate-90"></i></div>
+                    </div>
+                </div>
+
+                <div class="results-group">
+                    <div class="group-label">Navigation</div>
+                    
+                    <div class="result-item">
+                        <div class="result-left">
+                            <div class="result-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                            <div class="result-text">
+                                <div class="result-title">Go to Giving Reports</div>
+                                <div class="result-subtitle">Reports > Financial Summary</div>
+                            </div>
+                        </div>
+                        <div class="result-hint">Press Enter <i class="fa-solid fa-arrow-turn-down fa-rotate-90"></i></div>
+                    </div>
+                </div>
+
+                <div class="results-group">
+                    <div class="group-label">People</div>
+                    
+                    <div class="result-item">
+                        <div class="result-left">
+                            <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" class="result-avatar">
+                            <div class="result-text">
+                                <div class="result-title">David Garcia</div>
+                                <div class="result-subtitle">Member • Men's Fellowship</div>
+                            </div>
+                        </div>
+                        <div class="result-hint">Press Enter <i class="fa-solid fa-arrow-turn-down fa-rotate-90"></i></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="palette-footer">
+                <div class="footer-hint"><kbd>↑</kbd> <kbd>↓</kbd> to navigate</div>
+                <div class="footer-hint"><kbd>↵</kbd> to select</div>
+                <div class="footer-hint" style="margin-left: auto;"><kbd>⌘</kbd> + <kbd>K</kbd> to open anytime</div>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Focus input on load
+            const searchInput = document.querySelector('.palette-header input');
+            if(searchInput) searchInput.focus();
+
+            const resultItems = document.querySelectorAll('.result-item');
+            let selectedIndex = 0;
+
+            // Make result items clickable
+            resultItems.forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    executeAction(item);
+                });
+                item.addEventListener('mouseenter', () => {
+                    updateSelection(index);
+                });
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                const total = resultItems.length;
+                if(total === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    updateSelection((selectedIndex + 1) % total);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    updateSelection((selectedIndex - 1 + total) % total);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    executeAction(resultItems[selectedIndex]);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    // In a real app, this would close the modal.
+                    // Here we can just redirect to dashboard or blur.
+                    window.location.href = 'dashboard.html';
+                }
+            });
+
+            function updateSelection(newIndex) {
+                resultItems[selectedIndex].classList.remove('selected');
+                selectedIndex = newIndex;
+                resultItems[selectedIndex].classList.add('selected');
+                // Ensure visible in scroll
+                resultItems[selectedIndex].scrollIntoView({ block: 'nearest' });
+            }
+
+            function executeAction(item) {
+                const title = item.querySelector('.result-title').textContent.trim();
+                
+                if (title.includes("Add New Member")) {
+                    window.location.href = 'members-dashboard.html';
+                } else if (title.includes("Record Donation")) {
+                    window.location.href = 'giving-dashboard.html';
+                } else if (title.includes("Giving Reports")) {
+                    window.location.href = 'reports-dashboard.html';
+                } else if (title.includes("David Garcia")) {
+                    window.location.href = 'User Profile.html';
+                } else if (title.includes("Run query")) {
+                    // It's the AI Command
+                    ShepherdUI.showToast('Running AI Query...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'attendance.html'; // Or reports
+                    }, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

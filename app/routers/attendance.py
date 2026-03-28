@@ -478,15 +478,15 @@ async def attendance_chart_data(
 
     result = await db.execute(
         select(
-            func.to_char(AttendanceRecord.date, 'IYYY-IW').label("week"),
+            func.strftime('%Y-%W', AttendanceRecord.date).label("week"),
             func.count(AttendanceRecord.id).label("count"),
         )
         .where(
             AttendanceRecord.church_id == church_id,
             AttendanceRecord.date >= cutoff,
         )
-        .group_by(func.to_char(AttendanceRecord.date, 'IYYY-IW'))
-        .order_by(func.to_char(AttendanceRecord.date, 'IYYY-IW'))
+        .group_by(func.strftime('%Y-%W', AttendanceRecord.date))
+        .order_by(func.strftime('%Y-%W', AttendanceRecord.date))
     )
 
     return [AttendanceChartPoint(date=row.week, count=row.count) for row in result.all()]

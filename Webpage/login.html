@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shepherd - Sign In</title>
+    <meta name="description" content="Sign in to Shepherd Church Management System">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --card-radius: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .login-brand img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+        .login-brand p {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+        }
+
+        .login-card h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        .login-card .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 0 3px rgba(220, 179, 74, 0.15);
+        }
+
+        .form-extras {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .remember-me input { accent-color: var(--accent-yellow); }
+        .forgot-link {
+            color: var(--accent-yellow);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .forgot-link:hover { text-decoration: underline; }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-yellow);
+            color: var(--text-dark);
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(220, 179, 74, 0.35);
+        }
+        .login-btn:active { transform: translateY(0); }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .login-btn .spinner {
+            display: none;
+            animation: spin 0.8s linear infinite;
+        }
+        .login-btn.loading .spinner { display: inline-block; }
+        .login-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-msg {
+            background: rgba(254, 226, 226, 0.8);
+            color: #991b1b;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .error-msg.show { display: flex; }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 2FA Section */
+        .twofa-section {
+            display: none;
+            animation: slideUp 0.4s ease;
+        }
+        .twofa-section.show { display: block; }
+        .twofa-input {
+            text-align: center;
+            letter-spacing: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            padding: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-brand">
+            <img src="shepherd-logo.jpg" alt="Shepherd">
+            <p>Church Management System</p>
+        </div>
+
+        <div class="login-card">
+            <!-- Login Form -->
+            <div id="login-form-section">
+                <h1>Welcome back</h1>
+                <p class="subtitle">Sign in to your Shepherd dashboard</p>
+
+                <div id="login-error" class="error-msg">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <span id="error-text">Invalid credentials</span>
+                </div>
+
+                <form id="login-form" autocomplete="on">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input type="email" id="email" class="form-input" placeholder="you@church.org" required autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+                        </div>
+                    </div>
+                    <div class="form-extras">
+                        <label class="remember-me">
+                            <input type="checkbox" checked> Remember me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="login-btn" id="login-btn">
+                        <i class="fa-solid fa-circle-notch spinner"></i>
+                        <span class="btn-text">Sign In</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- 2FA Section (hidden by default) -->
+            <div id="twofa-section" class="twofa-section">
+                <h1>Two-Factor Authentication</h1>
+                <p class="subtitle">Enter the 6-digit code from your authenticator app</p>
+
+                <div id="twofa-error" class="error-msg">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <span id="twofa-error-text">Invalid code</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="totp-code">Verification Code</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <input type="text" id="totp-code" class="form-input twofa-input" placeholder="000000" maxlength="6" pattern="\d{6}" inputmode="numeric">
+                    </div>
+                </div>
+                <button type="button" class="login-btn" id="twofa-btn">
+                    <i class="fa-solid fa-circle-notch spinner"></i>
+                    <span class="btn-text">Verify</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="login-footer">
+            Shepherd ChMS &copy; 2025. Built with faith.
+        </div>
+    </div>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        // If already logged in, redirect to dashboard
+        if (ShepherdAuth.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const loginError = document.getElementById('login-error');
+        const errorText = document.getElementById('error-text');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.classList.remove('show');
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const data = await ShepherdAuth.login(email, password);
+
+                // Check if 2FA is required
+                if (data.requires_2fa) {
+                    document.getElementById('login-form-section').style.display = 'none';
+                    document.getElementById('twofa-section').classList.add('show');
+                    document.getElementById('totp-code').focus();
+                    return;
+                }
+
+                // Success — redirect
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errorText.textContent = err.message || 'Invalid email or password';
+                loginError.classList.add('show');
+            } finally {
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
+            }
+        });
+
+        // 2FA verification
+        document.getElementById('twofa-btn').addEventListener('click', async () => {
+            const code = document.getElementById('totp-code').value.trim();
+            const btn = document.getElementById('twofa-btn');
+            const errEl = document.getElementById('twofa-error');
+            if (code.length !== 6) return;
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            errEl.classList.remove('show');
+
+            try {
+                await ShepherdAPI.post('/auth/2fa/verify', { code });
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                document.getElementById('twofa-error-text').textContent = err.message || 'Invalid code';
+                errEl.classList.add('show');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        });
+
+        // Auto-submit on 6 digits
+        document.getElementById('totp-code').addEventListener('input', (e) => {
+            if (e.target.value.length === 6) {
+                document.getElementById('twofa-btn').click();
+            }
+        });
+    </script>
+
+</body>
+</html>

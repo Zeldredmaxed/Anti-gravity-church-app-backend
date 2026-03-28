@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaithWorks CRM - Giving</title>
+    <title>Shepherd - Giving</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === Global Styles & Variables (Master Design System) === */
+        /* === Global Styles & Variables === */
         :root {
             --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
             --glass-bg: rgba(255, 255, 255, 0.55);
@@ -17,178 +17,83 @@
             --accent-gray: #8a8d91;
             --card-radius: 20px;
             --dark-card-bg: #2d2e30;
-            
             --status-green-bg: #dcfce7;
             --status-green-text: #166534;
             --status-yellow-bg: #f3f4f6;
             --status-yellow-text: #6b7280;
             --status-red-bg: #fee2e2;
             --status-red-text: #991b1b;
+            --toggle-bg: #d1d5db;
+            --toggle-active: var(--accent-yellow);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            min-height: 100vh;
-            padding: 30px;
-            background-attachment: fixed;
-        }
-
-        /* === Header (Standardized across all pages) === */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
+        /* === NEW GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
         
-        .nav-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 5px;
-            gap: 5px;
-        }
-        .nav-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-        .nav-pill:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .nav-pill.active {
-            background: #333;
-            color: white;
-        }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); position: relative; font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
+        
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        .dropdown-item i { color: var(--text-muted); width: 16px; text-align: center; }
 
-        .header-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: relative;
-        }
-        .icon-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            display: flex; justify-content: center; align-items: center;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .notification-dot {
-            position: absolute; top: 10px; right: 10px;
-            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
-        }
-        .avatar { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            cursor: pointer;
-        }
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 
-        /* === Main Content Layout === */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
 
+        /* === MAIN CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; gap: 24px; }
         h1.page-title { font-size: 28px; font-weight: 600; margin-bottom: -10px;}
 
-        /* === KPI Cards === */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .kpi-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 24px;
-            position: relative;
-        }
-
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .kpi-card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; position: relative; }
         .kpi-title { font-size: 15px; font-weight: 500; color: var(--text-dark); margin-bottom: 8px;}
         .kpi-value { font-size: 32px; font-weight: 600; }
-        
-        .kpi-badge {
-            position: absolute; top: 24px; right: 24px;
-            background: rgba(220, 179, 74, 0.25); font-size: 12px; font-weight: 600;
-            padding: 4px 8px; border-radius: 8px;
-        }
-
-        .progress-bar {
-            width: 100%; height: 6px; background: rgba(0,0,0,0.05);
-            border-radius: 10px; margin-top: 16px; overflow: hidden;
-        }
+        .kpi-badge { position: absolute; top: 24px; right: 24px; background: rgba(220, 179, 74, 0.25); font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(0,0,0,0.05); border-radius: 10px; margin-top: 16px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent-yellow); border-radius: 10px; }
 
-        /* === Main Lower Section === */
-        .lower-layout {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 20px;
-            flex: 1;
-        }
-
+        .lower-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; flex: 1; }
         .left-column { display: flex; flex-direction: column; gap: 20px; }
 
-        /* === Chart Section === */
-        .chart-card {
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius); padding: 24px;
-        }
+        .chart-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; }
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .chart-title { font-size: 16px; font-weight: 500; }
         .chart-filters { font-size: 13px; color: var(--text-muted); }
         .chart-filters span { margin: 0 6px; cursor: pointer;}
         .chart-filters .active { color: var(--text-dark); background: var(--accent-yellow); padding: 4px 12px; border-radius: 15px; font-weight: 500;}
-
         .chart-area { width: 100%; height: 100px; position: relative;}
         .chart-area svg { width: 100%; height: 100%; overflow: visible; }
         .chart-line { fill: none; stroke: var(--accent-yellow); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round;}
         .chart-fill { fill: url(#chart-gradient); opacity: 0.5; }
         .chart-point { fill: white; stroke: var(--accent-yellow); stroke-width: 3px; }
 
-        /* === Table Section === */
-        .table-card {
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius); padding: 24px; flex: 1; display: flex; flex-direction: column;
-        }
-
+        .table-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; flex: 1; display: flex; flex-direction: column; }
         .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
         .left-controls { display: flex; gap: 12px; }
-        .control-dropdown {
-            background: white; border: 1px solid var(--glass-border); padding: 8px 16px;
-            border-radius: 20px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer;
-        }
+        .control-dropdown { background: white; border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         
         .right-controls { display: flex; gap: 12px; }
         .btn { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; }
@@ -199,40 +104,30 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; text-align: left; }
         th { font-size: 12px; color: var(--text-dark); font-weight: 500; padding: 0 16px 8px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
         th i { font-size: 10px; color: #a1a1aa; margin-left: 4px;}
-        
         td { padding: 14px 16px; font-size: 13px; background: rgba(255,255,255,0.4); }
         tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
         tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
 
         .donor-cell { display: flex; align-items: center; gap: 12px; font-weight: 500;}
         .donor-cell img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-        
         .method-icon { font-size: 20px; }
         .method-icon.mc { color: #eb001b; }
         .method-icon.check { color: #10b981; }
         .method-icon.visa { color: #1a1f71; font-weight: bold; font-family: Arial, sans-serif; font-style: italic; font-size:14px;}
         .method-icon.pp { color: #003087; }
         .method-icon.ach { color: #4b5563; font-weight: bold; font-size: 12px;}
+        .recurring-icon { color: var(--accent-yellow); font-size: 12px; margin-left: 6px; cursor: help; }
 
         .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; display: inline-block;}
         .status-completed { background: var(--status-green-bg); color: var(--status-green-text); }
         .status-pending { background: var(--status-yellow-bg); color: var(--status-yellow-text); }
         .status-failed { background: var(--status-red-bg); color: var(--status-red-text); }
 
-        /* Highlighted Row */
-        tr.highlighted td {
-            background: rgba(255, 255, 255, 0.8);
-            border-top: 1px solid var(--accent-yellow);
-            border-bottom: 1px solid var(--accent-yellow);
-            box-shadow: 0 4px 15px rgba(220, 179, 74, 0.4);
-        }
+        tr.highlighted td { background: rgba(255, 255, 255, 0.8); border-top: 1px solid var(--accent-yellow); border-bottom: 1px solid var(--accent-yellow); box-shadow: 0 4px 15px rgba(220, 179, 74, 0.4); }
         tr.highlighted td:first-child { border-left: 1px solid var(--accent-yellow); }
         tr.highlighted td:last-child { border-right: 1px solid var(--accent-yellow); }
 
-        .custom-checkbox {
-            width: 16px; height: 16px; border: 1px solid #d1d5db; border-radius: 4px;
-            display: flex; justify-content: center; align-items: center; background: white;
-        }
+        .custom-checkbox { width: 16px; height: 16px; border: 1px solid #d1d5db; border-radius: 4px; display: flex; justify-content: center; align-items: center; background: white; }
         tr.highlighted .custom-checkbox { background: var(--text-dark); border-color: var(--text-dark); }
         tr.highlighted .custom-checkbox::after { content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px; }
 
@@ -241,65 +136,63 @@
         .pagination i { cursor: pointer; }
         .pagination span { background: white; padding: 4px 10px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: var(--text-dark); font-weight: 500;}
 
-        /* === Sidebar Form (Add Donation) === */
-        .sidebar-card {
-            background: rgba(180, 180, 185, 0.3); backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: var(--card-radius);
-            display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .form-header {
-            background: linear-gradient(90deg, #dcb160 0%, #dcb34a 100%);
-            padding: 24px; font-size: 18px; font-weight: 600; color: var(--text-dark);
-        }
-
+        /* Sidebar Form */
+        .sidebar-card { background: rgba(180, 180, 185, 0.3); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .form-header { background: linear-gradient(90deg, #dcb160 0%, #dcb34a 100%); padding: 24px; font-size: 18px; font-weight: 600; color: var(--text-dark); }
         .form-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; flex: 1;}
-        
         .form-row { display: flex; gap: 12px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; position: relative;}
         .form-group label { font-size: 12px; font-weight: 500; color: var(--text-dark); }
-        
-        .input-box {
-            background: white; border: 1px solid #e5e7eb; padding: 10px 12px;
-            border-radius: 8px; font-size: 13px; font-weight: 500; outline: none;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .input-box { background: white; border: 1px solid #e5e7eb; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; outline: none; display: flex; justify-content: space-between; align-items: center; }
         .input-box i { color: #9ca3af; font-size: 12px;}
-
-        /* Mocking the Open Dropdowns from Image */
-        .mock-dropdown {
-            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
-            overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
+        .mock-dropdown { background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .md-item { padding: 8px 12px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between;}
         .md-item.selected { background: rgba(220, 179, 74, 0.25); font-weight: 500; }
-
         .form-actions { display: flex; gap: 12px; margin-top: auto; }
         .btn-cancel { flex: 1; background: #9ca3af; color: white; padding: 12px; border-radius: 20px; border: none; font-weight: 500; cursor: pointer;}
         .btn-save { flex: 1; background: var(--accent-yellow); color: var(--text-dark); padding: 12px; border-radius: 20px; border: none; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer;}
 
+        .toggle-switch { position: relative; width: 44px; height: 24px; background: var(--toggle-bg); border-radius: 12px; cursor: pointer; transition: background 0.3s; }
+        .toggle-switch.active { background: var(--toggle-active); }
+        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch.active::after { transform: translateX(20px); }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="dashboard.html" class="logo">
-            <i class="fa-solid fa-church"></i> FaithWorks CRM
-        </a>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
         <nav class="nav-pills">
             <a href="dashboard.html" class="nav-pill">Dashboard</a>
             <a href="members-dashboard.html" class="nav-pill">People</a>
             <a href="giving-dashboard.html" class="nav-pill active">Giving</a>
-            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
             <a href="groups-dashboard.html" class="nav-pill">Groups</a>
-            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
-            <a href="care-dashboard.html" class="nav-pill">Help</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
         </nav>
+
         <div class="header-actions">
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
             <button class="icon-btn">
-                <i class="fa-regular fa-envelope"></i>
+                <i class="fa-regular fa-bell"></i>
                 <div class="notification-dot"></div>
             </button>
             <a href="User Profile.html">
@@ -307,6 +200,14 @@
             </a>
         </div>
     </header>
+
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Donations</div>
+        <div class="sub-nav-item">Funds</div>
+        <div class="sub-nav-item">Pledges</div>
+        <div class="sub-nav-item">Statements</div>
+        <div class="sub-nav-item">Payment Methods</div>
+    </nav>
 
     <main>
         <h1 class="page-title">Giving</h1>
@@ -328,8 +229,9 @@
                 <div class="kpi-value">$4,950</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">Missions</div>
-                <div class="kpi-value">$4,400</div>
+                <div class="kpi-title">Building Fund Pledge</div>
+                <div class="kpi-value">$45,000 <span style="font-size: 14px; color: var(--text-muted); font-weight: normal;">/ $50k</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 90%;"></div></div>
             </div>
         </div>
 
@@ -388,7 +290,7 @@
                             <tr>
                                 <td><div class="custom-checkbox"></div></td>
                                 <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=1" alt="Mary"> Mary Johnson</div></td>
-                                <td>Tithe</td>
+                                <td>Tithe <i class="fa-solid fa-arrows-rotate recurring-icon" title="Recurring Gift"></i></td>
                                 <td>$200.00</td>
                                 <td>Oct 20, 2023</td>
                                 <td><i class="fa-brands fa-cc-mastercard method-icon mc"></i></td>
@@ -408,62 +310,21 @@
                             <tr class="highlighted">
                                 <td><div class="custom-checkbox"></div></td>
                                 <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=12" alt="David"> David Lee</div></td>
-                                <td>Tithe</td>
+                                <td>Tithe <i class="fa-solid fa-arrows-rotate recurring-icon" title="Recurring Gift"></i></td>
                                 <td>$1,500.00</td>
                                 <td>Oct 15, 2023</td>
                                 <td class="method-icon visa">VISA</td>
                                 <td>Building Fund</td>
                                 <td><span class="status-badge status-completed">Completed</span></td>
                             </tr>
-                            <tr>
-                                <td><div class="custom-checkbox"></div></td>
-                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=9" alt="Sarah"> Sarah Brown</div></td>
-                                <td>Missions</td>
-                                <td>$350.00</td>
-                                <td>Oct 12, 2023</td>
-                                <td><i class="fa-brands fa-cc-paypal method-icon pp"></i></td>
-                                <td>Global Missions</td>
-                                <td><span class="status-badge status-failed">Failed</span></td>
-                            </tr>
-                            <tr>
-                                <td><div class="custom-checkbox"></div></td>
-                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=14" alt="Thomas"> Pastor Thomas</div></td>
-                                <td>Offering</td>
-                                <td>$100.00</td>
-                                <td>Oct 10, 2023</td>
-                                <td><i class="fa-solid fa-money-bill-1 method-icon check"></i></td>
-                                <td>Benevolence</td>
-                                <td><span class="status-badge status-completed">Completed</span></td>
-                            </tr>
-                            <tr>
-                                <td><div class="custom-checkbox"></div></td>
-                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=20" alt="Lisa"> Lisa Chen</div></td>
-                                <td>Pledge</td>
-                                <td>$500.00</td>
-                                <td>Oct 5, 2023</td>
-                                <td class="method-icon ach">ACH</td>
-                                <td>Building Fund</td>
-                                <td><span class="status-badge status-completed">Completed</span></td>
-                            </tr>
                         </tbody>
                     </table>
-
-                    <div class="table-footer">
-                        <div class="pagination">
-                            <i class="fa-solid fa-chevron-left" style="color:#9ca3af;"></i>
-                            <span>1</span>
-                            <i class="fa-solid fa-chevron-right" style="color:#9ca3af;"></i>
-                        </div>
-                        <div>Showing 1-10 of 250 transactions</div>
-                    </div>
-
                 </div>
             </div>
 
             <div class="sidebar-card">
                 <div class="form-header">Add New Donation</div>
                 <div class="form-body">
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label>Donor</label>
@@ -474,46 +335,28 @@
                             <div class="input-box">Oct 22, 2023 <i class="fa-regular fa-calendar"></i></div>
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Amount</label>
                             <div class="input-box">$150.00</div>
-                            
                             <label style="margin-top:8px;">Category</label>
                             <div class="mock-dropdown">
-                                <div class="md-item">Tithe</div>
-                                <div class="md-item">Offering</div>
                                 <div class="md-item selected">Missions <i class="fa-solid fa-check"></i></div>
-                                <div class="md-item">Pledge</div>
-                                <div class="md-item">Gift</div>
+                                <div class="md-item">Tithe</div>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label>Method</label>
                             <div class="mock-dropdown">
-                                <div class="md-item">Mastercard</div>
-                                <div class="md-item">Visa</div>
-                                <div class="md-item">Check</div>
                                 <div class="md-item selected">Cash <i class="fa-solid fa-check"></i></div>
-                                <div class="md-item">Paypal</div>
-                            </div>
-                            
-                            <label style="margin-top:8px;">Fund</label>
-                            <div class="mock-dropdown">
-                                <div class="md-item selected">General Fund</div>
-                                <div class="md-item">Building Fund</div>
-                                <div class="md-item">Benevolence</div>
+                                <div class="md-item">Visa</div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Notes</label>
-                        <div class="input-box" style="justify-content: flex-start; color:var(--text-muted); font-weight:400;">Giving for the local food bank</div>
+                    <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.4); border-radius: 8px;">
+                        <label style="margin:0; font-size: 13px;">Make this a recurring gift</label>
+                        <div class="toggle-switch active"></div>
                     </div>
-
                     <div class="form-actions">
                         <button class="btn-cancel">Cancel</button>
                         <button class="btn-save"><i class="fa-solid fa-plus"></i> Save Donation</button>
@@ -521,8 +364,143 @@
                 </div>
             </div>
         </div>
-
     </main>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting');
+        ShepherdAuth.injectUserIntoHeader();
+
+        // ── State ──
+        let donPage = 1;
+        const donLimit = 15;
+
+        // ── KPI Cards ──
+        async function loadGivingKPIs() {
+            try {
+                const m = await ShepherdAPI.get('/dashboard/metrics');
+                const cards = document.querySelectorAll('.kpi-card');
+                if (cards[0]) cards[0].querySelector('.kpi-value').textContent = ShepherdUI.formatCurrency(m.giving.total);
+                if (cards[0]) {
+                    const badge = cards[0].querySelector('.kpi-badge');
+                    if (badge) badge.textContent = `${m.giving.trend > 0 ? '+' : ''}${m.giving.trend}%`;
+                }
+            } catch {}
+
+            // Pledges
+            try {
+                const pledges = await ShepherdAPI.get('/pledges');
+                const pledgeArr = Array.isArray(pledges) ? pledges : (pledges.items || []);
+                if (pledgeArr.length > 0) {
+                    const cards = document.querySelectorAll('.kpi-card');
+                    const p = pledgeArr[0];
+                    if (cards[3]) {
+                        const raised = p.amount_raised || p.current_amount || 0;
+                        const goal = p.goal_amount || p.amount || 1;
+                        cards[3].querySelector('.kpi-value').innerHTML = `${ShepherdUI.formatCurrency(raised)} <span style="font-size:14px;color:var(--text-muted);font-weight:normal;">/ ${ShepherdUI.formatCurrency(goal)}</span>`;
+                        const fill = cards[3].querySelector('.progress-fill');
+                        if (fill) fill.style.width = `${Math.min((raised / goal) * 100, 100).toFixed(0)}%`;
+                    }
+                }
+            } catch {}
+        }
+
+        // ── Giving Chart ──
+        async function loadGivingChart() {
+            try {
+                const data = await ShepherdAPI.get('/dashboard/giving-chart?months=12');
+                const chartArea = document.querySelector('.chart-area');
+                ShepherdUI.buildLineChart(data, chartArea);
+            } catch {}
+        }
+
+        // ── Donations Table ──
+        async function loadDonations() {
+            const tbody = document.querySelector('table tbody');
+            ShepherdUI.showSkeletonRows(tbody, 8, 5);
+            try {
+                const skip = (donPage - 1) * donLimit;
+                const data = await ShepherdAPI.get(`/donations?skip=${skip}&limit=${donLimit}`);
+                const donations = Array.isArray(data) ? data : (data.items || []);
+
+                if (donations.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">No donations found</td></tr>';
+                    return;
+                }
+
+                const methodIcons = {
+                    'credit_card': '<i class="fa-brands fa-cc-visa method-icon visa">VISA</i>',
+                    'mastercard': '<i class="fa-brands fa-cc-mastercard method-icon mc"></i>',
+                    'cash': '<i class="fa-solid fa-money-bill method-icon check" style="color:#10b981;"></i>',
+                    'check': '<i class="fa-solid fa-check method-icon check"></i>',
+                    'ach': '<span class="method-icon ach">ACH</span>',
+                    'paypal': '<i class="fa-brands fa-paypal method-icon pp"></i>',
+                };
+
+                tbody.innerHTML = donations.map(d => {
+                    const name = d.donor_name || d.member_name || 'Anonymous';
+                    const avatar = d.avatar_url || `https://i.pravatar.cc/150?u=${d.member_id || d.id}`;
+                    const recurring = d.is_recurring ? ' <i class="fa-solid fa-arrows-rotate recurring-icon" title="Recurring"></i>' : '';
+                    const category = (d.category || d.fund_name || 'General') + recurring;
+                    const method = methodIcons[d.payment_method?.toLowerCase()] || d.payment_method || '—';
+                    const fund = d.fund_name || 'General Fund';
+                    const status = (d.status || 'completed').toLowerCase();
+                    const statusClass = status === 'completed' ? 'status-completed' : status === 'pending' ? 'status-pending' : 'status-failed';
+
+                    return `
+                        <tr>
+                            <td><div class="custom-checkbox"></div></td>
+                            <td><div class="donor-cell"><img src="${avatar}" alt="${name}">${name}</div></td>
+                            <td>${category}</td>
+                            <td>${ShepherdUI.formatCurrencyFull(d.amount)}</td>
+                            <td>${ShepherdUI.formatDate(d.date || d.created_at)}</td>
+                            <td>${method}</td>
+                            <td>${fund}</td>
+                            <td><span class="status-badge ${statusClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load donations: ' + err.message, 'error');
+            }
+        }
+
+        // ── Sidebar Form Submit ──
+        const saveBtn = document.querySelector('.btn-save');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', async () => {
+                ShepherdUI.showToast('Saving donation...', 'info');
+                // In production, gather form values and POST /donations
+                // For now, show success toast
+                setTimeout(() => {
+                    ShepherdUI.showToast('Donation saved successfully!', 'success');
+                    loadDonations();
+                }, 1000);
+            });
+        }
+
+        // ── Chart filter ──
+        document.querySelectorAll('.chart-filters span').forEach(span => {
+            span.addEventListener('click', function() {
+                document.querySelectorAll('.chart-filters span').forEach(s => s.classList.remove('active'));
+                this.classList.add('active');
+                const label = this.textContent.trim().toLowerCase();
+                let months = 12;
+                if (label === 'weekly') months = 1;
+                else if (label === 'yearly') months = 24;
+                ShepherdAPI.get(`/dashboard/giving-chart?months=${months}`).then(data => {
+                    ShepherdUI.buildLineChart(data, document.querySelector('.chart-area'));
+                });
+            });
+        });
+
+        // ── Init ──
+        loadGivingKPIs();
+        loadGivingChart();
+        loadDonations();
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shepherd - Facilities & Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --accent-gray: #8a8d91;
+            --card-radius: 20px;
+            --dark-card-bg: #2d2e30;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
+
+        /* === GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
+        
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
+
+        /* === MAIN CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: -10px; }
+        .page-title { font-size: 28px; font-weight: 600; }
+        
+        .btn-add { background: var(--dark-card-bg); color: var(--accent-yellow); border: none; padding: 10px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s; }
+        .btn-add:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+
+        .split-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); overflow: hidden; padding: 24px;}
+
+        /* LEFT: Rooms Grid */
+        .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        
+        .room-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); transition: 0.2s; display: flex; flex-direction: column;}
+        .room-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); border-color: var(--accent-yellow);}
+        
+        .room-img { height: 140px; position: relative; }
+        .room-img img { width: 100%; height: 100%; object-fit: cover; }
+        .status-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); color: white; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px;}
+        .status-badge.available { background: rgba(22, 163, 74, 0.9); }
+        .status-badge.booked { background: rgba(220, 38, 38, 0.9); }
+
+        .room-info { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px;}
+        .room-header { display: flex; justify-content: space-between; align-items: flex-start;}
+        .room-title { font-size: 16px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px;}
+        .room-capacity { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; font-weight: 500;}
+        
+        .equip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .equip-tag { background: rgba(0,0,0,0.04); padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 4px;}
+        
+        .room-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05);}
+        .btn-view { flex: 1; background: transparent; border: 1px solid #d1d5db; padding: 8px; border-radius: 12px; font-size: 12px; font-weight: 600; color: var(--text-dark); cursor: pointer; text-align: center;}
+        .btn-book { flex: 1; background: var(--dark-card-bg); color: var(--accent-yellow); border: none; padding: 8px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center;}
+
+        /* RIGHT: Quick Book Sidebar */
+        .sidebar-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;}
+        
+        /* Timeline Availability UI */
+        .timeline-container { background: white; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+        .timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; font-weight: 600;}
+        .timeline-track { width: 100%; height: 24px; background: #dcfce7; border-radius: 6px; position: relative; overflow: hidden; display: flex;}
+        /* Simulating booked slots */
+        .slot-booked { position: absolute; height: 100%; background: #fee2e2; border-left: 1px solid white; border-right: 1px solid white; display: flex; justify-content: center; align-items: center; color: #991b1b; font-size: 10px; font-weight: bold; overflow: hidden; white-space: nowrap;}
+        
+        .timeline-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: var(--text-muted); font-weight: 500;}
+
+        /* Form */
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-dark); }
+        .form-input { background: white; border: 1px solid #d1d5db; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; outline: none; display: flex; justify-content: space-between; align-items: center; width: 100%; color: var(--text-dark);}
+        .form-input i { color: var(--text-muted); font-size: 12px;}
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px;}
+        
+        textarea.form-input { resize: none; height: 80px; align-items: flex-start; }
+
+        .btn-submit { background: var(--accent-yellow); color: var(--text-dark); border: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
+        <nav class="nav-pills">
+            <a href="dashboard.html" class="nav-pill">Dashboard</a>
+            <a href="members-dashboard.html" class="nav-pill">People</a>
+            <a href="giving-dashboard.html" class="nav-pill">Giving</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
+            <a href="groups-dashboard.html" class="nav-pill">Groups</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill active">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item" style="font-weight:bold; color:var(--accent-yellow);"><i class="fa-solid fa-building" style="color:var(--accent-yellow);"></i> Facilities</a>
+                    <a href="tasks-dashboard.html" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="reports-dashboard.html" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="communications-dashboard.html" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="sermons-dashboard.html" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i><div class="notification-dot"></div></button>
+            <a href="User Profile.html"><img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar"></a>
+        </div>
+    </header>
+
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Rooms & Spaces</div>
+        <div class="sub-nav-item">Master Calendar</div>
+        <div class="sub-nav-item">Pending Requests</div>
+        <div class="sub-nav-item">Equipment Inventory</div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Facilities & Room Booking</h1>
+            <button class="btn-add"><i class="fa-solid fa-plus"></i> Add Room</button>
+        </div>
+
+        <div class="split-layout">
+            
+            <div class="rooms-grid">
+                
+                <div class="room-card">
+                    <div class="room-img">
+                        <img src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=600&q=80" alt="Sanctuary">
+                        <div class="status-badge available"><i class="fa-solid fa-circle-check"></i> Available</div>
+                    </div>
+                    <div class="room-info">
+                        <div class="room-header">
+                            <div class="room-title">Main Sanctuary</div>
+                            <div class="room-capacity"><i class="fa-solid fa-users"></i> 500</div>
+                        </div>
+                        <div class="equip-list">
+                            <span class="equip-tag"><i class="fa-solid fa-microphone"></i> Full A/V</span>
+                            <span class="equip-tag"><i class="fa-solid fa-video"></i> Live Stream</span>
+                            <span class="equip-tag"><i class="fa-solid fa-music"></i> Instruments</span>
+                        </div>
+                        <div class="room-actions">
+                            <button class="btn-view">View Calendar</button>
+                            <button class="btn-book">Book Room</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="room-card">
+                    <div class="room-img">
+                        <img src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80" alt="Fellowship Hall">
+                        <div class="status-badge booked"><i class="fa-solid fa-ban"></i> Booked (until 2 PM)</div>
+                    </div>
+                    <div class="room-info">
+                        <div class="room-header">
+                            <div class="room-title">Fellowship Hall</div>
+                            <div class="room-capacity"><i class="fa-solid fa-users"></i> 150</div>
+                        </div>
+                        <div class="equip-list">
+                            <span class="equip-tag"><i class="fa-solid fa-utensils"></i> Kitchen Access</span>
+                            <span class="equip-tag"><i class="fa-solid fa-chair"></i> Round Tables</span>
+                        </div>
+                        <div class="room-actions">
+                            <button class="btn-view">View Calendar</button>
+                            <button class="btn-book">Book Room</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="room-card">
+                    <div class="room-img">
+                        <img src="https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&w=600&q=80" alt="Youth Room">
+                        <div class="status-badge available"><i class="fa-solid fa-circle-check"></i> Available</div>
+                    </div>
+                    <div class="room-info">
+                        <div class="room-header">
+                            <div class="room-title">Youth Room</div>
+                            <div class="room-capacity"><i class="fa-solid fa-users"></i> 60</div>
+                        </div>
+                        <div class="equip-list">
+                            <span class="equip-tag"><i class="fa-solid fa-tv"></i> Apple TV</span>
+                            <span class="equip-tag"><i class="fa-solid fa-gamepad"></i> Gaming Console</span>
+                            <span class="equip-tag"><i class="fa-solid fa-couch"></i> Sofas</span>
+                        </div>
+                        <div class="room-actions">
+                            <button class="btn-view">View Calendar</button>
+                            <button class="btn-book">Book Room</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="room-card">
+                    <div class="room-img">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80" alt="Conference Room">
+                        <div class="status-badge available"><i class="fa-solid fa-circle-check"></i> Available</div>
+                    </div>
+                    <div class="room-info">
+                        <div class="room-header">
+                            <div class="room-title">Conference Rm A</div>
+                            <div class="room-capacity"><i class="fa-solid fa-users"></i> 12</div>
+                        </div>
+                        <div class="equip-list">
+                            <span class="equip-tag"><i class="fa-solid fa-tv"></i> Monitor</span>
+                            <span class="equip-tag"><i class="fa-solid fa-pen"></i> Whiteboard</span>
+                        </div>
+                        <div class="room-actions">
+                            <button class="btn-view">View Calendar</button>
+                            <button class="btn-book">Book Room</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="glass-panel">
+                <h2 class="sidebar-title"><i class="fa-regular fa-calendar-plus"></i> Quick Book</h2>
+                
+                <div class="form-group">
+                    <label>Select Room</label>
+                    <div class="form-input">Fellowship Hall <i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <div class="form-input">Today, Mar 28 <i class="fa-regular fa-calendar"></i></div>
+                </div>
+
+                <div class="timeline-container">
+                    <div class="timeline-header">
+                        <span>Daily Availability</span>
+                        <span style="color: #166534;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Available</span>
+                    </div>
+                    <div class="timeline-track">
+                        <div class="slot-booked" style="left: 25%; width: 33%;">Women's Brunch</div>
+                    </div>
+                    <div class="timeline-labels">
+                        <span>8a</span><span>10a</span><span>12p</span><span>2p</span><span>4p</span><span>6p</span><span>8p</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Event / Meeting Title</label>
+                    <input type="text" class="form-input" placeholder="e.g., Elder Board Meeting">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <div class="form-input">3:00 PM <i class="fa-solid fa-chevron-down"></i></div>
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <div class="form-input">5:00 PM <i class="fa-solid fa-chevron-down"></i></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Notes or Equipment</label>
+                    <textarea class="form-input" placeholder="Need 10 extra chairs setup..."></textarea>
+                </div>
+
+                <button class="btn-submit"><i class="fa-solid fa-calendar-check"></i> Reserve Room</button>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting');
+        ShepherdAuth.injectUserIntoHeader();
+
+        const roomsGrid = document.querySelector('.rooms-grid');
+
+        // Placeholder images for rooms since backend doesn't store them currently
+        const roomImages = [
+            "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=600&q=80",
+            "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80",
+            "https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&w=600&q=80",
+            "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80"
+        ];
+
+        async function loadRooms() {
+            roomsGrid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading rooms...</div>';
+            try {
+                const data = await ShepherdAPI.get('/facilities/rooms');
+                const rooms = Array.isArray(data) ? data : (data.items || []);
+
+                if (rooms.length === 0) {
+                    roomsGrid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">No rooms configured</div>';
+                    return;
+                }
+
+                roomsGrid.innerHTML = rooms.map((room, index) => {
+                    let amenitiesHtml = '';
+                    if (room.amenities && Array.isArray(room.amenities)) {
+                        amenitiesHtml = room.amenities.map(a => `<span class="equip-tag"><i class="fa-solid fa-check"></i> ${a}</span>`).join('');
+                    } else if (typeof room.amenities === 'string') {
+                        // Sometimes it might come as a JSON string or comma separated
+                        const amArray = room.amenities.startsWith('[') ? JSON.parse(room.amenities) : room.amenities.split(',');
+                        amenitiesHtml = amArray.map(a => `<span class="equip-tag"><i class="fa-solid fa-check"></i> ${a.replace(/['"\[\]]/g, '').trim()}</span>`).join('');
+                    }
+
+                    const capacityHtml = room.capacity ? `<div class="room-capacity"><i class="fa-solid fa-users"></i> ${room.capacity}</div>` : '';
+                    const imgSrc = roomImages[index % roomImages.length];
+
+                    return `
+                        <div class="room-card">
+                            <div class="room-img">
+                                <img src="${imgSrc}" alt="${room.name}">
+                                <div class="status-badge available"><i class="fa-solid fa-circle-check"></i> Available</div>
+                            </div>
+                            <div class="room-info">
+                                <div class="room-header">
+                                    <div class="room-title">${room.name}</div>
+                                    ${capacityHtml}
+                                </div>
+                                <div class="equip-list">${amenitiesHtml}</div>
+                                <div class="room-actions">
+                                    <button class="btn-view" onclick="ShepherdUI.showToast('View calendar integration coming soon', 'info')">View Calendar</button>
+                                    <button class="btn-book" onclick="ShepherdUI.showToast('Select time slots in quick book panel', 'info')">Book Room</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load rooms: ' + err.message, 'error');
+            }
+        }
+
+        document.querySelector('.btn-submit').addEventListener('click', () => {
+             ShepherdUI.showToast('Booking submitted successfully.', 'success');
+        });
+
+        loadRooms();
+    </script>
+</body>
+</html>

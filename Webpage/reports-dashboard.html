@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shepherd - Reports & Analytics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --accent-gray: #8a8d91;
+            --card-radius: 20px;
+            --dark-card-bg: #2d2e30;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
+
+        /* === GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
+        
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-links { display: flex; gap: 24px; }
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
+
+        .sub-nav-actions { display: flex; gap: 12px; }
+        .btn-export { background: white; border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .btn-export:hover { background: rgba(0,0,0,0.02); }
+
+        /* === MAIN CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: -10px; }
+        .page-title { font-size: 28px; font-weight: 600; }
+        
+        .controls-row { display: flex; gap: 12px; }
+        .select-input { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+        /* Summary KPIs */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); }
+        .kpi-card { display: flex; flex-direction: column; gap: 8px; }
+        .kpi-title { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+        .kpi-value { font-size: 28px; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 10px;}
+        .kpi-trend { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;}
+        .trend-up { background: #dcfce7; color: #166534; }
+        .trend-down { background: #fee2e2; color: #991b1b; }
+
+        /* Charts Grid Layout */
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .charts-grid-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .chart-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .chart-title i { color: var(--text-muted); }
+
+        /* 1. YoY Giving Line Chart Mockup */
+        .line-chart-area { width: 100%; height: 220px; position: relative; }
+        .line-chart-area svg { width: 100%; height: 100%; overflow: visible; }
+        .chart-line-current { fill: none; stroke: var(--accent-yellow); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
+        .chart-line-prev { fill: none; stroke: #9ca3af; stroke-width: 2px; stroke-dasharray: 6 6; stroke-linecap: round; stroke-linejoin: round; }
+        .chart-fill-current { fill: url(#chart-gradient); opacity: 0.5; }
+        .chart-legend { display: flex; gap: 16px; font-size: 11px; font-weight: 600; color: var(--text-muted); justify-content: flex-end; margin-top: 10px;}
+        .legend-tag { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 4px; border-radius: 2px; }
+
+        /* 2. Growth Funnel Mockup */
+        .funnel-container { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 220px; justify-content: center;}
+        .funnel-stage { display: flex; justify-content: space-between; align-items: center; background: var(--dark-card-bg); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; position: relative;}
+        .fs-1 { width: 100%; background: #3b82f6; }
+        .fs-2 { width: 80%; background: #10b981; }
+        .fs-3 { width: 60%; background: var(--accent-yellow); color: var(--text-dark);}
+        .fs-4 { width: 40%; background: var(--dark-card-bg); }
+        .funnel-label { font-weight: 600; }
+        .funnel-rate { font-size: 11px; opacity: 0.9; }
+
+        /* 3. Engagement Histogram Mockup */
+        .histogram-container { display: flex; align-items: flex-end; justify-content: space-around; height: 180px; padding-top: 20px; margin-bottom: 20px;}
+        .hist-bar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+        .hist-bar { width: 40px; background: rgba(0,0,0,0.1); border-radius: 4px 4px 0 0; transition: 0.2s;}
+        .hist-bar:hover { background: var(--accent-yellow); }
+        .hist-label { font-size: 11px; color: var(--text-muted); font-weight: 500;}
+        .hist-val { font-size: 10px; font-weight: 600; color: var(--text-dark); margin-bottom: -4px;}
+
+        /* 4. Fund Donut Mockup */
+        .donut-wrapper { display: flex; justify-content: center; align-items: center; height: 180px; gap: 40px;}
+        .donut-chart { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#3b82f6 30%, #10b981 30% 55%, var(--accent-yellow) 55% 85%, #ef4444 85%); display: flex; justify-content: center; align-items: center; }
+        .donut-inner { width: 100px; height: 100px; background: #fdf5e6; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .donut-inner h3 { font-size: 18px; font-weight: 600; color: var(--text-dark); }
+        .donut-inner p { font-size: 10px; color: var(--text-muted); }
+        .donut-legend-col { display: flex; flex-direction: column; gap: 12px; }
+        .dl-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--text-dark); }
+        .dl-dot { width: 12px; height: 12px; border-radius: 4px; }
+        .dl-val { margin-left: auto; color: var(--text-muted); font-weight: 400;}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
+        <nav class="nav-pills">
+            <a href="dashboard.html" class="nav-pill">Dashboard</a>
+            <a href="members-dashboard.html" class="nav-pill">People</a>
+            <a href="giving-dashboard.html" class="nav-pill">Giving</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
+            <a href="groups-dashboard.html" class="nav-pill">Groups</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill active">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="tasks-dashboard.html" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item" style="font-weight:bold; color:var(--accent-yellow);"><i class="fa-solid fa-chart-pie" style="color:var(--accent-yellow);"></i> Reports</a>
+                    <a href="communications-dashboard.html" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="sermons-dashboard.html" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i><div class="notification-dot"></div></button>
+            <a href="User Profile.html"><img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar"></a>
+        </div>
+    </header>
+
+    <nav class="sub-nav">
+        <div class="sub-nav-links">
+            <div class="sub-nav-item active">Analytics Overview</div>
+            <div class="sub-nav-item">Financials & Giving</div>
+            <div class="sub-nav-item">Attendance & Growth</div>
+            <div class="sub-nav-item">Engagement Score</div>
+        </div>
+        <div class="sub-nav-actions">
+            <button class="btn-export"><i class="fa-solid fa-file-invoice-dollar" style="color:#10b981;"></i> Generate Tax Statements</button>
+            <button class="btn-export"><i class="fa-solid fa-download"></i> Export Data (CSV)</button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Church Health Analytics</h1>
+            <div class="controls-row">
+                <div class="select-input">
+                    <i class="fa-regular fa-calendar"></i> Year to Date (2026) <i class="fa-solid fa-chevron-down" style="margin-left: 8px;"></i>
+                </div>
+                <div class="select-input">
+                    All Campuses <i class="fa-solid fa-chevron-down" style="margin-left: 8px;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="glass-panel kpi-card">
+                <div class="kpi-title">Total Giving (YTD)</div>
+                <div class="kpi-value">$214,500 <span class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> 12%</span></div>
+            </div>
+            <div class="glass-panel kpi-card">
+                <div class="kpi-title">Avg. Weekly Attendance</div>
+                <div class="kpi-value">845 <span class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> 5%</span></div>
+            </div>
+            <div class="glass-panel kpi-card">
+                <div class="kpi-title">New Members (YTD)</div>
+                <div class="kpi-value">142 <span class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> 24%</span></div>
+            </div>
+            <div class="glass-panel kpi-card">
+                <div class="kpi-title">Churn / At-Risk</div>
+                <div class="kpi-value">28 <span class="kpi-trend trend-down"><i class="fa-solid fa-arrow-trend-down"></i> 2%</span></div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            
+            <div class="glass-panel">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Year-over-Year Giving Trends</div>
+                </div>
+                <div class="line-chart-area">
+                    <svg viewBox="0 0 800 200" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="chart-gradient" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="0%" stop-color="#dcb34a" stop-opacity="0.4"/>
+                                <stop offset="100%" stop-color="#dcb34a" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path class="chart-line-prev" d="M0,150 L100,120 L200,130 L300,100 L400,110 L500,80 L600,90 L700,60 L800,70"></path>
+                        <path class="chart-fill-current" d="M0,130 L100,90 L200,80 L300,60 L400,40 L500,50 L600,20 L700,30 L800,10 L800,200 L0,200 Z"></path>
+                        <path class="chart-line-current" d="M0,130 L100,90 L200,80 L300,60 L400,40 L500,50 L600,20 L700,30 L800,10"></path>
+                    </svg>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-tag"><div class="legend-color" style="background:var(--accent-yellow);"></div> 2026 (Current)</div>
+                    <div class="legend-tag"><div class="legend-color" style="background:#9ca3af; border-top:2px dashed white;"></div> 2025 (Previous)</div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fa-solid fa-filter"></i> Growth & Discipleship Funnel</div>
+                </div>
+                <div class="funnel-container">
+                    <div class="funnel-stage fs-1">
+                        <span class="funnel-label">First-Time Visitors</span>
+                        <span class="funnel-rate">320</span>
+                    </div>
+                    <div class="funnel-stage fs-2">
+                        <span class="funnel-label">Regular Attendees</span>
+                        <span class="funnel-rate">75% Conversion (240)</span>
+                    </div>
+                    <div class="funnel-stage fs-3">
+                        <span class="funnel-label">Covenanted Members</span>
+                        <span class="funnel-rate">58% Conversion (140)</span>
+                    </div>
+                    <div class="funnel-stage fs-4">
+                        <span class="funnel-label">Serving / Leaders</span>
+                        <span class="funnel-rate">22% Conversion (52)</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="charts-grid-bottom">
+            
+            <div class="glass-panel">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fa-solid fa-chart-column"></i> Member Engagement Distribution</div>
+                </div>
+                <div class="histogram-container">
+                    <div class="hist-bar-wrapper">
+                        <div class="hist-val">42</div>
+                        <div class="hist-bar" style="height: 15%;"></div>
+                        <div class="hist-label">0-20 (At Risk)</div>
+                    </div>
+                    <div class="hist-bar-wrapper">
+                        <div class="hist-val">150</div>
+                        <div class="hist-bar" style="height: 40%;"></div>
+                        <div class="hist-label">21-40 (Low)</div>
+                    </div>
+                    <div class="hist-bar-wrapper">
+                        <div class="hist-val">340</div>
+                        <div class="hist-bar" style="height: 75%; background: var(--accent-yellow);"></div>
+                        <div class="hist-label" style="color:var(--text-dark); font-weight:600;">41-60 (Avg)</div>
+                    </div>
+                    <div class="hist-bar-wrapper">
+                        <div class="hist-val">280</div>
+                        <div class="hist-bar" style="height: 60%;"></div>
+                        <div class="hist-label">61-80 (High)</div>
+                    </div>
+                    <div class="hist-bar-wrapper">
+                        <div class="hist-val">120</div>
+                        <div class="hist-bar" style="height: 30%;"></div>
+                        <div class="hist-label">81-100 (Core)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fa-solid fa-chart-pie"></i> Giving by Fund (YTD)</div>
+                </div>
+                <div class="donut-wrapper">
+                    <div class="donut-chart">
+                        <div class="donut-inner">
+                            <h3>$214.5k</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                    <div class="donut-legend-col">
+                        <div class="dl-item"><div class="dl-dot" style="background:#3b82f6;"></div> Tithe <span class="dl-val">45%</span></div>
+                        <div class="dl-item"><div class="dl-dot" style="background:#10b981;"></div> Building Fund <span class="dl-val">25%</span></div>
+                        <div class="dl-item"><div class="dl-dot" style="background:var(--accent-yellow);"></div> General Offering <span class="dl-val">20%</span></div>
+                        <div class="dl-item"><div class="dl-dot" style="background:#ef4444;"></div> Missions <span class="dl-val">10%</span></div>
+                    </div>
+                </div>
+        </div>
+
+    </main>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting');
+        ShepherdAuth.injectUserIntoHeader();
+
+        async function loadReports() {
+            try {
+                // Fetch reports data
+                const [dashboardData, growthData, givingData] = await Promise.all([
+                    ShepherdAPI.get('/reports/dashboard'),
+                    ShepherdAPI.get('/reports/analytics/growth'),
+                    ShepherdAPI.get('/reports/giving')
+                ]);
+
+                // Update KPIs
+                const kpiValues = document.querySelectorAll('.kpi-value');
+                if (kpiValues.length >= 3) {
+                    const givingTrendCls = dashboardData.giving_trend_percent >= 0 ? 'trend-up' : 'trend-down';
+                    const givingTrendIcon = dashboardData.giving_trend_percent >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                    kpiValues[0].innerHTML = `$${dashboardData.total_giving_ytd.toLocaleString()} <span class="kpi-trend ${givingTrendCls}"><i class="fa-solid ${givingTrendIcon}"></i> ${Math.abs(dashboardData.giving_trend_percent)}%</span>`;
+                    
+                    const attTrendCls = dashboardData.attendance_trend_percent >= 0 ? 'trend-up' : 'trend-down';
+                    const attTrendIcon = dashboardData.attendance_trend_percent >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                    kpiValues[1].innerHTML = `${dashboardData.avg_weekly_attendance} <span class="kpi-trend ${attTrendCls}"><i class="fa-solid ${attTrendIcon}"></i> ${Math.abs(dashboardData.attendance_trend_percent)}%</span>`;
+                    
+                    kpiValues[2].innerHTML = `${dashboardData.new_members_this_month} <span class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> New</span>`;
+                    // 4th KPI (Churn) remains static for now, as no direct endpoint property exists.
+                }
+
+                // Update Growth Funnel
+                if (growthData && growthData.funnel) {
+                    const fContainer = document.querySelector('.funnel-container');
+                    const totalFunnel = (growthData.funnel.visitors || 0) + (growthData.funnel.active_members || 0) + (growthData.funnel.prospects || 0);
+                    const visitorRate = totalFunnel > 0 ? 100 : 0;
+                    const activeRate = totalFunnel > 0 ? Math.round(((growthData.funnel.active_members || 0) / totalFunnel) * 100) : 0;
+                    
+                    if (fContainer) {
+                        fContainer.innerHTML = `
+                            <div class="funnel-stage fs-1" style="width: 100%;">
+                                <span class="funnel-label">Visitors & Prospects</span>
+                                <span class="funnel-rate">${(growthData.funnel.visitors || 0) + (growthData.funnel.prospects || 0)}</span>
+                            </div>
+                            <div class="funnel-stage fs-2" style="width: ${Math.max(activeRate, 20)}%;">
+                                <span class="funnel-label">Active Members</span>
+                                <span class="funnel-rate">${activeRate}% Conversion (${growthData.funnel.active_members || 0})</span>
+                            </div>
+                            <div class="funnel-stage fs-3" style="width: ${Math.max(activeRate * 0.5, 20)}%;">
+                                <span class="funnel-label">Covenanted Leaders</span>
+                                <span class="funnel-rate">Serving Role</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Update Donut Legend for Giving by Fund
+                if (givingData && givingData.by_fund) {
+                    const dlContainer = document.querySelector('.donut-legend-col');
+                    const dInner = document.querySelector('.donut-inner h3');
+                    if (dlContainer && dInner) {
+                        dInner.textContent = `$${givingData.total_amount.toLocaleString()}`;
+                        
+                        const colors = ['#3b82f6', '#10b981', 'var(--accent-yellow)', '#ef4444', '#8b5cf6'];
+                        dlContainer.innerHTML = givingData.by_fund.map((f, i) => {
+                            const pct = givingData.total_amount > 0 ? Math.round((f.total / givingData.total_amount) * 100) : 0;
+                            return `<div class="dl-item"><div class="dl-dot" style="background:${colors[i % colors.length]};"></div> ${f.fund_name} <span class="dl-val">${pct}%</span></div>`;
+                        }).join('');
+                    }
+                }
+
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load reports: ' + err.message, 'error');
+            }
+        }
+
+        loadReports();
+    </script>
+</body>
+</html>

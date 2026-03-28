@@ -57,6 +57,9 @@ class UserResponse(UserBase):
     is_anointed: bool = False
     member_id: Optional[int] = None
     created_at: datetime
+    phone_number: Optional[str] = None
+    language_preference: Optional[str] = None
+    notification_prefs: Optional[dict] = None
 
     model_config = {"from_attributes": True}
 

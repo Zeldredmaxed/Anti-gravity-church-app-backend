@@ -3,572 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaithWorks CRM - User Profile</title>
+    <title>Shepherd - User Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === Global Styles & Variables (Master Design System) === */
-        :root {
-            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
-            --glass-bg: rgba(255, 255, 255, 0.55);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --text-dark: #202124;
-            --text-muted: #5f6368;
-            --accent-yellow: #dcb34a;
-            --accent-gray: #8a8d91;
-            --card-radius: 20px;
-            --dark-card-bg: #2d2e30;
-        }
+        /* === Global Styles === */
+        :root { --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%); --glass-bg: rgba(255, 255, 255, 0.55); --glass-border: rgba(255, 255, 255, 0.8); --text-dark: #202124; --text-muted: #5f6368; --accent-yellow: #dcb34a; --card-radius: 20px; --dark-card-bg: #2d2e30; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            min-height: 100vh;
-            padding: 30px;
-            background-attachment: fixed;
-        }
-
-        /* === Header (Standardized across all pages) === */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
+        /* === GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
         
-        .nav-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 5px;
-            gap: 5px;
-        }
-        .nav-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-        .nav-pill:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .nav-pill.active {
-            background: #333;
-            color: white;
-        }
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;}
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 
-        .header-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: relative;
-        }
-        .icon-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            display: flex; justify-content: center; align-items: center;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .notification-dot {
-            position: absolute; top: 10px; right: 10px;
-            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
-        }
-        .avatar { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            cursor: pointer;
-        }
+        /* === SUB-NAV === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
 
-        /* === Main Content === */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        /* === MAIN === */
+        main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .profile-header { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 30px; }
+        .profile-avatar-large { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .profile-info { flex: 1; padding-top: 10px; }
+        .profile-info h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+        .profile-role { font-size: 15px; color: var(--text-muted); margin-bottom: 16px; }
+        .profile-stats { display: flex; gap: 30px; align-items: center;}
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-value { font-size: 24px; font-weight: 600; color: var(--accent-yellow); }
+        .stat-label { font-size: 12px; color: var(--text-muted); }
+        .health-badge { background: #b1df8c; color: #205c20; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;}
 
-        /* === Profile Header === */
-        .profile-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 24px;
-            margin-bottom: 30px;
-        }
+        .content-grid { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
+        .info-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 20px;}
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-header h2 { font-size: 18px; font-weight: 600; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .info-item { display: flex; flex-direction: column; gap: 4px; }
+        .info-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .info-value { font-size: 14px; color: var(--text-dark); }
 
-        .profile-avatar-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid white;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        }
+        .timeline { display: flex; flex-direction: column; gap: 15px; position: relative; margin-left: 10px; border-left: 2px solid rgba(0,0,0,0.1); padding-left: 20px;}
+        .timeline-item { position: relative; }
+        .timeline-item::before { content: ''; position: absolute; left: -26px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+        .timeline-item.completed::before { background: var(--accent-yellow); box-shadow: 0 0 0 4px rgba(220, 179, 74, 0.2);}
+        .timeline-title { font-size: 14px; font-weight: 500; }
+        .timeline-date { font-size: 11px; color: var(--text-muted); }
 
-        .profile-info {
-            flex: 1;
-            padding-top: 10px;
-        }
-
-        .profile-info h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .profile-role {
-            font-size: 15px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .profile-stats {
-            display: flex;
-            gap: 30px;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--accent-yellow);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .profile-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--accent-yellow);
-            color: var(--text-dark);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.6);
-            border: 1px solid var(--glass-border);
-            color: var(--text-dark);
-        }
-
-        /* === Content Grid === */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 24px;
-        }
-
-        /* === Left Column - Info Cards === */
-        .left-column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .info-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 24px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .card-header .edit-link {
-            font-size: 13px;
-            color: var(--accent-yellow);
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .info-value {
-            font-size: 14px;
-            color: var(--text-dark);
-        }
-
-        /* === Activity Section === */
-        .activity-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .activity-item {
-            display: flex;
-            gap: 16px;
-            padding: 16px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 12px;
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent-yellow);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 16px;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .activity-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .activity-time {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        /* === Right Column === */
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .groups-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 24px;
-        }
-
-        .groups-card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .group-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px dashed rgba(0,0,0,0.1);
-        }
-
-        .group-item:last-child {
-            border-bottom: none;
-        }
-
-        .group-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: rgba(220, 179, 74, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--accent-yellow);
-            font-size: 16px;
-        }
-
-        .group-info {
-            flex: 1;
-        }
-
-        .group-name {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .group-role {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* === Skills/Tags === */
-        .skills-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 24px;
-        }
-
-        .skills-card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .skills-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .skill-tag {
-            padding: 6px 14px;
-            background: rgba(220, 179, 74, 0.2);
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
+        .family-member { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px dashed rgba(0,0,0,0.1);}
+        .family-member img { width: 32px; height: 32px; border-radius: 50%; }
+        .family-info { flex: 1; }
+        .family-name { font-size: 13px; font-weight: 500; }
+        .family-rel { font-size: 11px; color: var(--text-muted); }
     </style>
 </head>
 <body>
-
     <header>
-        <a href="dashboard.html" class="logo">
-            <i class="fa-solid fa-church"></i> FaithWorks CRM
-        </a>
+        <div class="logo"><img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;"></div>
         <nav class="nav-pills">
             <a href="dashboard.html" class="nav-pill">Dashboard</a>
-            <a href="members-dashboard.html" class="nav-pill">People</a>
+            <a href="members-dashboard.html" class="nav-pill active">People</a>
             <a href="giving-dashboard.html" class="nav-pill">Giving</a>
-            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
             <a href="groups-dashboard.html" class="nav-pill">Groups</a>
-            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
-            <a href="care-dashboard.html" class="nav-pill">Help</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            <div class="dropdown-container">
+                <div class="nav-pill">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
         </nav>
         <div class="header-actions">
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
-            <button class="icon-btn">
-                <i class="fa-regular fa-envelope"></i>
-                <div class="notification-dot"></div>
-            </button>
-            <a href="User Profile.html">
-                <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar">
-            </a>
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i><div class="notification-dot"></div></button>
+            <a href="User Profile.html"><img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar"></a>
         </div>
     </header>
+
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Personal Info</div>
+        <div class="sub-nav-item">Skills & Interests</div>
+        <div class="sub-nav-item">Engagement</div>
+        <div class="sub-nav-item">Giving History</div>
+        <div class="sub-nav-item">Activity Timeline</div>
+        <div class="sub-nav-item">Notes</div>
+    </nav>
 
     <main>
         <div class="profile-header">
             <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="profile-avatar-large">
-            
             <div class="profile-info">
-                <h1>Pastor David</h1>
-                <p class="profile-role">Senior Pastor at FaithWorks Church</p>
-                
+                <h1>David Johnson</h1>
+                <p class="profile-role">Senior Pastor at FaithWorks</p>
                 <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-value">12</span>
-                        <span class="stat-label">Years of Service</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">3</span>
-                        <span class="stat-label">Ministries</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">156</span>
-                        <span class="stat-label">Sermons</span>
-                    </div>
+                    <div class="stat-item"><span class="stat-value">12</span><span class="stat-label">Years of Service</span></div>
+                    <div class="stat-item"><span class="health-badge"><i class="fa-solid fa-heart-pulse"></i> AI Score: Engaged</span></div>
                 </div>
-            </div>
-
-            <div class="profile-actions">
-                <button class="btn btn-primary"><i class="fa-solid fa-pencil"></i> Edit Profile</button>
-                <button class="btn btn-secondary"><i class="fa-solid fa-envelope"></i> Message</button>
             </div>
         </div>
 
         <div class="content-grid">
-            
             <div class="left-column">
                 <div class="info-card">
-                    <div class="card-header">
-                        <h2>Personal Information</h2>
-                        <span class="edit-link">Edit</span>
-                    </div>
-                    
+                    <div class="card-header"><h2>Personal Information</h2></div>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Full Name</span>
-                            <span class="info-value">David Michael Johnson</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Email</span>
-                            <span class="info-value">pastor.david@faithworks.org</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Phone</span>
-                            <span class="info-value">+1 (555) 123-4567</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Date of Birth</span>
-                            <span class="info-value">March 15, 1975</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Address</span>
-                            <span class="info-value">123 Faith Street, Grace City, CA 90210</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Member Since</span>
-                            <span class="info-value">January 2012</span>
-                        </div>
+                        <div class="info-item"><span class="info-label">Email</span><span class="info-value">david@example.com</span></div>
+                        <div class="info-item"><span class="info-label">Phone</span><span class="info-value">+1 (555) 123-4567</span></div>
+                        <div class="info-item"><span class="info-label">Date of Birth</span><span class="info-value">March 15, 1975</span></div>
+                        <div class="info-item"><span class="info-label">Address</span><span class="info-value">123 Faith Street, Grace City</span></div>
                     </div>
                 </div>
 
                 <div class="info-card">
-                    <div class="card-header">
-                        <h2>Recent Activity</h2>
-                    </div>
-                    
-                    <div class="activity-list">
-                        <div class="activity-item">
-                            <div class="activity-icon"><i class="fa-solid fa-microphone"></i></div>
-                            <div class="activity-content">
-                                <div class="activity-title">Preached Sunday Sermon</div>
-                                <div class="activity-desc">"Walking in Faith" - John 3:16</div>
-                            </div>
-                            <div class="activity-time">2 days ago</div>
+                    <div class="card-header"><h2>Household: The Johnsons</h2></div>
+                    <div class="family-list">
+                        <div class="family-member">
+                            <img src="https://i.pravatar.cc/150?img=5" alt="Wife">
+                            <div class="family-info"><div class="family-name">Sarah Johnson</div><div class="family-rel">Spouse</div></div>
                         </div>
-                        
-                        <div class="activity-item">
-                            <div class="activity-icon"><i class="fa-solid fa-user-plus"></i></div>
-                            <div class="activity-content">
-                                <div class="activity-title">Baptized New Members</div>
-                                <div class="activity-desc">5 new members baptized</div>
-                            </div>
-                            <div class="activity-time">1 week ago</div>
-                        </div>
-                        
-                        <div class="activity-item">
-                            <div class="activity-icon"><i class="fa-solid fa-calendar-check"></i></div>
-                            <div class="activity-content">
-                                <div class="activity-title">Led Leadership Meeting</div>
-                                <div class="activity-desc">Quarterly strategic planning</div>
-                            </div>
-                            <div class="activity-time">2 weeks ago</div>
+                        <div class="family-member" style="border-bottom:none;">
+                            <img src="https://i.pravatar.cc/150?img=2" alt="Child">
+                            <div class="family-info"><div class="family-name">Timmy Johnson</div><div class="family-rel">Child</div></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="right-column">
-                <div class="groups-card">
-                    <h3>My Groups</h3>
-                    
-                    <div class="group-item">
-                        <div class="group-icon"><i class="fa-solid fa-users"></i></div>
-                        <div class="group-info">
-                            <div class="group-name">Leadership Team</div>
-                            <div class="group-role">Team Leader</div>
-                        </div>
-                    </div>
-                    
-                    <div class="group-item">
-                        <div class="group-icon"><i class="fa-solid fa-hands-praying"></i></div>
-                        <div class="group-info">
-                            <div class="group-name">Prayer Warriors</div>
-                            <div class="group-role">Member</div>
-                        </div>
-                    </div>
-                    
-                    <div class="group-item">
-                        <div class="group-icon"><i class="fa-solid fa-book-bible"></i></div>
-                        <div class="group-info">
-                            <div class="group-name">Bible Study</div>
-                            <div class="group-role">Teacher</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="skills-card">
-                    <h3>Skills & Interests</h3>
-                    <div class="skills-list">
-                        <span class="skill-tag">Preaching</span>
-                        <span class="skill-tag">Counseling</span>
-                        <span class="skill-tag">Leadership</span>
-                        <span class="skill-tag">Teaching</span>
-                        <span class="skill-tag">Mentoring</span>
-                        <span class="skill-tag">Worship</span>
+                <div class="info-card">
+                    <h3>Spiritual Journey</h3>
+                    <div class="timeline" style="margin-top: 15px;">
+                        <div class="timeline-item completed"><div class="timeline-title">Saved</div><div class="timeline-date">Aug 12, 1995</div></div>
+                        <div class="timeline-item completed"><div class="timeline-title">Baptized</div><div class="timeline-date">Sept 05, 1995</div></div>
+                        <div class="timeline-item completed"><div class="timeline-title">Completed Membership Class</div><div class="timeline-date">Jan 10, 2012</div></div>
+                        <div class="timeline-item"><div class="timeline-title">Discipleship Track</div><div class="timeline-date">Pending Registration</div></div>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
+    <script src="api-client.js"></script>
+    <script>
+        ShepherdAuth.requireAuth();
 
+        let memberId = new URLSearchParams(window.location.search).get('id');
+
+        async function loadProfile() {
+            try {
+                // If no specific member id is provided, fetch the current user's member profile.
+                if (!memberId) {
+                    const me = await ShepherdAPI.get('/auth/me');
+                    if (me.member_id) {
+                        memberId = me.member_id;
+                    } else {
+                        // User without a linked member profile: show basic info
+                        document.querySelector('.profile-info h1').textContent = me.full_name;
+                        document.querySelector('.profile-role').textContent = me.role.replace('_', ' ').toUpperCase();
+                        if (me.avatar_url) document.querySelector('.profile-avatar-large').src = me.avatar_url;
+                        
+                        document.querySelector('.info-card .info-grid').innerHTML = `
+                            <div class="info-item"><span class="info-label">Email</span><span class="info-value">${me.email || 'N/A'}</span></div>
+                            <div class="info-item"><span class="info-label">Phone</span><span class="info-value">${me.phone_number || 'N/A'}</span></div>
+                        `;
+                        
+                        return; // Exit early since we don't have a linked member to fetch more data
+                    }
+                }
+
+                // 1. Fetch Member Details
+                const member = await ShepherdAPI.get(`/members/${memberId}`);
+                
+                document.querySelector('.profile-info h1').textContent = `${member.first_name} ${member.last_name}`;
+                document.querySelector('.profile-role').textContent = member.membership_status || 'Attendee';
+                
+                // 2. Fetch Engagement Score
+                const engagement = await ShepherdAPI.get(`/members/${memberId}/engagement`);
+                const scoreSpan = document.querySelector('.stat-item .stat-value');
+                const scoreBadge = document.querySelector('.health-badge');
+                
+                // Using a made-up "Years of Service" calculation logic based on join_date
+                let yearsOfService = 0;
+                if (member.join_date) {
+                    const diffTime = Math.abs(new Date() - new Date(member.join_date));
+                    yearsOfService = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
+                }
+                scoreSpan.textContent = yearsOfService;
+
+                let badgeColor = "#b1df8c";
+                let badgeText = "#205c20";
+                if (engagement.level === 'at_risk' || engagement.level === 'disengaged') {
+                    badgeColor = "#fecaca";
+                    badgeText = "#991b1b";
+                } else if (engagement.level === 'somewhat_engaged') {
+                    badgeColor = "#fef08a";
+                    badgeText = "#854d0e";
+                }
+
+                scoreBadge.style.backgroundColor = badgeColor;
+                scoreBadge.style.color = badgeText;
+                scoreBadge.innerHTML = `<i class="fa-solid fa-heart-pulse"></i> AI Score: ${engagement.overall_score} (${engagement.level.replace('_', ' ')})`;
+
+                // 3. Update Personal Information Card
+                document.querySelector('.info-card .info-grid').innerHTML = `
+                    <div class="info-item"><span class="info-label">Email</span><span class="info-value">${member.email || 'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Phone</span><span class="info-value">${member.phone || 'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Date of Birth</span><span class="info-value">${member.date_of_birth ? new Date(member.date_of_birth).toLocaleDateString() : 'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Address</span><span class="info-value">${member.address || ''} ${member.city || ''}, ${member.state || ''}</span></div>
+                    <div class="info-item"><span class="info-label">Gender</span><span class="info-value">${member.gender || 'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Membership</span><span class="info-value">${member.membership_status || 'N/A'}</span></div>
+                `;
+
+                // 4. Update Family
+                // If they have a family_id, load the family to find members
+                const familyListContainer = document.querySelector('.family-list');
+                familyListContainer.innerHTML = ''; // clear mock
+                if (member.family_id) {
+                    const familyDetails = await ShepherdAPI.get(`/families/${member.family_id}`);
+                    document.querySelector('.info-card .card-header h2').textContent = `Household: ${familyDetails.family_name}`;
+                    
+                    if (familyDetails.relationships && familyDetails.relationships.length > 0) {
+                        familyDetails.relationships.forEach(rel => {
+                            // Don't list themselves
+                            if (rel.member_id == memberId) return;
+
+                            const div = document.createElement('div');
+                            div.className = 'family-member';
+                            div.innerHTML = `
+                                <img src="https://i.pravatar.cc/150?u=${rel.member_id}" alt="Family member">
+                                <div class="family-info">
+                                    <div class="family-name"><a href="User Profile.html?id=${rel.member_id}" style="color:var(--text-dark); text-decoration:none;">${rel.member_name}</a></div>
+                                    <div class="family-rel">${rel.relationship_type.replace('_', ' ')}</div>
+                                </div>
+                            `;
+                            familyListContainer.appendChild(div);
+                        });
+                    } else {
+                        familyListContainer.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">No other family members found.</p>';
+                    }
+                } else {
+                    document.querySelector('.info-card .card-header h2').textContent = `Household`;
+                    familyListContainer.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">No household linked.</p>';
+                }
+
+                // 5. Update Spiritual Journey
+                const timeline = document.querySelector('.timeline');
+                timeline.innerHTML = '';
+                
+                const events = [];
+                if (member.salvation_date) events.push({ title: 'Saved', date: new Date(member.salvation_date) });
+                if (member.baptism_date) events.push({ title: 'Baptized', date: new Date(member.baptism_date) });
+                if (member.join_date) events.push({ title: 'Joined Church', date: new Date(member.join_date) });
+
+                events.sort((a,b) => a.date - b.date); // ASC order
+                
+                if (events.length === 0) {
+                    timeline.innerHTML = '<div class="timeline-item"><div class="timeline-title">Unknown</div><div class="timeline-date">No records</div></div>';
+                } else {
+                    events.forEach(ev => {
+                        const div = document.createElement('div');
+                        div.className = 'timeline-item completed';
+                        div.innerHTML = `<div class="timeline-title">${ev.title}</div><div class="timeline-date">${ev.date.toLocaleDateString()}</div>`;
+                        timeline.appendChild(div);
+                    });
+                }
+
+            } catch(e) {
+                console.error("Error loading profile:", e);
+                ShepherdUI.showToast("Failed to load user profile.", "error");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+            ShepherdUI.initCommandPalette();
+        });
+    </script>
 </body>
 </html>

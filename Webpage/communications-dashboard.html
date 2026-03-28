@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shepherd - Communications</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --accent-gray: #8a8d91;
+            --card-radius: 20px;
+            --dark-card-bg: #2d2e30;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
+
+        /* === GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
+        
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); position: relative; font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
+        
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        .dropdown-item i { color: var(--text-muted); width: 16px; text-align: center; }
+
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
+
+        /* === MAIN CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+        .page-title { font-size: 28px; font-weight: 600; margin-bottom: -10px;}
+        
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); }
+
+        .split-layout { display: grid; grid-template-columns: 350px 1fr; gap: 24px; align-items: start; }
+
+        /* === LEFT COLUMN: AUDIENCE SEGMENT BUILDER === */
+        .audience-builder { display: flex; flex-direction: column; gap: 16px; }
+        .panel-header { font-size: 16px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .panel-header i { color: var(--text-muted); }
+
+        .segment-box { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;}
+        .segment-row { display: flex; flex-direction: column; gap: 6px; }
+        .segment-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .select-input { background: white; border: 1px solid #d1d5db; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--text-dark);}
+        .select-input i { color: #9ca3af; font-size: 12px; }
+
+        .condition-divider { text-align: center; font-size: 11px; font-weight: bold; color: var(--text-muted); margin: 4px 0; position: relative;}
+        .condition-divider::before, .condition-divider::after { content:''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(0,0,0,0.08); }
+        .condition-divider::before { left: 0; }
+        .condition-divider::after { right: 0; }
+
+        .btn-add-rule { background: transparent; border: 1px dashed var(--text-muted); color: var(--text-muted); padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; transition: 0.2s; }
+        .btn-add-rule:hover { background: rgba(0,0,0,0.02); color: var(--text-dark); border-color: var(--text-dark);}
+
+        /* Recipient Counter */
+        .recipient-counter { background: var(--dark-card-bg); color: white; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 8px;}
+        .rc-number { font-size: 36px; font-weight: 600; color: var(--accent-yellow); line-height: 1;}
+        .rc-label { font-size: 13px; font-weight: 500; opacity: 0.9;}
+        .rc-sub { font-size: 11px; opacity: 0.6; margin-top: 4px;}
+
+        /* === RIGHT COLUMN: MESSAGE COMPOSER === */
+        .composer-panel { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden;}
+        
+        .composer-tabs { display: flex; background: rgba(0,0,0,0.03); border-bottom: 1px solid var(--glass-border); }
+        .comp-tab { flex: 1; padding: 16px; text-align: center; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .comp-tab.active { background: white; color: var(--text-dark); font-weight: 600; box-shadow: inset 0 2px 0 var(--accent-yellow);}
+        .comp-tab:hover:not(.active) { background: rgba(255,255,255,0.4); }
+
+        .composer-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; background: rgba(255,255,255,0.4);}
+        
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 12px; font-weight: 600; color: var(--text-dark); }
+        .text-input { background: white; border: 1px solid #d1d5db; padding: 12px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; transition: border 0.2s;}
+        .text-input:focus { border-color: var(--accent-yellow); }
+
+        /* Rich Text Editor Mockup */
+        .editor-container { background: white; border: 1px solid #d1d5db; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;}
+        .editor-toolbar { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid #d1d5db; background: #f9fafb; }
+        .toolbar-btn { width: 28px; height: 28px; border-radius: 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #4b5563; font-size: 13px; }
+        .toolbar-btn:hover { background: #e5e7eb; color: var(--text-dark); }
+        .editor-textarea { border: none; padding: 16px; min-height: 250px; font-size: 14px; outline: none; resize: vertical; line-height: 1.5; color: var(--text-dark);}
+
+        /* Smart Variables */
+        .variables-tray { display: flex; gap: 8px; flex-wrap: wrap;}
+        .var-chip { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid rgba(220, 179, 74, 0.4); transition: 0.2s;}
+        .var-chip:hover { background: var(--accent-yellow); color: var(--text-dark); }
+
+        /* Actions */
+        .composer-footer { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid var(--glass-border); background: white;}
+        .schedule-btn { background: transparent; border: 1px solid #d1d5db; color: var(--text-dark); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .send-btn { background: var(--dark-card-bg); color: var(--accent-yellow); border: none; padding: 10px 28px; border-radius: 20px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s;}
+        .send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
+        <nav class="nav-pills">
+            <a href="dashboard.html" class="nav-pill">Dashboard</a>
+            <a href="members-dashboard.html" class="nav-pill">People</a>
+            <a href="giving-dashboard.html" class="nav-pill">Giving</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
+            <a href="groups-dashboard.html" class="nav-pill">Groups</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill active">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item" style="font-weight:bold; color:var(--accent-yellow);"><i class="fa-solid fa-bullhorn" style="color:var(--accent-yellow);"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i><div class="notification-dot"></div></button>
+            <a href="User Profile.html"><img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar"></a>
+        </div>
+    </header>
+
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Compose Message</div>
+        <div class="sub-nav-item">Audience Segments</div>
+        <div class="sub-nav-item">Sent History</div>
+        <div class="sub-nav-item">Scheduled</div>
+    </nav>
+
+    <main>
+        <h1 class="page-title">Communications</h1>
+
+        <div class="split-layout">
+            
+            <div class="audience-builder">
+                <div class="glass-panel">
+                    <div class="panel-header"><i class="fa-solid fa-users-rays"></i> Smart Segment Builder</div>
+                    
+                    <div class="segment-box">
+                        <div class="segment-row">
+                            <span class="segment-label">Audience Preset</span>
+                            <select id="segmentPreset" class="select-input" style="appearance: auto;">
+                                <option value="all">All Members</option>
+                                <option value="active">Active Members</option>
+                                <option value="inactive30">Inactive (30+ Days)</option>
+                                <option value="men">Men Only</option>
+                                <option value="women">Women Only</option>
+                                <option value="serving">Currently Serving/Volunteering</option>
+                            </select>
+                        </div>
+
+                        <div class="condition-divider">OR ADD CUSTOM RULES</div>
+
+                        <div id="customRulesContainer">
+                            <!-- Custom rules could be added here in a future iteration -->
+                            <div class="segment-row" style="opacity: 0.5;">
+                                <div class="select-input" style="font-weight: normal; color: var(--text-muted); font-size: 12px; cursor: not-allowed;">
+                                    Adding custom stacked rules coming soon.
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-add-rule" disabled style="opacity: 0.5; cursor: not-allowed;"><i class="fa-solid fa-plus"></i> Add Condition</button>
+                    </div>
+
+                    <div class="recipient-counter">
+                        <div class="rc-number" id="recipientCount">...</div>
+                        <div class="rc-label">Total Recipients</div>
+                        <div class="rc-sub">Matching selected criteria</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel composer-panel">
+                
+                <div class="composer-tabs">
+                    <div class="comp-tab active" data-medium="email"><i class="fa-regular fa-envelope"></i> Email</div>
+                    <div class="comp-tab" data-medium="sms"><i class="fa-solid fa-mobile-screen"></i> SMS Text</div>
+                    <div class="comp-tab" data-medium="push"><i class="fa-regular fa-bell"></i> Push App</div>
+                </div>
+
+                <div class="composer-body">
+                    
+                    <div class="input-group">
+                        <label>Subject Line</label>
+                        <input type="text" id="msgSubject" class="text-input" placeholder="e.g., Join us for Small Groups this Fall!">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Message Body</label>
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <div class="toolbar-btn"><i class="fa-solid fa-bold"></i></div>
+                                <div class="toolbar-btn"><i class="fa-solid fa-italic"></i></div>
+                                <div class="toolbar-btn"><i class="fa-solid fa-underline"></i></div>
+                                <div style="width: 1px; background: #d1d5db; margin: 4px;"></div>
+                                <div class="toolbar-btn"><i class="fa-solid fa-link"></i></div>
+                                <div class="toolbar-btn"><i class="fa-solid fa-list-ul"></i></div>
+                                <div class="toolbar-btn"><i class="fa-solid fa-list-ol"></i></div>
+                                <div class="toolbar-btn"><i class="fa-regular fa-image"></i></div>
+                            </div>
+                            <textarea id="msgBody" class="editor-textarea" placeholder="Start typing your message here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label style="color: var(--text-muted); font-size: 11px;">INSERT SMART VARIABLE</label>
+                        <div class="variables-tray">
+                            <div class="var-chip" onclick="insertVariable('{first_name}')">{first_name}</div>
+                            <div class="var-chip" onclick="insertVariable('{last_name}')">{last_name}</div>
+                            <div class="var-chip" onclick="insertVariable('{church_name}')">{church_name}</div>
+                            <div class="var-chip" onclick="insertVariable('{giving_link}')">{giving_link}</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="composer-footer">
+                    <button class="schedule-btn"><i class="fa-regular fa-clock"></i> Schedule for later</button>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fa-regular fa-paper-plane"></i> Send Message Now</button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- App Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            ShepherdAuth.requireAuth();
+
+            // Setup medium tabs
+            document.querySelectorAll('.comp-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.comp-tab').forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                });
+            });
+
+            // Listen to segment dropdown changes
+            document.getElementById('segmentPreset').addEventListener('change', fetchSegmentPreview);
+
+            // Initial fetch
+            fetchSegmentPreview();
+        });
+
+        let currentTargetMemberIds = [];
+
+        async function fetchSegmentPreview() {
+            const presetVal = document.getElementById('segmentPreset').value;
+            let filterPayload = {};
+
+            if (presetVal === 'active') {
+                filterPayload = { membership_status: "Active Member" };
+            } else if (presetVal === 'inactive30') {
+                filterPayload = { not_attended_days: 30 };
+            } else if (presetVal === 'men') {
+                filterPayload = { gender: "Male" };
+            } else if (presetVal === 'women') {
+                filterPayload = { gender: "Female" };
+            } else if (presetVal === 'serving') {
+                filterPayload = { is_serving: true };
+            }
+
+            try {
+                document.getElementById('recipientCount').textContent = "...";
+                const members = await ShepherdAPI.post('/communications/segment', filterPayload);
+                currentTargetMemberIds = members.map(m => m.id);
+                document.getElementById('recipientCount').textContent = currentTargetMemberIds.length;
+            } catch (err) {
+                console.error("Failed to fetch segment", err);
+                ShepherdUI.showToast("Failed to calculate audience segment.", "error");
+                document.getElementById('recipientCount').textContent = "0";
+                currentTargetMemberIds = [];
+            }
+        }
+
+        function insertVariable(variableString) {
+            const textarea = document.getElementById('msgBody');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + variableString + text.substring(end);
+            textarea.focus();
+            textarea.selectionEnd = start + variableString.length;
+        }
+
+        async function sendMessage() {
+            const subject = document.getElementById('msgSubject').value.trim();
+            const body = document.getElementById('msgBody').value.trim();
+            const activeTab = document.querySelector('.comp-tab.active');
+            const medium = activeTab ? activeTab.dataset.medium : 'email';
+
+            if (!body) {
+                ShepherdUI.showToast("Message body cannot be empty.", "warning");
+                return;
+            }
+
+            if (currentTargetMemberIds.length === 0) {
+                ShepherdUI.showToast("No recipients match the current segment.", "warning");
+                return;
+            }
+
+            const sendBtn = document.getElementById('sendBtn');
+            const originalText = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
+            sendBtn.disabled = true;
+
+            const payload = {
+                medium: medium,
+                subject: subject,
+                body: body,
+                target_member_ids: currentTargetMemberIds
+            };
+
+            try {
+                const response = await ShepherdAPI.post('/communications/mass-message', payload);
+                ShepherdUI.showToast(`Successfully queued ${response.messages_queued} messages via ${medium.toUpperCase()}.`, 'success');
+                document.getElementById('msgSubject').value = '';
+                document.getElementById('msgBody').value = '';
+            } catch (error) {
+                console.error("Mass message failed:", error);
+                ShepherdUI.showToast("Failed to send message.", "error");
+            } finally {
+                sendBtn.innerHTML = originalText;
+                sendBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

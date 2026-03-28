@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaithWorks CRM - Groups</title>
+    <title>Shepherd - Groups & Discipleship</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === Global Styles & Variables (Master Design System) === */
+        /* === Global Styles & Variables === */
         :root {
             --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
             --glass-bg: rgba(255, 255, 255, 0.55);
@@ -14,346 +14,121 @@
             --text-dark: #202124;
             --text-muted: #5f6368;
             --accent-yellow: #dcb34a;
-            --accent-gray: #8a8d91;
             --card-radius: 20px;
             --dark-card-bg: #2d2e30;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            min-height: 100vh;
-            padding: 30px;
-            background-attachment: fixed;
-        }
-
-        /* === Header (Standardized across all pages) === */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
+        /* === NEW GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
         
-        .nav-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 5px;
-            gap: 5px;
-        }
-        .nav-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-        .nav-pill:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .nav-pill.active {
-            background: #333;
-            color: white;
-        }
-
-        .header-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: relative;
-        }
-        .icon-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            display: flex; justify-content: center; align-items: center;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .notification-dot {
-            position: absolute; top: 10px; right: 10px;
-            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
-        }
-        .avatar { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            cursor: pointer;
-        }
-
-        /* === Main Content === */
-        main {
-            flex: 1;
-            position: relative;
-        }
-
-        /* Sub Header */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 30px;
-        }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); position: relative; font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
         
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        .dropdown-item i { color: var(--text-muted); width: 16px; text-align: center; }
+
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
+
+        /* === MAIN CONTENT === */
+        main { flex: 1; position: relative; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
         .page-title h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
-        .breadcrumbs { font-size: 13px; color: var(--text-muted); }
-        .breadcrumbs span { color: var(--text-dark); font-weight: 500; }
-
-        .page-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .control-btn {
-            background: transparent;
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex; align-items: center; gap: 8px;
-            cursor: pointer;
-        }
+        
+        .page-controls { display: flex; align-items: center; gap: 12px; }
+        .control-btn { background: transparent; border: 1px solid rgba(0,0,0,0.1); padding: 10px 16px; border-radius: 30px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .control-btn.white { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .control-btn.ai-filter { background: var(--dark-card-bg); color: var(--accent-yellow); border: none; }
+        .search-input { background: transparent; border: 1px solid rgba(0,0,0,0.1); padding: 10px 16px; border-radius: 30px; font-size: 14px; display: flex; align-items: center; gap: 8px; width: 220px; }
+        .search-input input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; }
         
-        .search-input {
-            background: transparent;
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 14px;
-            display: flex; align-items: center; gap: 8px;
-            width: 220px;
-        }
-        .search-input input {
-            border: none; background: transparent; outline: none; width: 100%; font-size: 14px;
-        }
-        .search-input i { color: var(--text-muted); }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; position: relative; }
 
-        /* === Grid Layout === */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            position: relative;
-        }
+        .group-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; gap: 16px; position: relative; transition: all 0.3s ease; }
+        .group-card.glowing { box-shadow: 0 0 0 2px var(--accent-yellow), 0 12px 30px rgba(220, 179, 74, 0.3); z-index: 10; }
 
-        /* === Cards === */
-        .group-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        /* Golden Glowing State for Cards */
-        .group-card.glowing {
-            box-shadow: 0 0 0 2px var(--accent-yellow), 0 12px 30px rgba(220, 179, 74, 0.3);
-            z-index: 10;
-        }
-
-        .card-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-        .card-subtitle { font-size: 14px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+        .card-header-top { display: flex; justify-content: space-between; align-items: flex-start;}
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .card-subtitle { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
         
-        .card-stats { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .stat-main { font-size: 15px; font-weight: 500; }
-        .stat-sub { font-size: 13px; color: var(--text-muted); }
+        .health-badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .health-badge.good { background: #dcfce7; color: #166534; }
+        
+        .track-badge { background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px;}
+        .track-badge i { color: var(--accent-yellow); }
 
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-        }
+        .card-stats { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .stat-block { display: flex; flex-direction: column; gap: 2px;}
+        .stat-main { font-size: 15px; font-weight: 600; }
+        .stat-sub { font-size: 11px; color: var(--text-muted); }
+        .trend-up { color: #166534; font-size: 11px; font-weight:bold;}
 
-        /* Avatar Stack */
-        .avatar-stack {
-            display: flex;
-            align-items: center;
-        }
-        .avatar-stack img {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            border: 2px solid var(--glass-bg);
-            object-fit: cover;
-            margin-left: -10px;
-        }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.05);}
+        .avatar-stack { display: flex; align-items: center; }
+        .avatar-stack img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--glass-bg); object-fit: cover; margin-left: -10px; }
         .avatar-stack img:first-child { margin-left: 0; }
-
-        .action-ellipsis {
-            width: 36px; height: 28px;
-            border-radius: 14px;
-            background: rgba(0,0,0,0.05);
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; border: none; font-size: 16px; color: var(--text-muted);
-        }
-
-        .btn-assign {
-            background: var(--accent-yellow);
-            color: #333;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* === Overlapping Elements (Dropdowns & Modals) === */
-        
-        /* 1. Action Menu Dropdown (Attached to Card 1) */
-        .action-menu {
-            position: absolute; bottom: -50px; right: 20px;
-            background: white;
-            border-radius: 12px;
-            padding: 8px 0;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.1);
-            z-index: 20;
-            width: 160px;
-            border: 1px solid rgba(0,0,0,0.06);
-        }
-        .action-item {
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex; align-items: center; gap: 10px;
-            cursor: pointer;
-        }
-        .action-item i { color: var(--text-muted); font-size: 14px; width: 16px;}
-
-        /* 2. Assign Members Search Popover (Attached to Card 2) */
-        .assign-popover {
-            position: absolute; top: calc(100% - 20px); left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            border-radius: 16px;
-            padding: 16px;
-            width: 260px;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.1);
-            z-index: 30;
-            border: 1px solid rgba(0,0,0,0.06);
-            display: flex; flex-direction: column; gap: 12px;
-        }
-        .popover-search {
-            background: white; border: 1px solid #ddd;
-            padding: 8px 12px; border-radius: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .popover-search input { border: none; outline: none; font-size: 13px; width: 100%;}
-        .popover-search i { color: var(--text-muted); font-size: 12px; }
-        
-        .member-list { display: flex; flex-direction: column; gap: 10px; max-height: 150px; overflow-y: auto;}
-        .member-item { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500;}
-        .member-item img { width: 24px; height: 24px; border-radius: 50%; }
-        
-        /* Custom Checkbox */
-        .custom-check {
-            width: 16px; height: 16px; border-radius: 4px;
-            border: 1px solid #ccc; display: flex; justify-content: center; align-items: center;
-        }
-        .custom-check.checked { background: var(--accent-yellow); border-color: var(--accent-yellow); }
-        .custom-check.checked::after {
-            content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px;
-        }
-
-        .popover-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-        .popover-actions .btn-save {
-            background: var(--accent-yellow); color: #333; padding: 6px 20px; border-radius: 16px; font-size: 13px; font-weight: 500; border: none; cursor: pointer;
-        }
-        .popover-actions .btn-cancel {
-            background: transparent; color: var(--text-dark); font-size: 13px; font-weight: 500; border: none; cursor: pointer;
-        }
-
-        /* 3. Create New Group Modal (Floating right) */
-        .create-modal {
-            position: absolute; top: 20px; right: 0;
-            width: 380px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--card-radius);
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            border: 1px solid var(--glass-border);
-            z-index: 100;
-            display: flex; flex-direction: column; gap: 16px;
-        }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
-        .modal-header h2 { font-size: 18px; font-weight: 500; }
-        .modal-header i { cursor: pointer; color: var(--text-dark); font-size: 18px;}
-
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 12px; font-weight: 500; }
-        
-        .input-box {
-            background: transparent;
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .input-box i { color: var(--text-dark); font-size: 12px; }
-        
-        textarea.input-box { height: 80px; resize: none; align-items: flex-start; }
-
-        .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
-        .modal-footer .btn-create {
-            background: var(--accent-yellow); color: #333; padding: 10px 24px; border-radius: 20px; font-size: 14px; font-weight: 500; border: none; cursor: pointer;
-        }
-
+        .btn-assign { background: var(--accent-yellow); color: #333; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="dashboard.html" class="logo">
-            <i class="fa-solid fa-church"></i> FaithWorks CRM
-        </a>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
         <nav class="nav-pills">
             <a href="dashboard.html" class="nav-pill">Dashboard</a>
             <a href="members-dashboard.html" class="nav-pill">People</a>
             <a href="giving-dashboard.html" class="nav-pill">Giving</a>
-            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
             <a href="groups-dashboard.html" class="nav-pill active">Groups</a>
-            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
-            <a href="care-dashboard.html" class="nav-pill">Help</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
         </nav>
+
         <div class="header-actions">
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
             <button class="icon-btn">
-                <i class="fa-regular fa-envelope"></i>
+                <i class="fa-regular fa-bell"></i>
                 <div class="notification-dot"></div>
             </button>
             <a href="User Profile.html">
@@ -362,276 +137,155 @@
         </div>
     </header>
 
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Active Groups</div>
+        <div class="sub-nav-item">Directory</div>
+        <div class="sub-nav-item">Discipleship Tracks</div>
+    </nav>
+
     <main>
         <div class="page-header">
             <div class="title-area">
-                <div class="page-title"><h1>Groups</h1></div>
-                <div class="breadcrumbs">Dashboard > <span>Groups</span></div>
+                <h1 class="page-title">Groups & Discipleship</h1>
             </div>
-            
             <div class="page-controls">
-                <button class="control-btn"><i class="fa-solid fa-filter" style="color: var(--text-muted);"></i> Filter</button>
-                <button class="control-btn white">All groups <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--text-muted); margin-left: 4px;"></i></button>
+                <button class="control-btn ai-filter"><i class="fa-solid fa-wand-magic-sparkles"></i> Smart Segments</button>
+                <button class="control-btn white">All Groups <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></button>
                 <div class="search-input">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" placeholder="Search">
+                    <i class="fa-solid fa-magnifying-glass" style="color:#888;"></i>
+                    <input type="text" placeholder="Search Groups">
                 </div>
             </div>
         </div>
 
         <div class="grid-container">
-            
             <div class="group-card glowing">
-                <div>
-                    <h2 class="card-title">Sunday Morning Team</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
+                <div class="card-header-top">
+                    <div>
+                        <h2 class="card-title">Foundations Class</h2>
+                        <div class="card-subtitle"><i class="fa-solid fa-book"></i> Discipleship Group</div>
                     </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                    <button class="action-ellipsis">...</button>
-                </div>
-
-                <div class="action-menu">
-                    <div class="action-item"><i class="fa-solid fa-user-plus"></i> Assign Members</div>
-                    <div class="action-item"><i class="fa-solid fa-circle-info"></i> View Detail</div>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <div>
-                    <h2 class="card-title">Small Group Alpha</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
-                    </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                    <button class="action-ellipsis">...</button>
-                    <button class="btn-assign" style="position: absolute; right: 24px; bottom: 24px;">Assign Members</button>
-                </div>
-
-                <div class="assign-popover">
-                    <div class="popover-search">
-                        <input type="text" placeholder="Search...">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </div>
-                    <div class="member-list">
-                        <div class="member-item">
-                            <div class="custom-check checked"></div>
-                            <img src="https://i.pravatar.cc/100?img=5" alt="Avatar"> Eleanor Vance
-                        </div>
-                        <div class="member-item">
-                            <div class="custom-check"></div>
-                            <img src="https://i.pravatar.cc/100?img=11" alt="Avatar"> Team Meeting
-                        </div>
-                        <div class="member-item">
-                            <div class="custom-check checked"></div>
-                            <img src="https://i.pravatar.cc/100?img=5" alt="Avatar"> Eleanor Vance
-                        </div>
-                        <div class="member-item">
-                            <div class="custom-check checked"></div>
-                            <img src="https://i.pravatar.cc/100?img=9" alt="Avatar"> Eleanor More
-                        </div>
-                        <div class="member-item">
-                            <div class="custom-check"></div>
-                            <img src="https://i.pravatar.cc/100?img=1" alt="Avatar"> Lora Group
-                        </div>
-                    </div>
-                    <div class="popover-actions">
-                        <button class="btn-save">Save</button>
-                        <button class="btn-cancel">Cancel</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="group-card glowing">
-                <div>
-                    <h2 class="card-title">Small Group Alpha</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
-                    </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="group-card">
-                <div>
-                    <h2 class="card-title">Sunday Morning Team</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
-                    </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <div>
-                    <h2 class="card-title">Small Groups Alpha</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
-                    </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                    <button class="action-ellipsis">...</button>
-                </div>
-            </div>
-            
-            <div class="group-card">
-                <div>
-                    <h2 class="card-title">Small Group Alpha</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
-                    </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <div>
-                    <h2 class="card-title">Small Group Alpha</h2>
-                    <div class="card-subtitle">
-                        <span>Group Name</span>
-                        <span>Service Team</span>
-                    </div>
-                </div>
-                <div class="card-stats">
-                    <span class="stat-main">14 Members</span>
-                    <span class="stat-sub">Last active: 2 hours ago</span>
-                </div>
-                <div class="card-footer">
-                    <div class="avatar-stack">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=14" alt="Member">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Member">
-                    </div>
-                </div>
-            </div>
-
-            <div class="create-modal">
-                <div class="modal-header">
-                    <h2>Create New Group</h2>
-                    <i class="fa-solid fa-xmark"></i>
+                    <div class="health-badge good"><i class="fa-solid fa-arrow-trend-up"></i> Thriving</div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Group Name</label>
-                        <div class="input-box">
-                            Small Group <i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Type</label>
-                        <div class="input-box">
-                            Team, Class <i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                    </div>
+                <div>
+                    <div class="track-badge"><i class="fa-solid fa-map"></i> Pathway: New Believers Track</div>
                 </div>
 
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea class="input-box" placeholder="Description"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Leader</label>
-                    <div class="input-box">
-                        Leader <i class="fa-solid fa-chevron-down"></i>
+                <div class="card-stats">
+                    <div class="stat-block">
+                        <span class="stat-main">24 Enrolled</span>
+                        <span class="stat-sub">Led by Pastor David</span>
+                    </div>
+                    <div class="stat-block" style="text-align: right;">
+                        <span class="stat-main">92% Attnd.</span>
+                        <span class="trend-up">↑ 5% this month</span>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Assign Initial Members</label>
-                    <div class="input-box">
-                        Search... <i class="fa-solid fa-chevron-down"></i>
+                
+                <div class="card-footer">
+                    <div class="avatar-stack">
+                        <img src="https://i.pravatar.cc/100?img=11" alt="Member">
+                        <img src="https://i.pravatar.cc/100?img=12" alt="Member">
+                        <img src="https://i.pravatar.cc/100?img=13" alt="Member">
+                        <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">+21 more</span>
                     </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn-create">Create Group</button>
-                    <button style="background:transparent; border:none; font-weight:500; cursor:pointer;">Cancel</button>
+                    <button class="btn-assign">Manage</button>
                 </div>
             </div>
-
         </div>
     </main>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting');
+        ShepherdAuth.injectUserIntoHeader();
+
+        const grid = document.querySelector('.grid-container');
+
+        async function loadGroups() {
+            grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:24px;color:var(--accent-yellow);"></i><br>Loading groups...</div>';
+            try {
+                const data = await ShepherdAPI.get('/groups');
+                const groups = Array.isArray(data) ? data : (data.items || []);
+
+                if (groups.length === 0) {
+                    grid.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);font-size:14px;">No groups found</div>';
+                    return;
+                }
+
+                grid.innerHTML = groups.map((g, i) => {
+                    const type = g.group_type || g.type || 'Small Group';
+                    const memberCount = g.member_count || g.members_count || 0;
+                    const leader = g.leader_name || 'No leader';
+                    const attendance = g.avg_attendance || 0;
+                    const isGlowing = i === 0;
+                    const healthLabel = attendance >= 80 ? 'Thriving' : attendance >= 50 ? 'Steady' : 'Needs Attention';
+                    const healthBg = attendance >= 80 ? '#dcfce7' : attendance >= 50 ? '#fef9c3' : '#fee2e2';
+                    const healthColor = attendance >= 80 ? '#166534' : attendance >= 50 ? '#854d0e' : '#991b1b';
+
+                    // Generate avatar stack (up to 3)
+                    const avatarHtml = Array.from({length: Math.min(memberCount, 3)}, (_, j) =>
+                        `<img src="https://i.pravatar.cc/100?u=${g.id}-${j}" alt="Member">`
+                    ).join('');
+                    const moreCount = Math.max(0, memberCount - 3);
+
+                    return `
+                        <div class="group-card${isGlowing ? ' glowing' : ''}">
+                            <div class="card-header-top">
+                                <div>
+                                    <h2 class="card-title">${g.name}</h2>
+                                    <div class="card-subtitle"><i class="fa-solid fa-book"></i> ${type}</div>
+                                </div>
+                                <div class="health-badge" style="background:${healthBg};color:${healthColor};">
+                                    <i class="fa-solid fa-arrow-trend-up"></i> ${healthLabel}
+                                </div>
+                            </div>
+                            ${g.pathway ? `<div><div class="track-badge"><i class="fa-solid fa-map"></i> Pathway: ${g.pathway}</div></div>` : ''}
+                            <div class="card-stats">
+                                <div class="stat-block">
+                                    <span class="stat-main">${memberCount} Enrolled</span>
+                                    <span class="stat-sub">Led by ${leader}</span>
+                                </div>
+                                <div class="stat-block" style="text-align:right;">
+                                    <span class="stat-main">${attendance}% Attnd.</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="avatar-stack">
+                                    ${avatarHtml}
+                                    ${moreCount > 0 ? `<span style="font-size:11px;color:var(--text-muted);margin-left:8px;">+${moreCount} more</span>` : ''}
+                                </div>
+                                <button class="btn-assign">Manage</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load groups: ' + err.message, 'error');
+            }
+        }
+
+        // Search
+        const searchInput = document.querySelector('.search-input input');
+        if (searchInput) {
+            let debounce;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {
+                    const q = e.target.value.trim().toLowerCase();
+                    document.querySelectorAll('.group-card').forEach(card => {
+                        const name = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+                        card.style.display = name.includes(q) ? '' : 'none';
+                    });
+                }, 300);
+            });
+        }
+
+        loadGroups();
+    </script>
 
 </body>
 </html>

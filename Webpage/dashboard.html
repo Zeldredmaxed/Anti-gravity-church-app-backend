@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaithWorks CRM - Dashboard</title>
+    <title>Shepherd - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === Global Styles & Variables (Master Design System) === */
+        /* === Global Styles & Variables === */
         :root {
             --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
             --glass-bg: rgba(255, 255, 255, 0.55);
@@ -19,246 +19,155 @@
             --dark-card-bg: #2d2e30;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            min-height: 100vh;
-            padding: 30px;
-            background-attachment: fixed;
-        }
-
-        /* === Typography === */
-        h1 { font-size: 28px; font-weight: 600; margin-bottom: 5px; }
-        h2 { font-size: 20px; font-weight: 500; }
-        h3 { font-size: 16px; font-weight: 500; margin-bottom: 15px; }
-        .text-muted { color: var(--text-muted); }
-        .large-stat { font-size: 36px; font-weight: 600; margin: 10px 0; }
-
-        /* === Reusable Classes === */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            padding: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-        }
-
-        .flex { display: flex; }
-        .flex-col { display: flex; flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-10 { gap: 10px; }
-        .gap-15 { gap: 15px; }
-        .gap-20 { gap: 20px; }
-
-        /* === Header (Standardized across all pages) === */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
+        /* === NEW GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
         
-        .nav-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 5px;
-            gap: 5px;
-        }
-        .nav-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-        .nav-pill:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .nav-pill.active {
-            background: #333;
-            color: white;
-        }
-
-        .header-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: relative;
-        }
-        .icon-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            display: flex; justify-content: center; align-items: center;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .notification-dot {
-            position: absolute; top: 10px; right: 10px;
-            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
-        }
-        .avatar { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            cursor: pointer;
-        }
-
-        /* === Hero & Quick Actions === */
-        .hero { margin-bottom: 30px; }
-        .quick-actions { margin-top: 20px; display: flex; gap: 15px; }
-        .btn {
-            padding: 12px 24px;
-            border-radius: 30px;
-            border: none;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .btn-yellow { background: var(--accent-yellow); color: #333; }
-        .btn-gray { background: var(--accent-gray); color: white; }
-        .btn-white { background: white; color: #333; }
-
-        /* === Main Grid Layout === */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2.5fr 1.2fr 3fr 2fr;
-            gap: 20px;
-        }
-
-        /* === Column 1: Bars & Insights === */
-        .progress-section { margin-bottom: 20px; }
-        .progress-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
-        .progress-track { width: 100%; height: 12px; background: rgba(255,255,255,0.7); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 10px; }
-        .fill-yellow { background: var(--accent-yellow); width: 25%; }
-        .fill-dark { background: #333; width: 78%; }
-        .fill-striped { 
-            width: 65%;
-            background: repeating-linear-gradient(-45deg, #333, #333 4px, transparent 4px, transparent 8px);
-        }
-
-        .ai-insights ul { list-style: none; padding: 0; margin-top: 15px; }
-        .ai-insights li { font-size: 13px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
-        .ai-insights li::before { content: "•"; color: #333; font-weight: bold; }
-        .insight-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-dark { background: #333; color: white; padding: 10px; border-radius: 12px; font-size: 12px; flex: 1; text-align: center; cursor: pointer; border: none;}
-        .btn-dark span { display: block; font-size: 10px; color: #aaa; margin-top: 3px;}
-
-        /* === Column 2: Donut & Avatars === */
-        .donut-wrapper { display: flex; justify-content: center; align-items: center; padding: 20px 0; }
-        .donut-chart {
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            background: conic-gradient(#b0b3b8 10%, rgba(255,255,255,0.5) 0);
-            display: flex; justify-content: center; align-items: center;
-            position: relative;
-        }
-        .donut-inner {
-            width: 90px; height: 90px;
-            background: #fdf6ec;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 24px; font-weight: bold;
-        }
-
-        .avatar-list { display: flex; flex-direction: column; gap: 15px; align-items: center;}
-        .avatar-row { display: flex; gap: 10px; }
-        .avatar-small { width: 32px; height: 32px; border-radius: 50%; background: #ccc; }
-        .avatar-yellow { background: var(--accent-yellow); }
-        .letters { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; font-size: 12px; font-weight: bold; color: #555;}
-
-        /* === Column 3: Top Stats & Calendar === */
-        .top-stats-container { display: flex; gap: 20px; margin-bottom: 20px; }
-        .stat-card { flex: 1; position: relative; }
-        .stat-icon-bottom { position: absolute; bottom: 20px; left: 24px; color: #666; font-size: 18px;}
-        .stat-trend { position: absolute; top: 24px; right: 24px; color: #2e7d32; font-size: 18px; display: flex; flex-direction: column; align-items: center;}
-
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-add-event { background: #333; color: white; border: none; padding: 6px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; }
+        /* Nav Pills & "More" Dropdown */
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); position: relative; font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
         
-        .calendar-grid { display: flex; }
-        .time-col { width: 60px; font-size: 12px; color: #666; display: flex; flex-direction: column; gap: 40px; padding-top: 40px;}
-        .days-col { flex: 1; }
-        .days-header { display: flex; justify-content: space-between; font-size: 13px; text-align: center; margin-bottom: 20px; color: #555;}
-        .day { flex: 1; }
-        
-        .calendar-body { position: relative; height: 200px; border-left: 1px dashed rgba(0,0,0,0.1); }
-        .event {
-            position: absolute;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 13px;
-            display: flex; align-items: center; gap: 8px;
-            right: 10px;
-        }
-        .event-white { background: white; top: 10px; left: 10px; width: 80%; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
-        .event-dark { background: #333; color: white; top: 50px; left: 60px; width: 70%; }
-        .event-light { background: rgba(255,255,255,0.7); top: 120px; left: 140px; width: 40%; }
-        .event-outline { background: white; border: 1px solid #ddd; top: 170px; left: 140px; width: 40%; }
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        .dropdown-item i { color: var(--text-muted); width: 16px; text-align: center; }
 
-        /* === Column 4: Sidebar === */
-        .sidebar-stat { margin-bottom: 20px; position: relative;}
+        /* Right Side Header Actions */
+        .header-actions { display: flex; align-items: center; gap: 15px; }
         
-        .action-center { background: var(--dark-card-bg); color: white; border: none; }
-        .action-center h3 { color: white; margin-bottom: 20px; font-size: 18px;}
-        .action-list { display: flex; flex-direction: column; gap: 15px; }
-        .action-item { display: flex; align-items: center; gap: 15px; }
-        .action-icon { 
-            width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); 
-            display: flex; justify-content: center; align-items: center; color: #ccc;
-        }
-        .action-text { flex: 1; }
-        .action-title { font-size: 14px; font-weight: 500; margin-bottom: 2px;}
-        .action-time { font-size: 12px; color: #999; }
-        .check-icon { color: var(--accent-yellow); font-size: 14px; }
+        /* Command Palette Button */
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        
+        /* Login Streak Badge */
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
+
+        /* === MAIN DASHBOARD CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); }
+
+        /* 7 KPI Cards Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .kpi-card { display: flex; flex-direction: column; gap: 10px; position: relative; }
+        .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .kpi-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(0,0,0,0.04); display: flex; justify-content: center; align-items: center; font-size: 16px; color: var(--text-muted); }
+        .kpi-title { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-top: 5px;}
+        .kpi-value { font-size: 28px; font-weight: 600; color: var(--text-dark); }
+        .kpi-trend { font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; align-self: flex-start;}
+        .trend-up { background: #dcfce7; color: #166534; }
+        .trend-down { background: #fee2e2; color: #991b1b; }
+        .trend-neutral { background: rgba(0,0,0,0.05); color: var(--text-muted); }
+
+        /* Charts & Activity Grid */
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+        .section-title i { color: var(--text-muted); font-size: 14px;}
+        .chart-filters { font-size: 12px; font-weight: 500; color: var(--text-muted); background: rgba(0,0,0,0.04); padding: 4px; border-radius: 20px; display: inline-flex;}
+        .chart-filters span { padding: 4px 12px; border-radius: 16px; cursor: pointer; }
+        .chart-filters span.active { background: white; color: var(--text-dark); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* Chart Areas (Mockups) */
+        .chart-area { width: 100%; height: 180px; position: relative; display: flex; align-items: flex-end; justify-content: space-between; padding-top: 20px;}
+        
+        /* Line Chart (Giving) */
+        .chart-area svg { width: 100%; height: 100%; overflow: visible; }
+        .chart-line { fill: none; stroke: var(--accent-yellow); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round;}
+        .chart-fill { fill: url(#chart-gradient); opacity: 0.5; }
+        
+        /* Bar Chart (Attendance & Growth) */
+        .bar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;}
+        .bar { width: 24px; background: rgba(0,0,0,0.1); border-radius: 4px 4px 0 0; position: relative;}
+        .bar.highlight { background: var(--dark-card-bg); }
+        .bar-label { font-size: 10px; color: var(--text-muted); }
+        
+        /* Donut Chart (Care) */
+        .donut-container { display: flex; justify-content: center; align-items: center; height: 180px; gap: 30px;}
+        .donut-chart { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#1d4ed8 20%, #f59e0b 20% 50%, #16a34a 50% 85%, #dc2626 85%); display: flex; justify-content: center; align-items: center; position: relative; }
+        .donut-inner { width: 90px; height: 90px; background: #fdf6ec; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 600; }
+        .donut-legend { display: flex; flex-direction: column; gap: 8px; font-size: 12px; font-weight: 500;}
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* Right Column Lists */
+        .list-container { display: flex; flex-direction: column; gap: 16px; }
+        .activity-item { display: flex; gap: 12px; }
+        .activity-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; font-size: 12px; border: 1px solid var(--glass-border); flex-shrink: 0;}
+        .activity-content h4 { font-size: 13px; font-weight: 500; margin-bottom: 2px;}
+        .activity-content p { font-size: 11px; color: var(--text-muted); }
+        .activity-time { font-size: 10px; color: #a1a1aa; margin-top: 4px;}
+
+        .event-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.4); border-radius: 12px; border: 1px solid rgba(0,0,0,0.03); cursor: pointer;}
+        .event-date { display: flex; flex-direction: column; align-items: center; background: white; padding: 6px 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); min-width: 50px;}
+        .evt-month { font-size: 10px; font-weight: 600; color: var(--accent-yellow); text-transform: uppercase;}
+        .evt-day { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+        .event-details h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px;}
+        .event-details p { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;}
 
     </style>
 </head>
 <body>
 
     <header>
-        <a href="dashboard.html" class="logo">
-            <i class="fa-solid fa-church"></i> FaithWorks CRM
-        </a>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
         <nav class="nav-pills">
             <a href="dashboard.html" class="nav-pill active">Dashboard</a>
             <a href="members-dashboard.html" class="nav-pill">People</a>
             <a href="giving-dashboard.html" class="nav-pill">Giving</a>
-            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
             <a href="groups-dashboard.html" class="nav-pill">Groups</a>
-            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
-            <a href="care-dashboard.html" class="nav-pill">Help</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
         </nav>
+
         <div class="header-actions">
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="cmd-k-btn">
+                <i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span>
+            </button>
+            
+            <div class="streak-badge">
+                🔥 12 Day Streak
+            </div>
+
             <button class="icon-btn">
-                <i class="fa-regular fa-envelope"></i>
+                <i class="fa-regular fa-bell"></i>
                 <div class="notification-dot"></div>
             </button>
             <a href="User Profile.html">
@@ -267,173 +176,443 @@
         </div>
     </header>
 
-    <section class="hero">
-        <h1>Welcome back, Pastor David</h1>
-        <h2 class="text-muted">Church Dashboard (Command Center)</h2>
-        
-        <div class="quick-actions">
-            <button class="btn btn-yellow"><i class="fa-solid fa-user-plus"></i> Add Member</button>
-            <button class="btn btn-gray"><i class="fa-solid fa-user-check"></i> Log Attendance</button>
-            <button class="btn btn-white"><i class="fa-regular fa-envelope"></i> Send Message</button>
-        </div>
-    </section>
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Overview</div>
+        <div class="sub-nav-item">Analytics</div>
+        <div class="sub-nav-item">Activity Feed</div>
+    </nav>
 
-    <main class="dashboard-grid">
-        
-        <div class="flex-col gap-20">
-            <div class="glass-card">
-                <div class="progress-section">
-                    <div class="progress-header"><span>Visitors</span><span>45</span></div>
-                    <div class="progress-track"><div class="progress-fill fill-yellow"></div></div>
-                    <div style="font-size:10px; margin-top:3px;">25%</div>
+    <main>
+        <div class="kpi-grid">
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +15 this month</div>
                 </div>
-                <div class="progress-section">
-                    <div class="progress-header"><span>Members</span><span>1,532</span></div>
-                    <div class="progress-track"><div class="progress-fill fill-dark"></div></div>
-                    <div style="font-size:10px; margin-top:3px;">78%</div>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-header"><span>Attendance %</span><span>65%</span></div>
-                    <div class="progress-track"><div class="progress-fill fill-striped"></div></div>
+                <div>
+                    <div class="kpi-value">1,532</div>
+                    <div class="kpi-title">Total Members</div>
                 </div>
             </div>
 
-            <div class="glass-card ai-insights">
-                <h3>AI Insights <img src="https://i.pravatar.cc/150?img=5" style="width:24px; height:24px; border-radius:50%; float:right;"></h3>
-                <ul>
-                    <li>3 long-term visitors are ready for next steps.</li>
-                    <li>Upcoming event: Youth Camp - planning complete.</li>
-                    <li>Prayer request trend: 5 new requests this week.</li>
-                </ul>
-                <div class="insight-buttons">
-                    <button class="btn-dark">"View Members" <span>opens filtered Members page</span></button>
-                    <button class="btn-dark">"Send Follow-Up" <span>opens communication modal</span></button>
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <div class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +8% vs last month</div>
                 </div>
-            </div>
-        </div>
-
-        <div class="flex-col gap-20">
-            <div class="glass-card">
-                <h3>Goal Output</h3>
-                <div class="donut-wrapper">
-                    <div class="donut-chart">
-                        <div class="donut-inner">10%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="glass-card" style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
-                <div class="avatar-list">
-                    <div class="avatar-row">
-                        <img src="https://i.pravatar.cc/150?img=1" class="avatar-small">
-                        <img src="https://i.pravatar.cc/150?img=2" class="avatar-small">
-                    </div>
-                    <div style="width: 80%; height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0;"></div>
-                    <div style="width: 80%; height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0;"></div>
-                    <div style="width: 80%; height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0;"></div>
-                    <div class="avatar-row" style="margin-top: 10px;">
-                        <img src="https://i.pravatar.cc/150?img=3" class="avatar-small">
-                        <img src="https://i.pravatar.cc/150?img=4" class="avatar-small">
-                        <div class="avatar-small avatar-yellow"></div>
-                    </div>
-                    <div class="letters"><span>S</span><span>W</span><span>T</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex-col gap-20">
-            <div class="top-stats-container">
-                <div class="glass-card stat-card">
-                    <h3>Total Members</h3>
-                    <div class="large-stat">1,532</div>
-                    <i class="fa-solid fa-users stat-icon-bottom"></i>
-                </div>
-                <div class="glass-card stat-card">
-                    <h3>Weekly Attendance</h3>
-                    <div class="large-stat">845</div>
-                    <i class="fa-solid fa-users stat-icon-bottom"></i>
-                    <div class="stat-trend"><i class="fa-solid fa-arrow-up"></i></div>
+                <div>
+                    <div class="kpi-value">$18,450</div>
+                    <div class="kpi-title">Giving (MTD)</div>
                 </div>
             </div>
 
-            <div class="glass-card" style="flex: 1;">
-                <div class="calendar-header">
-                    <h3>Calendar - September 2024</h3>
-                    <button class="btn-add-event">+ Add Event</button>
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-clipboard-user"></i></div>
+                    <div class="kpi-trend trend-down"><i class="fa-solid fa-arrow-trend-down"></i> -2% vs prev 30d</div>
                 </div>
-                
-                <div class="calendar-grid">
-                    <div class="time-col">
-                        <span>8:00 AM</span>
-                        <span>9:00 AM</span>
-                        <span>12:30 PM</span>
-                        <span>12:00 PM</span>
-                    </div>
-                    <div class="days-col">
-                        <div class="days-header">
-                            <div class="day">Mon<br>22</div>
-                            <div class="day">Mon<br>23</div>
-                            <div class="day">Tue<br>23</div>
-                            <div class="day">Wed<br>24</div>
-                            <div class="day">Thu<br>25</div>
-                            <div class="day">Fri<br>26</div>
-                            <div class="day">Sat<br>27</div>
-                        </div>
-                        <div class="calendar-body">
-                            <div class="event event-white"><i class="fa-regular fa-clipboard"></i> Morning Service Prep</div>
-                            <div class="event event-dark"><i class="fa-solid fa-cross"></i> Sunday Service</div>
-                            <div class="event event-light"><i class="fa-solid fa-mug-hot"></i> Youth Group <img src="https://i.pravatar.cc/150?img=8" style="width:16px;height:16px;border-radius:50%;margin-left:5px;"></div>
-                            <div class="event event-outline"><i class="fa-solid fa-book-open"></i> Mid-week Study</div>
-                        </div>
-                    </div>
+                <div>
+                    <div class="kpi-value">845</div>
+                    <div class="kpi-title">Avg. Attendance (30d)</div>
+                </div>
+            </div>
+
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-house-user"></i></div>
+                    <div class="kpi-trend trend-neutral">52 Active</div>
+                </div>
+                <div>
+                    <div class="kpi-value">52</div>
+                    <div class="kpi-title">Active Groups</div>
+                </div>
+            </div>
+
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-heart"></i></div>
+                    <div class="kpi-trend trend-neutral">2 Urgent</div>
+                </div>
+                <div>
+                    <div class="kpi-value">14</div>
+                    <div class="kpi-title">Open Care Cases</div>
+                </div>
+            </div>
+
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-hand"></i></div>
+                    <div class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +120 hrs</div>
+                </div>
+                <div>
+                    <div class="kpi-value">2,450</div>
+                    <div class="kpi-title">Volunteer Hours (MTD)</div>
+                </div>
+            </div>
+
+            <div class="glass-panel kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon"><i class="fa-solid fa-hands-praying"></i></div>
+                    <div class="kpi-trend trend-neutral">12 Unanswered</div>
+                </div>
+                <div>
+                    <div class="kpi-value">78</div>
+                    <div class="kpi-title">Active Prayers</div>
                 </div>
             </div>
         </div>
 
-        <div class="flex-col gap-20">
-            <div class="glass-card sidebar-stat">
-                <h3>Monthly Giving</h3>
-                <div class="large-stat">$18,750</div>
-                <div class="stat-trend"><i class="fa-solid fa-sack-dollar" style="color:#333; font-size:24px;"></i> <i class="fa-solid fa-arrow-up" style="position:absolute; top:0; right:-15px;"></i></div>
-            </div>
+        <div class="dashboard-grid">
             
-            <div class="glass-card sidebar-stat">
-                <h3>Pending Actions</h3>
-                <div class="large-stat">12</div>
-                <i class="fa-solid fa-gavel stat-icon-bottom" style="right:24px; left:auto; bottom:24px; font-size: 24px; color:#333;"></i>
-            </div>
+            <div class="charts-column">
+                
+                <div class="grid-row">
+                    <div class="glass-panel">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Giving Trends</h2>
+                            <div class="chart-filters">
+                                <span>6M</span>
+                                <span class="active">12M</span>
+                                <span>24M</span>
+                            </div>
+                        </div>
+                        <div class="chart-area">
+                            <svg viewBox="0 0 800 100" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="chart-gradient" x1="0" x2="0" y1="0" y2="1">
+                                        <stop offset="0%" stop-color="#dcb34a" stop-opacity="0.4"/>
+                                        <stop offset="100%" stop-color="#dcb34a" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path class="chart-fill" d="M0,80 L150,60 L280,40 L380,65 L500,75 L650,45 L800,30 L800,100 L0,100 Z"></path>
+                                <path class="chart-line" d="M0,80 L150,60 L280,40 L380,65 L500,75 L650,45 L800,30"></path>
+                                <circle class="chart-point" cx="280" cy="40" r="4"></circle>
+                            </svg>
+                        </div>
+                    </div>
 
-            <div class="glass-card action-center">
-                <h3>Action Center</h3>
-                <div class="action-list">
-                    <div class="action-item">
-                        <div class="action-icon"><i class="fa-solid fa-hands-praying"></i></div>
-                        <div class="action-text">
-                            <div class="action-title">Prayer Request</div>
-                            <div class="action-time">Sep 13, 08:30</div>
+                    <div class="glass-panel">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fa-solid fa-users-viewfinder"></i> Attendance (12 Weeks)</h2>
                         </div>
-                        <i class="fa-solid fa-circle-check check-icon"></i>
-                    </div>
-                    <div class="action-item">
-                        <div class="action-icon"><i class="fa-regular fa-user"></i></div>
-                        <div class="action-text">
-                            <div class="action-title">Missed Attendance</div>
-                            <div class="action-time">Sep 13, 10:30</div>
+                        <div class="chart-area" style="padding-top:0;">
+                            <div class="bar-wrapper"><div class="bar" style="height: 60%;"></div><span class="bar-label">W1</span></div>
+                            <div class="bar-wrapper"><div class="bar highlight" style="height: 80%;"></div><span class="bar-label" style="color:var(--text-dark); font-weight:600;">W2</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 40%;"></div><span class="bar-label">W3</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 70%;"></div><span class="bar-label">W4</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 65%;"></div><span class="bar-label">W5</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 90%;"></div><span class="bar-label">W6</span></div>
                         </div>
-                        <i class="fa-solid fa-circle-check check-icon"></i>
-                    </div>
-                    <div class="action-item">
-                        <div class="action-icon"><i class="fa-solid fa-droplet"></i></div>
-                        <div class="action-text">
-                            <div class="action-title">Baptism Candidates</div>
-                            <div class="action-time">Sep 13, 13:00</div>
-                        </div>
-                        <i class="fa-solid fa-circle-check check-icon"></i>
                     </div>
                 </div>
+
+                <div class="grid-row">
+                    <div class="glass-panel">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fa-solid fa-seedling"></i> Member Growth</h2>
+                            <div class="chart-filters">
+                                <span class="active">12M</span>
+                            </div>
+                        </div>
+                        <div class="chart-area" style="padding-top:0;">
+                            <div class="bar-wrapper"><div class="bar highlight" style="height: 30%; background:var(--accent-gray);"></div><span class="bar-label">Jan</span></div>
+                            <div class="bar-wrapper"><div class="bar highlight" style="height: 45%; background:var(--accent-gray);"></div><span class="bar-label">Feb</span></div>
+                            <div class="bar-wrapper"><div class="bar highlight" style="height: 80%; background:var(--accent-gray);"></div><span class="bar-label">Mar</span></div>
+                            <div class="bar-wrapper"><div class="bar highlight" style="height: 50%; background:var(--accent-gray);"></div><span class="bar-label">Apr</span></div>
+                            <div class="bar-wrapper"><div class="bar highlight" style="height: 60%; background:var(--accent-gray);"></div><span class="bar-label">May</span></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fa-solid fa-hand-holding-heart"></i> Care Summary</h2>
+                        </div>
+                        <div class="donut-container">
+                            <div class="donut-chart">
+                                <div class="donut-inner">28</div>
+                            </div>
+                            <div class="donut-legend">
+                                <div class="legend-item"><div class="legend-dot" style="background:#1d4ed8;"></div> New (5)</div>
+                                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div> In Progress (12)</div>
+                                <div class="legend-item"><div class="legend-dot" style="background:#16a34a;"></div> Resolved (8)</div>
+                                <div class="legend-item"><div class="legend-dot" style="background:#dc2626;"></div> Needs Leader (3)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="feeds-column flex-col" style="gap: 20px;">
+                
+                <div class="glass-panel">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fa-regular fa-calendar"></i> Upcoming Events</h2>
+                        <a href="calendar-dashboard.html" style="font-size: 12px; color: var(--accent-yellow); text-decoration: none; font-weight: 500;">View All</a>
+                    </div>
+                    <div class="list-container">
+                        <div class="event-card">
+                            <div class="event-date">
+                                <span class="evt-month">Mar</span>
+                                <span class="evt-day">30</span>
+                            </div>
+                            <div class="event-details">
+                                <h4>Good Friday Service</h4>
+                                <p><i class="fa-regular fa-clock"></i> 2:00 PM • Main Sanctuary</p>
+                            </div>
+                        </div>
+                        <div class="event-card">
+                            <div class="event-date">
+                                <span class="evt-month">Apr</span>
+                                <span class="evt-day">01</span>
+                            </div>
+                            <div class="event-details">
+                                <h4>Easter Sunrise Service</h4>
+                                <p><i class="fa-regular fa-clock"></i> 6:30 AM • Outdoor Campus</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel" style="flex: 1;">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Recent Activity</h2>
+                    </div>
+                    <div class="list-container">
+                        <div class="activity-item">
+                            <div class="activity-icon" style="color: #3b82f6;"><i class="fa-solid fa-droplet"></i></div>
+                            <div class="activity-content">
+                                <h4>Marcus Johnson Baptized</h4>
+                                <p>Added to the New Believers track.</p>
+                                <div class="activity-time">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="color: #16a34a;"><i class="fa-solid fa-house-user"></i></div>
+                            <div class="activity-content">
+                                <h4>Sarah Green joined a Group</h4>
+                                <p>Joined "Young Adults Connect".</p>
+                                <div class="activity-time">5 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="color: #f59e0b;"><i class="fa-solid fa-star"></i></div>
+                            <div class="activity-content">
+                                <h4>First-Time Visit Logged</h4>
+                                <p>The Smith Family attended 10am Service.</p>
+                                <div class="activity-time">Yesterday</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="color: #6b7280;"><i class="fa-solid fa-note-sticky"></i></div>
+                            <div class="activity-content">
+                                <h4>Care Note Added</h4>
+                                <p>Pastor David followed up with Alice.</p>
+                                <div class="activity-time">Yesterday</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
     </main>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        // ── Auth Guard ──
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting to login');
+        ShepherdAuth.injectUserIntoHeader();
+
+        // ── DOM References ──
+        const kpiCards   = document.querySelectorAll('.kpi-card');
+        const givingChartArea     = document.querySelector('.charts-column .grid-row:nth-child(1) .glass-panel:nth-child(1) .chart-area');
+        const attendanceChartArea = document.querySelector('.charts-column .grid-row:nth-child(1) .glass-panel:nth-child(2) .chart-area');
+        const growthChartArea     = document.querySelector('.charts-column .grid-row:nth-child(2) .glass-panel:nth-child(1) .chart-area');
+        const careContainer       = document.querySelector('.charts-column .grid-row:nth-child(2) .glass-panel:nth-child(2) .donut-container');
+        const activityList        = document.querySelector('.feeds-column .glass-panel:nth-child(2) .list-container');
+        const eventsContainer     = document.querySelector('.feeds-column .glass-panel:nth-child(1) .list-container');
+
+        // ── KPI Cards ──
+        async function loadMetrics() {
+            try {
+                const m = await ShepherdAPI.get('/dashboard/metrics');
+
+                const kpiData = [
+                    { value: ShepherdUI.formatNumber(m.members.total), title: 'Total Members', trend: `+${m.members.trend} this month`, dir: m.members.trend > 0 ? 'up' : 'neutral' },
+                    { value: ShepherdUI.formatCurrency(m.giving.total), title: 'Giving (MTD)', trend: `${m.giving.trend > 0 ? '+' : ''}${m.giving.trend}% vs last month`, dir: m.giving.trend > 0 ? 'up' : m.giving.trend < 0 ? 'down' : 'neutral' },
+                    { value: ShepherdUI.formatNumber(m.attendance.total), title: 'Avg. Attendance (30d)', trend: `${m.attendance.trend > 0 ? '+' : ''}${m.attendance.trend}% vs prev 30d`, dir: m.attendance.trend > 0 ? 'up' : m.attendance.trend < 0 ? 'down' : 'neutral' },
+                    { value: ShepherdUI.formatNumber(m.groups.total), title: 'Active Groups', trend: `${m.groups.total} Active`, dir: 'neutral' },
+                    { value: ShepherdUI.formatNumber(m.care_cases.total), title: 'Open Care Cases', trend: `${m.care_cases.total} open`, dir: 'neutral' },
+                    { value: ShepherdUI.formatNumber(m.volunteer_hours.total), title: 'Volunteer Hours (MTD)', trend: `+${m.volunteer_hours.total} hrs`, dir: 'up' },
+                    { value: ShepherdUI.formatNumber(m.prayers.total), title: 'Active Prayers', trend: `${m.prayers.total} active`, dir: 'neutral' },
+                ];
+
+                kpiCards.forEach((card, i) => {
+                    if (!kpiData[i]) return;
+                    const d = kpiData[i];
+                    card.querySelector('.kpi-value').textContent = d.value;
+                    card.querySelector('.kpi-title').textContent = d.title;
+                    const trendEl = card.querySelector('.kpi-trend');
+                    if (trendEl) {
+                        trendEl.textContent = d.trend;
+                        trendEl.className = `kpi-trend trend-${d.dir}`;
+                        if (d.dir === 'up') trendEl.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${d.trend}`;
+                        else if (d.dir === 'down') trendEl.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> ${d.trend}`;
+                    }
+                });
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load KPI metrics: ' + err.message, 'error');
+            }
+        }
+
+        // ── Giving Chart ──
+        async function loadGivingChart() {
+            try {
+                const data = await ShepherdAPI.get('/dashboard/giving-chart?months=12');
+                ShepherdUI.buildLineChart(data, givingChartArea);
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load giving chart', 'error');
+            }
+        }
+
+        // ── Attendance Chart ──
+        async function loadAttendanceChart() {
+            try {
+                const data = await ShepherdAPI.get('/dashboard/attendance-chart?weeks=12');
+                // Convert week labels to short form
+                const formatted = data.map((d, i) => ({ ...d, date: `W${i + 1}` }));
+                ShepherdUI.buildBarChart(formatted, attendanceChartArea);
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load attendance chart', 'error');
+            }
+        }
+
+        // ── Member Growth ──
+        async function loadMemberGrowth() {
+            try {
+                const data = await ShepherdAPI.get('/dashboard/member-growth?months=12');
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                const formatted = data.map(d => {
+                    const m = parseInt(d.date.split('-')[1]) - 1;
+                    return { ...d, date: months[m] || d.date };
+                });
+                ShepherdUI.buildBarChart(formatted, growthChartArea, { color: 'var(--accent-gray)', highlightColor: 'var(--accent-gray)' });
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load growth chart', 'error');
+            }
+        }
+
+        // ── Care Summary Donut ──
+        async function loadCareSummary() {
+            try {
+                const data = await ShepherdAPI.get('/dashboard/care-summary');
+                ShepherdUI.buildDonutChart(data, careContainer);
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load care summary', 'error');
+            }
+        }
+
+        // ── Recent Activity ──
+        async function loadRecentActivity() {
+            try {
+                const activities = await ShepherdAPI.get('/dashboard/recent-activity?limit=6');
+                if (activities.length === 0) {
+                    activityList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No recent activity</div>';
+                    return;
+                }
+
+                const typeIcons = {
+                    'baptism': { icon: 'fa-solid fa-droplet', color: '#3b82f6' },
+                    'joined_group': { icon: 'fa-solid fa-house-user', color: '#16a34a' },
+                    'first_visit': { icon: 'fa-solid fa-star', color: '#f59e0b' },
+                    'care_note': { icon: 'fa-solid fa-note-sticky', color: '#6b7280' },
+                    'donation': { icon: 'fa-solid fa-sack-dollar', color: '#dcb34a' },
+                    'volunteer': { icon: 'fa-solid fa-hand', color: '#8b5cf6' },
+                    'default': { icon: 'fa-solid fa-bolt', color: '#6b7280' },
+                };
+
+                activityList.innerHTML = activities.map(a => {
+                    const t = typeIcons[a.activity_type] || typeIcons.default;
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-icon" style="color:${t.color};"><i class="${t.icon}"></i></div>
+                            <div class="activity-content">
+                                <h4>${a.description}</h4>
+                                <div class="activity-time">${ShepherdUI.formatRelativeTime(a.occurred_at)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load activity feed', 'error');
+            }
+        }
+
+        // ── Upcoming Events ──
+        async function loadUpcomingEvents() {
+            try {
+                const events = await ShepherdAPI.get('/dashboard/upcoming-events?limit=4');
+                if (events.length === 0) {
+                    eventsContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No upcoming events</div>';
+                    return;
+                }
+
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                eventsContainer.innerHTML = events.map(e => {
+                    const d = new Date(e.date);
+                    const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                    return `
+                        <div class="event-card">
+                            <div class="event-date">
+                                <span class="evt-month">${months[d.getMonth()]}</span>
+                                <span class="evt-day">${String(d.getDate()).padStart(2, '0')}</span>
+                            </div>
+                            <div class="event-details">
+                                <h4>${e.title}</h4>
+                                <p><i class="fa-regular fa-clock"></i> ${timeStr}${e.location ? ' &bull; ' + e.location : ''}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load events', 'error');
+            }
+        }
+
+        // ── Chart filter interaction ──
+        document.querySelectorAll('.chart-filters').forEach(filterGroup => {
+            filterGroup.querySelectorAll('span').forEach(span => {
+                span.addEventListener('click', function() {
+                    filterGroup.querySelectorAll('span').forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                    // Re-fetch with new period
+                    const months = parseInt(this.textContent.replace('M','')) || 12;
+                    if (filterGroup.closest('.glass-panel').querySelector('.section-title')?.textContent.includes('Giving')) {
+                        ShepherdAPI.get(`/dashboard/giving-chart?months=${months}`).then(data => {
+                            ShepherdUI.buildLineChart(data, givingChartArea);
+                        });
+                    }
+                });
+            });
+        });
+
+        // ── Load Everything ──
+        Promise.all([
+            loadMetrics(),
+            loadGivingChart(),
+            loadAttendanceChart(),
+            loadMemberGrowth(),
+            loadCareSummary(),
+            loadRecentActivity(),
+            loadUpcomingEvents(),
+        ]).then(() => {
+            console.log('[Shepherd] Dashboard loaded');
+        });
+    </script>
 
 </body>
 </html>

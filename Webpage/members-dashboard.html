@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaithWorks CRM - Members</title>
+    <title>Shepherd - Members</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === Global Styles & Variables (Master Design System) === */
+        /* === Global Styles & Variables === */
         :root {
             --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
             --glass-bg: rgba(255, 255, 255, 0.55);
@@ -17,328 +17,133 @@
             --accent-gray: #8a8d91;
             --card-radius: 20px;
             --dark-card-bg: #2d2e30;
-            
             --pill-blue-bg: #2f71d5;
             --pill-blue-text: #ffffff;
             --pill-green-bg: #b1df8c;
             --pill-green-text: #205c20;
+            --pill-yellow-bg: #fef08a;
+            --pill-yellow-text: #854d0e;
+            --pill-red-bg: #fecaca;
+            --pill-red-text: #991b1b;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            min-height: 100vh;
-            padding: 30px;
-            background-attachment: fixed;
-        }
-
-        /* === Header (Standardized across all pages) === */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
+        /* === NEW GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
         
-        .nav-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 5px;
-            gap: 5px;
-        }
-        .nav-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-        .nav-pill:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .nav-pill.active {
-            background: #333;
-            color: white;
-        }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); position: relative; font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
+        
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        .dropdown-item i { color: var(--text-muted); width: 16px; text-align: center; }
 
-        .header-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: relative;
-        }
-        .icon-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            display: flex; justify-content: center; align-items: center;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .notification-dot {
-            position: absolute; top: 10px; right: 10px;
-            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
-        }
-        .avatar { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            cursor: pointer;
-        }
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .cmd-k-btn:hover { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 
-        /* === Reusable Glass Class === */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-        }
+        /* === CONTEXTUAL SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item:hover { color: var(--text-dark); }
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
 
-        /* === Main Content === */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        /* === MAIN CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        h1.page-title { font-size: 28px; font-weight: 600; margin-bottom: 24px; }
 
-        h1.page-title {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 24px;
-        }
-
-        /* === KPI Cards === */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .kpi-card {
-            padding: 20px 24px;
-            display: flex; flex-direction: column; gap: 8px;
-        }
-
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { padding: 20px 24px; display: flex; flex-direction: column; gap: 8px; }
         .kpi-title { font-size: 13px; font-weight: 500; }
         .kpi-value { font-size: 28px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; }
-        
         .progress-container { flex: 1; margin-left: 20px; display: flex; align-items: center;}
-        .progress-bar {
-            width: 100%; height: 14px; background: rgba(0,0,0,0.06);
-            border-radius: 10px; overflow: hidden; position: relative;
-        }
+        .progress-bar { width: 100%; height: 14px; background: rgba(0,0,0,0.06); border-radius: 10px; overflow: hidden; position: relative; }
         .progress-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 9px; font-weight: bold;}
         .fill-yellow { background: var(--accent-yellow); width: 65%; color: var(--text-dark); }
         .fill-dark { background: var(--dark-card-bg); width: 78%; color: white; }
 
-        /* === Table Toolbar === */
-        .table-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .search-wrapper { display: flex; flex-direction: column; gap: 4px; margin-right: 10px;}
-        .search-box {
-            background: rgba(255,255,255,0.5);
-            border: 1px solid var(--glass-border);
-            padding: 10px 16px;
-            border-radius: 30px;
-            display: flex; align-items: center; gap: 10px; width: 220px;
-        }
+        .table-toolbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .search-box { background: rgba(255,255,255,0.5); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 30px; display: flex; align-items: center; gap: 10px; width: 220px; }
         .search-box input { border: none; background: transparent; outline: none; font-size: 13px; width: 100%; }
         .search-box i { color: var(--text-muted); font-size: 14px; }
-        .search-hint { font-size: 10px; color: var(--text-muted); margin-left: 12px; }
-
-        .filter-dropdown {
-            background: rgba(255,255,255,0.4);
-            border: 1px solid var(--glass-border);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 13px; font-weight: 500;
-            display: flex; align-items: center; gap: 8px;
-            cursor: pointer; position: relative;
-        }
-        .filter-dropdown.active { background: #e3d2b7; }
-
-        .toolbar-right {
-            display: flex;
-            gap: 12px;
-            position: relative;
-        }
-        .btn-outline {
-            background: rgba(255,255,255,0.4);
-            border: 1px solid var(--glass-border);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 13px; font-weight: 500;
-            display: flex; align-items: center; gap: 8px; cursor: pointer;
-        }
-
-        /* === Table Styles === */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            font-size: 12px; font-weight: 500; color: var(--text-dark);
-            padding: 16px; border-bottom: 1px dashed rgba(0,0,0,0.15);
-        }
+        .filter-dropdown { background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; position: relative; }
+        .filter-dropdown.ai-filter { background: var(--dark-card-bg); color: var(--accent-yellow); border: none; }
         
-        td {
-            padding: 14px 16px; font-size: 13px;
-        }
+        .toolbar-right { display: flex; gap: 12px; position: relative; }
+        .btn-outline { background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .btn-solid { background: var(--accent-yellow); color: #333; padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; border: none;}
 
-        /* Custom Checkbox */
-        .custom-checkbox {
-            width: 16px; height: 16px; border: 1px solid #999; border-radius: 4px;
-            display: flex; justify-content: center; align-items: center; background: transparent;
-        }
-        .custom-checkbox.checked {
-            background: var(--text-dark); border-color: var(--text-dark);
-        }
-        .custom-checkbox.checked::after {
-            content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px;
-        }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { font-size: 12px; font-weight: 500; color: var(--text-dark); padding: 16px; border-bottom: 1px dashed rgba(0,0,0,0.15); }
+        td { padding: 14px 16px; font-size: 13px; }
+        
+        .custom-checkbox { width: 16px; height: 16px; border: 1px solid #999; border-radius: 4px; display: flex; justify-content: center; align-items: center; background: transparent; }
+        .custom-checkbox.checked { background: var(--text-dark); border-color: var(--text-dark); }
+        .custom-checkbox.checked::after { content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px; }
 
         .avatar-cell { display: flex; align-items: center; gap: 12px; }
         .avatar-cell img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
 
-        .status-pill {
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
-            display: inline-flex; align-items: center; gap: 6px;
-        }
+        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
         .status-pill.blue { background: var(--pill-blue-bg); color: var(--pill-blue-text); }
         .status-pill.green { background: var(--pill-green-bg); color: var(--pill-green-text); }
-        
-        .action-icons { display: flex; gap: 12px; color: var(--text-muted); font-size: 14px; opacity: 0;}
-        .action-icons i { cursor: pointer; }
-        .action-icons .fa-trash-can { color: #d64a4a; }
-
-        /* Row Highlights */
-        tr.highlight-light td { background: rgba(220, 179, 74, 0.25); }
-        tr.highlight-light .action-icons { opacity: 1; }
-        tr.highlight-dark td { background: rgba(220, 179, 74, 0.85); font-weight: 500;}
-
-        /* Pagination */
-        .pagination {
-            display: flex; justify-content: flex-end; align-items: center;
-            padding: 20px 0 0; font-size: 13px; gap: 16px;
-        }
-        .page-info { display: flex; align-items: center; gap: 8px; }
-        .page-input { background: rgba(255,255,255,0.5); border: 1px solid var(--glass-border); border-radius: 6px; padding: 4px 8px; width: 40px; text-align: center; font-size: 13px;}
-        .page-nav { display: flex; gap: 8px; font-weight: 500; cursor: pointer; }
-
-        /* === Floating Elements (Absolute Positioned for exact match) === */
-        
-        /* 1. Membership Status Dropdown */
-        .dropdown-menu {
-            position: absolute; top: 45px; left: 0;
-            background: rgba(245, 245, 245, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px; width: 150px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 10;
-            padding: 8px 0;
-        }
-        .dropdown-item { padding: 10px 16px; font-size: 13px; cursor: pointer; }
-        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
-
-        /* 2. Export Dropdown */
-        .export-dropdown {
-            position: absolute; top: 45px; right: 0;
-            background: rgba(245, 245, 245, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px; width: 120px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 10;
-            padding: 8px 0;
-        }
-
-        /* 3. Add New Member Modal */
-        .modal-overlay {
-            position: absolute; top: 45%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fdfaf6;
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius); width: 400px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15); z-index: 100;
-            padding: 24px;
-        }
-        .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
-        .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-        .form-group label { font-size: 11px; font-weight: 500; }
-        .form-input {
-            background: transparent; border: 1px solid #ccc; border-radius: 20px;
-            padding: 8px 12px; font-size: 13px; outline: none; width: 100%;
-        }
-        .input-icon { position: relative; }
-        .input-icon i { position: absolute; right: 12px; top: 10px; color: var(--text-muted); font-size: 12px;}
-        .modal-actions { display: flex; gap: 16px; margin-top: 24px; }
-        .btn-save { flex: 1; background: var(--accent-yellow); border: none; border-radius: 20px; padding: 10px; font-weight: 500; cursor: pointer; }
-        .btn-cancel { flex: 1; background: transparent; border: 1px solid var(--text-dark); border-radius: 20px; padding: 10px; font-weight: 500; cursor: pointer; }
-
+        .status-pill.yellow { background: var(--pill-yellow-bg); color: var(--pill-yellow-text); }
+        .status-pill.red { background: var(--pill-red-bg); color: var(--pill-red-text); }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="dashboard.html" class="logo">
-            <i class="fa-solid fa-church"></i> FaithWorks CRM
-        </a>
+        <div class="logo">
+            <img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;">
+        </div>
+        
         <nav class="nav-pills">
             <a href="dashboard.html" class="nav-pill">Dashboard</a>
             <a href="members-dashboard.html" class="nav-pill active">People</a>
             <a href="giving-dashboard.html" class="nav-pill">Giving</a>
-            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
             <a href="groups-dashboard.html" class="nav-pill">Groups</a>
-            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
-            <a href="care-dashboard.html" class="nav-pill">Help</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            
+            <div class="dropdown-container">
+                <div class="nav-pill">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
         </nav>
+
         <div class="header-actions">
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
             <button class="icon-btn">
-                <i class="fa-regular fa-envelope"></i>
+                <i class="fa-regular fa-bell"></i>
                 <div class="notification-dot"></div>
             </button>
             <a href="User Profile.html">
@@ -347,89 +152,71 @@
         </div>
     </header>
 
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Members List</div>
+        <div class="sub-nav-item">Families</div>
+        <div class="sub-nav-item">Discipleship</div>
+        <div class="sub-nav-item">Activity Feed</div>
+    </nav>
+
     <main>
-        <h1 class="page-title">Members</h1>
+        <h1 class="page-title">Members Directory</h1>
 
         <div class="kpi-grid">
             <div class="glass-panel kpi-card">
-                <span class="kpi-title">New Members</span>
-                <span class="kpi-value">35</span>
+                <span class="kpi-title">Total Members</span>
+                <span class="kpi-value">1,532</span>
             </div>
             <div class="glass-panel kpi-card">
-                <span class="kpi-title">Total Members</span>
+                <span class="kpi-title">Overall Health Score</span>
                 <div class="kpi-value">
-                    1200
+                    84%
                     <div class="progress-container">
-                        <div class="progress-bar"><div class="progress-fill fill-yellow">65%</div></div>
+                        <div class="progress-bar"><div class="progress-fill fill-yellow">84%</div></div>
                     </div>
                 </div>
-            </div>
-            <div class="glass-panel kpi-card">
-                <span class="kpi-title">Active Small Groups</span>
-                <span class="kpi-value">52</span>
             </div>
             <div class="glass-panel kpi-card">
                 <span class="kpi-title">Baptism Rate</span>
-                <div class="kpi-value">
-                    78%
-                    <div class="progress-container">
-                        <div class="progress-bar"><div class="progress-fill fill-dark">78%</div></div>
-                    </div>
-                </div>
+                <span class="kpi-value">78%</span>
+            </div>
+            <div class="glass-panel kpi-card">
+                <span class="kpi-title">At-Risk Members (AI)</span>
+                <span class="kpi-value" style="color: #991b1b;">42</span>
             </div>
         </div>
 
         <div class="table-toolbar">
             <div class="toolbar-left">
-                <div class="search-wrapper">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Search members...">
-                    </div>
-                    <span class="search-hint">*Live search filtering</span>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search members...">
                 </div>
-                
-                <div class="filter-dropdown">Columns <i class="fa-solid fa-chevron-down"></i></div>
-                
-                <div class="filter-dropdown active">
-                    Membership Status <i class="fa-solid fa-chevron-down"></i>
-                    <div class="dropdown-menu">
-                        <div class="dropdown-item">Visitor</div>
-                        <div class="dropdown-item">Member</div>
-                        <div class="dropdown-item">Inactive</div>
-                    </div>
-                </div>
-                
-                <div class="filter-dropdown">Baptism Status <i class="fa-solid fa-chevron-down"></i></div>
-                <div class="filter-dropdown">Group <i class="fa-solid fa-chevron-down"></i></div>
+                <div class="filter-dropdown">Status <i class="fa-solid fa-chevron-down"></i></div>
                 <div class="filter-dropdown">Ministry <i class="fa-solid fa-chevron-down"></i></div>
+                <div class="filter-dropdown ai-filter">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Smart Segments <i class="fa-solid fa-chevron-down"></i>
+                </div>
             </div>
 
             <div class="toolbar-right">
-                <button class="btn-outline"><i class="fa-solid fa-plus"></i> Add Member</button>
-                <div class="btn-outline">
-                    <i class="fa-solid fa-download"></i> Export <i class="fa-solid fa-chevron-down"></i>
-                    <div class="export-dropdown">
-                        <div class="dropdown-item">CSV</div>
-                        <div class="dropdown-item">PDF</div>
-                    </div>
-                </div>
+                <button class="btn-outline"><i class="fa-regular fa-envelope"></i> Mass Message</button>
+                <button class="btn-solid"><i class="fa-solid fa-plus"></i> Add Member</button>
             </div>
         </div>
 
-        <div class="table-container">
+        <div class="table-container glass-panel" style="padding: 24px;">
             <table>
                 <thead>
                     <tr>
                         <th width="40"><div class="custom-checkbox checked"></div></th>
-                        <th>Avatar Name</th>
-                        <th>Email</th>
+                        <th>Name</th>
                         <th>Phone</th>
-                        <th>Date of Birth</th>
                         <th>Primary Group</th>
-                        <th>Ministry</th>
-                        <th>Baptism Status</th>
-                        <th>Membership Status</th>
+                        <th>Saved</th>
+                        <th>Baptized</th>
+                        <th>Status</th>
+                        <th>AI Health <i class="fa-solid fa-heart-pulse"></i></th>
                         <th></th>
                     </tr>
                 </thead>
@@ -441,155 +228,164 @@
                                 <img src="https://i.pravatar.cc/150?img=11" alt="Avatar"> John Smith
                             </div>
                         </td>
-                        <td>sarah.j@email.com</td>
                         <td>(555) 123-4567</td>
-                        <td>1985-05-15</td>
                         <td>Men's Ministry</td>
-                        <td>Outreach</td>
-                        <td><div class="status-pill blue">Baptized <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td><div class="status-pill green">Member <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td></td>
+                        <td><i class="fa-solid fa-check" style="color: #205c20;"></i></td>
+                        <td><div class="status-pill blue">Yes</div></td>
+                        <td><div class="status-pill green">Member</div></td>
+                        <td><div class="status-pill green">Engaged</div></td>
+                        <td><i class="fa-solid fa-ellipsis"></i></td>
                     </tr>
                     
-                    <tr class="highlight-light">
+                    <tr style="background: rgba(220, 179, 74, 0.25);">
                         <td><div class="custom-checkbox"></div></td>
                         <td>
                             <div class="avatar-cell">
                                 <img src="https://i.pravatar.cc/150?img=5" alt="Avatar"> Sarah Johnson
                             </div>
                         </td>
-                        <td>sarah.j@email.com</td>
-                        <td>(555) 123-4567</td>
-                        <td>1985-05-15</td>
-                        <td>Men's Ministry</td>
-                        <td>Outreach</td>
-                        <td><div class="status-pill blue">Visitor <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td><div class="status-pill green">Member <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td style="position: relative;">
-                            <div class="action-icons">
-                                <i class="fa-regular fa-eye"></i>
-                                <i class="fa-solid fa-pencil"></i>
-                                <i class="fa-regular fa-trash-can"></i>
-                            </div>
-                        </td>
+                        <td>(555) 987-6543</td>
+                        <td>Women's Study</td>
+                        <td><i class="fa-solid fa-check" style="color: #205c20;"></i></td>
+                        <td><div class="status-pill blue">Yes</div></td>
+                        <td><div class="status-pill green">Member</div></td>
+                        <td><div class="status-pill yellow">Inconsistent</div></td>
+                        <td><i class="fa-solid fa-ellipsis"></i></td>
                     </tr>
 
                     <tr>
                         <td><div class="custom-checkbox checked"></div></td>
                         <td>
                             <div class="avatar-cell">
-                                <img src="https://i.pravatar.cc/150?img=12" alt="Avatar"> Renom Smith
+                                <img src="https://i.pravatar.cc/150?img=12" alt="Avatar"> Mike Davis
                             </div>
                         </td>
-                        <td>sarah.j@email.com</td>
-                        <td>(555) 123-4567</td>
-                        <td>1985-05-15</td>
-                        <td>Men's Ministry</td>
-                        <td>Outreach</td>
-                        <td><div class="status-pill blue">Baptized <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td><div class="status-pill green">Member <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td></td>
+                        <td>(555) 444-3333</td>
+                        <td>None</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><div class="status-pill blue">Visitor</div></td>
+                        <td><div class="status-pill red">At Risk</div></td>
+                        <td><i class="fa-solid fa-ellipsis"></i></td>
                     </tr>
-
-                    <tr class="highlight-dark">
-                        <td><div class="custom-checkbox checked"></div></td>
-                        <td>
-                            <div class="avatar-cell">
-                                <img src="https://i.pravatar.cc/150?img=9" alt="Avatar"> Ksenia Bator
-                            </div>
-                        </td>
-                        <td>sarah.j@email.com</td>
-                        <td>(555) 123-4567</td>
-                        <td>1985-05-15</td>
-                        <td>Men's Ministry</td>
-                        <td>Outreach</td>
-                        <td><div class="status-pill blue">Baptized <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td><div class="status-pill green">Member <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <td><div class="custom-checkbox checked"></div></td>
-                        <td>
-                            <div class="avatar-cell">
-                                <img src="https://i.pravatar.cc/150?img=1" alt="Avatar"> Arsen Yatsenko
-                            </div>
-                        </td>
-                        <td>saren.k@email.com</td>
-                        <td>(555) 123-4567</td>
-                        <td>1985-05-15</td>
-                        <td>Men's Ministry</td>
-                        <td>Outreach</td>
-                        <td><div class="status-pill blue">Baptized <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td><div class="status-pill green">Member <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <td><div class="custom-checkbox"></div></td>
-                        <td>
-                            <div class="avatar-cell">
-                                <img src="https://i.pravatar.cc/150?img=20" alt="Avatar"> Daria Yurchenko
-                            </div>
-                        </td>
-                        <td>sarah.j@email.com</td>
-                        <td>(555) 123-4567</td>
-                        <td>1985-05-15</td>
-                        <td>Men's Ministry</td>
-                        <td>Outreach</td>
-                        <td><div class="status-pill blue">Baptized <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td><div class="status-pill green">Member <i class="fa-solid fa-chevron-down"></i></div></td>
-                        <td></td>
-                    </tr>
-
                 </tbody>
             </table>
-        </div>
-
-        <div class="pagination">
-            <div class="page-info">
-                Pages: <input type="text" class="page-input" value="1"> of 12
-            </div>
-            <div class="page-nav">
-                <span><i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i> Next <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i></span>
-            </div>
-        </div>
-
-        <div class="modal-overlay">
-            <h2 class="modal-title">Add New Member</h2>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-input" placeholder="Input">
+            <div class="table-footer" id="members-footer">
+                <div id="members-count">Showing 0 of 0 members</div>
+                <div class="pagination">
+                    <i class="fa-solid fa-chevron-left" id="prev-page" style="cursor:pointer;"></i>
+                    <span id="page-num">1</span>
+                    <i class="fa-solid fa-chevron-right" id="next-page" style="cursor:pointer;"></i>
                 </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="text" class="form-input" placeholder="Email">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" class="form-input" placeholder="Phone">
-                </div>
-                <div class="form-group">
-                    <label>Date of Birth</label>
-                    <div class="input-icon">
-                        <input type="text" class="form-input" placeholder="Date of Birth">
-                        <i class="fa-regular fa-calendar"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-save">Save</button>
-                <button class="btn-cancel">Cancel</button>
             </div>
         </div>
-
     </main>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting');
+        ShepherdAuth.injectUserIntoHeader();
+
+        // ── State ──
+        let currentPage = 1;
+        const pageSize = 20;
+        let totalMembers = 0;
+        let searchQuery = '';
+
+        const tbody = document.querySelector('table tbody');
+        const countEl = document.getElementById('members-count');
+        const pageEl = document.getElementById('page-num');
+
+        // ── Load Members ──
+        async function loadMembers() {
+            ShepherdUI.showSkeletonRows(tbody, 9, 6);
+            try {
+                const skip = (currentPage - 1) * pageSize;
+                let path = `/members?skip=${skip}&limit=${pageSize}`;
+                if (searchQuery) path += `&search=${encodeURIComponent(searchQuery)}`;
+
+                const data = await ShepherdAPI.get(path);
+                const members = Array.isArray(data) ? data : (data.items || data.members || []);
+                totalMembers = data.total || members.length;
+
+                if (members.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">No members found</td></tr>';
+                    countEl.textContent = '0 members';
+                    return;
+                }
+
+                tbody.innerHTML = members.map(m => {
+                    const name = `${m.first_name || ''} ${m.last_name || ''}`.trim();
+                    const avatar = m.avatar_url || `https://i.pravatar.cc/150?u=${m.id}`;
+                    const phone = m.phone || m.phone_number || '—';
+                    const group = m.group_name || '—';
+                    const baptized = m.baptism_date ? '<i class="fa-solid fa-check" style="color:#205c20;"></i>' : '—';
+                    const volunteer = m.is_volunteer ? '<div class="status-pill blue">Yes</div>' : '—';
+                    const memberType = m.member_type || m.membership_status || 'Member';
+                    const typeClass = memberType.toLowerCase() === 'visitor' ? 'blue' : 'green';
+                    const score = m.health_score ?? 50;
+                    const healthLabel = ShepherdUI.healthScoreLabel(score);
+                    const healthClass = ShepherdUI.healthScoreClass(score) === 'green' ? 'green' : ShepherdUI.healthScoreClass(score) === 'red' ? 'red' : 'yellow';
+
+                    return `
+                        <tr onclick="window.location.href='User Profile.html?id=${m.id}'" style="cursor:pointer;">
+                            <td><div class="custom-checkbox"></div></td>
+                            <td><div class="avatar-cell"><img src="${avatar}" alt="">${name}</div></td>
+                            <td>${phone}</td>
+                            <td>${group}</td>
+                            <td>${baptized}</td>
+                            <td>${volunteer}</td>
+                            <td><div class="status-pill ${typeClass}">${memberType}</div></td>
+                            <td><div class="status-pill ${healthClass}">${healthLabel}</div></td>
+                            <td><i class="fa-solid fa-ellipsis"></i></td>
+                        </tr>
+                    `;
+                }).join('');
+
+                countEl.textContent = `Showing ${skip + 1}–${Math.min(skip + members.length, totalMembers)} of ${totalMembers} members`;
+                pageEl.textContent = currentPage;
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load members: ' + err.message, 'error');
+            }
+        }
+
+        // ── Pagination ──
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; loadMembers(); }
+        });
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage * pageSize < totalMembers) { currentPage++; loadMembers(); }
+        });
+
+        // ── Search ──
+        const searchInput = document.querySelector('.search-container input') || document.querySelector('input[type="text"]');
+        if (searchInput) {
+            let debounce;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {
+                    searchQuery = e.target.value.trim();
+                    currentPage = 1;
+                    loadMembers();
+                }, 400);
+            });
+        }
+
+        // ── KPI Cards ──
+        async function loadMemberKPIs() {
+            try {
+                const m = await ShepherdAPI.get('/dashboard/metrics');
+                const cards = document.querySelectorAll('.kpi-card');
+                if (cards[0]) cards[0].querySelector('.kpi-value').textContent = ShepherdUI.formatNumber(m.members.total);
+            } catch {}
+        }
+
+        // ── Init ──
+        loadMembers();
+        loadMemberKPIs();
+    </script>
 
 </body>
 </html>

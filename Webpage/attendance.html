@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FaithWorks CRM - Attendance</title>
+    <title>Shepherd - Attendance</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === Global Styles & Variables (Master Design System) === */
+        /* === Global Styles & Variables === */
         :root {
             --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
             --glass-bg: rgba(255, 255, 255, 0.55);
@@ -19,508 +19,284 @@
             --dark-card-bg: #2d2e30;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-dark); min-height: 100vh; padding: 30px; background-attachment: fixed; }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            min-height: 100vh;
-            padding: 30px;
-            background-attachment: fixed;
-        }
-
-        /* === Header (Standardized across all pages) === */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
+        /* === GLOBAL HEADER === */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 50; }
+        .logo { display: flex; align-items: center; }
+        .nav-pills { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 30px; padding: 5px; gap: 5px; }
+        .nav-pill { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; color: var(--text-dark); font-weight: 500;}
+        .nav-pill:hover { background: rgba(0, 0, 0, 0.05); }
+        .nav-pill.active { background: #333; color: white; }
         
-        .nav-pills {
-            display: flex;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            padding: 5px;
-            gap: 5px;
-        }
-        .nav-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-        .nav-pill:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .nav-pill.active {
-            background: #333;
-            color: white;
-        }
+        .dropdown-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
+        .dropdown-container:hover .dropdown-menu { display: block; }
+        .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .cmd-k-btn { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 20px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;}
+        .cmd-k-btn span { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; color: var(--text-dark);}
+        .streak-badge { background: rgba(220, 179, 74, 0.2); color: #854d0e; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(220, 179, 74, 0.4);}
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; position: relative; }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--accent-yellow); border-radius: 50%; border: 2px solid white;}
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 
-        .header-actions { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            position: relative;
-        }
-        .icon-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            display: flex; justify-content: center; align-items: center;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .notification-dot {
-            position: absolute; top: 10px; right: 10px;
-            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
-        }
-        .avatar { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            cursor: pointer;
-        }
+        /* === SUB-NAVIGATION === */
+        .sub-nav { display: flex; gap: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; margin-bottom: 30px; margin-top: 10px; padding-left: 10px;}
+        .sub-nav-item { font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; position: relative; padding-bottom: 12px; margin-bottom: -13px;}
+        .sub-nav-item.active { color: var(--text-dark); font-weight: 600; }
+        .sub-nav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--accent-yellow); border-radius: 2px; }
 
-        /* === Reusable Classes === */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--card-radius);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-        }
-
-        .flex { display: flex; }
-        .flex-col { display: flex; flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-10 { gap: 10px; }
-        .gap-15 { gap: 15px; }
-        .gap-20 { gap: 20px; }
-
-        button {
-            cursor: pointer; border: none; outline: none; font-weight: 500;
-            transition: 0.2s ease;
-        }
-
-        /* === Page Title & Controls === */
+        /* === MAIN CONTENT === */
+        main { flex: 1; display: flex; flex-direction: column; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: var(--card-radius); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); }
         .page-header { margin-bottom: 24px; }
         .page-title { font-size: 28px; font-weight: 600; margin-bottom: 20px; }
         
         .controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;}
         .left-controls { display: flex; gap: 15px; }
         .right-controls { display: flex; gap: 10px; }
-
-        .control-input {
-            background: rgba(255,255,255,0.6);
-            border: 1px solid var(--glass-border);
-            padding: 10px 16px;
-            border-radius: 30px;
-            display: flex; align-items: center; gap: 10px;
-            font-size: 13px; font-weight: 500;
-        }
-        .control-input select, .control-input input {
-            background: transparent; border: none; outline: none; color: var(--text-dark); font-weight: 500;
-        }
+        .control-input { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 30px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; position: relative;}
         .control-input .label-small { font-size: 10px; color: var(--text-muted); position: absolute; top: -18px; left: 10px;}
-        .input-group { position: relative; }
-
-        .search-bar { width: 250px; }
-        
-        .btn { padding: 10px 18px; border-radius: 30px; font-size: 13px; display: flex; align-items: center; gap: 8px;}
+        .btn { padding: 10px 18px; border-radius: 30px; font-size: 13px; display: flex; align-items: center; gap: 8px; border: none; font-weight: 500; cursor: pointer;}
         .btn-gray { background: var(--accent-gray); color: white; }
         .btn-gold { background: var(--accent-yellow); color: #333; }
 
-        /* === KPI Cards === */
-        .kpi-row { display: flex; gap: 20px; margin-bottom: 24px; }
-        .kpi-card { flex: 1; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
         .kpi-info h3 { font-size: 14px; font-weight: 500; color: var(--text-dark); margin-bottom: 4px;}
-        .kpi-number { font-size: 36px; font-weight: 600; color: var(--accent-yellow); display: flex; align-items: baseline; gap: 8px;}
-        .kpi-number span { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-        
-        .kpi-icon-wrapper {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: rgba(220, 179, 74, 0.2); display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--accent-yellow); border: 2px solid white;
-        }
+        .kpi-number { font-size: 32px; font-weight: 600; color: var(--text-dark); display: flex; align-items: baseline; gap: 8px;}
+        .kpi-number span { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .kpi-icon-wrapper { width: 50px; height: 50px; border-radius: 50%; background: rgba(220, 179, 74, 0.2); display: flex; justify-content: center; align-items: center; font-size: 20px; color: var(--accent-yellow); border: 2px solid white; }
+        .kpi-red .kpi-number { color: #991b1b; }
+        .kpi-red .kpi-icon-wrapper { background: #fee2e2; color: #991b1b; }
+        .kpi-blue .kpi-icon-wrapper { background: #dbeafe; color: #1e40af; }
 
-        /* === Main Content Grid === */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 20px;
-        }
-
-        /* === Attendance Table Area === */
-        .table-section { padding: 24px; position: relative; min-height: 500px;}
-        .section-title { font-size: 18px; font-weight: 500; margin-bottom: 20px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+        .table-section { padding: 24px; }
+        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-size: 18px; font-weight: 500; }
+        .smart-filters { display: flex; gap: 8px; }
+        .filter-pill { padding: 6px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.5); cursor: pointer; color: var(--text-muted);}
+        .filter-pill.active { background: var(--dark-card-bg); color: var(--accent-yellow); border: none; }
 
         .data-table { width: 100%; border-collapse: collapse; text-align: left; }
         .data-table th { font-weight: 500; color: var(--text-dark); padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.1); font-size: 13px;}
         .data-table td { padding: 16px 10px; border-bottom: 1px dashed rgba(0,0,0,0.1); font-size: 13px; }
-        
-        /* Table highlight row */
-        .row-highlight td { background: rgba(0,0,0,0.03); }
-
-        .custom-checkbox {
-            width: 18px; height: 18px; border: 1.5px solid #a0a0a0; border-radius: 4px;
-            display: inline-flex; justify-content: center; align-items: center; background: white;
-        }
+        .custom-checkbox { width: 18px; height: 18px; border: 1.5px solid #a0a0a0; border-radius: 4px; display: inline-flex; justify-content: center; align-items: center; background: white; }
         .custom-checkbox.checked { background: var(--accent-yellow); border-color: var(--accent-yellow); color: white; }
-
-        /* Sort Arrows */
-        .sort-icon { color: #ccc; font-size: 10px; margin-left: 5px; }
-        
-        /* Status Toggle */
-        .status-toggle {
-            display: inline-flex; background: rgba(255,255,255,0.8); border-radius: 20px; padding: 2px; border: 1px solid #ddd;
-        }
-        .status-btn {
-            width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px;
-        }
+        .custom-checkbox.checked::after { content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px; }
+        .status-toggle { display: inline-flex; background: rgba(255,255,255,0.8); border-radius: 20px; padding: 2px; border: 1px solid #ddd; }
+        .status-btn { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; }
         .status-btn.active-check { background: var(--accent-yellow); color: white; }
-        .status-btn.inactive { color: #aaa; }
+        .status-btn.inactive { color: #aaa; cursor: pointer;}
         .status-btn.active-x { background: #8a8d91; color: white; }
+        .auto-badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;}
+        .auto-badge.alert { background: #fee2e2; color: #991b1b; border: 1px solid #f87171;}
+        .auto-badge.success { background: #dcfce7; color: #166534; border: 1px solid #86efac;}
+        .auto-badge.neutral { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db;}
 
-        /* Tooltip / Popovers */
-        .bulk-tooltip {
-            position: absolute; top: 90px; left: 30px;
-            background: white; padding: 10px 15px; border-radius: 8px; font-size: 12px; font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10;
-        }
-
-        /* Profile Popover Card */
-        .profile-popover {
-            position: absolute; top: 180px; left: 250px;
-            background: white; border-radius: 16px; padding: 20px; width: 280px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 20;
-        }
-        .popover-header { display: flex; gap: 12px; margin-bottom: 15px; position: relative;}
-        .popover-header img { width: 45px; height: 45px; border-radius: 10px; object-fit: cover;}
-        .popover-header h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px;}
-        .popover-header p { font-size: 11px; color: var(--text-muted); }
-        .close-btn { position: absolute; top: 0; right: 0; color: #aaa; cursor: pointer; font-size: 14px;}
-        
-        .popover-body p { font-size: 11px; margin-bottom: 5px; color: #444;}
-        .popover-body strong { font-weight: 600; color: var(--text-dark);}
-        
-        .popover-btn {
-            width: 100%; padding: 8px; border-radius: 20px; border: 1px solid #ddd; background: white; margin-top: 15px; font-size: 12px; font-weight: 500;
-        }
-
-        /* === Charts Area === */
         .chart-card { padding: 24px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;}
         .chart-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 30px; text-align: center; width: 100%;}
-
-        /* Bar Chart */
-        .bar-chart-container { display: flex; align-items: flex-end; gap: 15px; height: 120px; padding-bottom: 5px; }
-        .bar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .bar-label-top { font-size: 10px; font-weight: 600; }
-        .bar { width: 18px; border-radius: 4px 4px 0 0; background: #a0a0a0; }
-        .bar.highlight { background: var(--accent-yellow); }
-        .bar-label-bottom { font-size: 10px; color: var(--text-muted); margin-top: 5px;}
-
-        /* Donut Chart */
         .donut-container { position: relative; width: 140px; height: 140px; }
-        .donut-text {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
+        .donut-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .donut-text h2 { font-size: 28px; font-weight: 600; }
         .donut-text p { font-size: 11px; color: var(--text-muted); }
-
     </style>
 </head>
 <body>
 
     <header>
-        <a href="dashboard.html" class="logo">
-            <i class="fa-solid fa-church"></i> FaithWorks CRM
-        </a>
+        <div class="logo"><img src="shepherd-logo.jpg" alt="Shepherd Logo" style="height: 35px; width: auto; object-fit: contain;"></div>
         <nav class="nav-pills">
             <a href="dashboard.html" class="nav-pill">Dashboard</a>
             <a href="members-dashboard.html" class="nav-pill">People</a>
             <a href="giving-dashboard.html" class="nav-pill">Giving</a>
-            <a href="attendance.html" class="nav-pill active">Services</a>
+            <a href="calendar-dashboard.html" class="nav-pill">Events</a>
             <a href="groups-dashboard.html" class="nav-pill">Groups</a>
-            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
-            <a href="care-dashboard.html" class="nav-pill">Help</a>
+            <a href="care-dashboard.html" class="nav-pill">Care</a>
+            <div class="dropdown-container">
+                <div class="nav-pill active">More <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i></div>
+                <div class="dropdown-menu">
+                    <a href="attendance.html" class="dropdown-item" style="font-weight:bold; color:var(--accent-yellow);"><i class="fa-solid fa-clipboard-user" style="color:var(--accent-yellow);"></i> Attendance</a>
+                    <a href="volunteers-dashboard.html" class="dropdown-item"><i class="fa-solid fa-hand-holding-heart"></i> Volunteers</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-building"></i> Facilities</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-list-check"></i> Tasks</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Communications</a>
+                    <a href="#" class="dropdown-item"><i class="fa-solid fa-microphone"></i> Sermons</a>
+                    <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+                    <a href="settings-dashboard.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+            </div>
         </nav>
         <div class="header-actions">
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
-            <button class="icon-btn">
-                <i class="fa-regular fa-envelope"></i>
-                <div class="notification-dot"></div>
-            </button>
-            <a href="User Profile.html">
-                <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar">
-            </a>
+            <button class="cmd-k-btn"><i class="fa-solid fa-magnifying-glass"></i> Search... <span>⌘K</span></button>
+            <div class="streak-badge">🔥 12 Day Streak</div>
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i><div class="notification-dot"></div></button>
+            <a href="User Profile.html"><img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar"></a>
         </div>
     </header>
 
+    <nav class="sub-nav">
+        <div class="sub-nav-item active">Services List</div>
+        <div class="sub-nav-item">Live Check-In</div>
+        <div class="sub-nav-item">Bulk Entry</div>
+        <div class="sub-nav-item">Attendance Trends</div>
+        <div class="sub-nav-item">Absentee Report</div>
+    </nav>
+
     <main>
         <div class="page-header">
-            <h1 class="page-title">Sunday Service Attendance</h1>
-            
+            <h1 class="page-title">Service Attendance & Follow-ups</h1>
             <div class="controls-row">
                 <div class="left-controls">
                     <div class="input-group">
                         <div class="control-input" style="width: 220px; justify-content: space-between;">
-                            <span class="label-small">Select Event</span>
-                            Sunday Worship - 10 AM
-                            <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: #888;"></i>
+                            <span class="label-small">Select Event</span>Sunday Worship - 10 AM <i class="fa-solid fa-chevron-down"></i>
                         </div>
                     </div>
-                    
                     <div class="control-input">
-                        <i class="fa-regular fa-calendar" style="color: #666;"></i>
-                        <span>Sep 22, 2024</span>
-                    </div>
-
-                    <div class="control-input search-bar">
-                        <i class="fa-solid fa-magnifying-glass" style="color: #999;"></i>
-                        <input type="text" placeholder="Search member...">
+                        <i class="fa-regular fa-calendar"></i> <span>Sep 24, 2024</span>
                     </div>
                 </div>
-
                 <div class="right-controls">
                     <button class="btn btn-gray"><i class="fa-solid fa-plus"></i> Add Visitor</button>
-                    <button class="btn btn-gray">Bulk Present</button>
-                    <button class="btn btn-gold">Save Attendance</button>
-                    <button class="btn btn-gray">Export Report</button>
+                    <button class="btn btn-gold"><i class="fa-solid fa-check-double"></i> Save Attendance</button>
                 </div>
             </div>
         </div>
 
         <div class="kpi-row">
             <div class="glass-panel kpi-card">
-                <div class="kpi-info">
-                    <h3>Present</h3>
-                    <div class="kpi-number">215 <span>89%</span></div>
-                </div>
+                <div class="kpi-info"><h3>Total Present</h3><div class="kpi-number" style="color: var(--accent-yellow);">215 <span>89%</span></div></div>
                 <div class="kpi-icon-wrapper"><i class="fa-solid fa-hands-clapping"></i></div>
             </div>
-            <div class="glass-panel kpi-card">
-                <div class="kpi-info">
-                    <h3 style="color:#555;">Absent</h3>
-                    <div class="kpi-number" style="color:#a0a0a0;">18 <span>11%</span></div>
-                </div>
-                <div class="kpi-icon-wrapper" style="background:transparent; border-color:var(--accent-yellow); color:#a0a0a0;"><i class="fa-solid fa-chair" style="color:#a0a0a0;"></i></div>
+            <div class="glass-panel kpi-card kpi-blue">
+                <div class="kpi-info"><h3>First-Time Guests</h3><div class="kpi-number">12 <span style="color: #1e40af; background:#dbeafe; padding:2px 6px; border-radius:8px;">+4 this week</span></div></div>
+                <div class="kpi-icon-wrapper"><i class="fa-solid fa-handshake"></i></div>
+            </div>
+            <div class="glass-panel kpi-card kpi-red">
+                <div class="kpi-info"><h3>At-Risk (Missed 3+)</h3><div class="kpi-number">8 <span>Care Alerts Sent</span></div></div>
+                <div class="kpi-icon-wrapper"><i class="fa-solid fa-triangle-exclamation"></i></div>
             </div>
             <div class="glass-panel kpi-card">
-                <div class="kpi-info">
-                    <h3 style="color:#555;">Visitors</h3>
-                    <div class="kpi-number">7 <span>3%</span></div>
-                </div>
-                <div class="kpi-icon-wrapper"><i class="fa-solid fa-handshake"></i></div>
+                <div class="kpi-info"><h3>Secure Check-Ins</h3><div class="kpi-number">45 <span>Children</span></div></div>
+                <div class="kpi-icon-wrapper" style="color: #4b5563; border-color: #4b5563;"><i class="fa-solid fa-child"></i></div>
             </div>
         </div>
 
         <div class="main-grid">
-            
             <div class="glass-panel table-section">
-                <h2 class="section-title">Attendance Table</h2>
-                
-                <div class="bulk-tooltip">Bulk Mark Present</div>
-
+                <div class="table-header-row">
+                    <h2 class="section-title">Attendance Roster</h2>
+                    <div class="smart-filters">
+                        <div class="filter-pill active">All Members</div>
+                        <div class="filter-pill"><i class="fa-solid fa-star" style="color:var(--accent-yellow);"></i> First-Time Guests</div>
+                        <div class="filter-pill"><i class="fa-solid fa-triangle-exclamation" style="color:#f87171;"></i> Triggered Alerts</div>
+                    </div>
+                </div>
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th width="40"><div class="custom-checkbox"></div></th>
-                            <th><div style="background:rgba(255,255,255,0.8); border:1px solid #ddd; padding:6px 12px; border-radius:20px; display:inline-block; font-size:12px;">Attendance <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i></div></th>
-                            <th>Status <i class="fa-solid fa-circle-check" style="color:var(--accent-yellow);"></i></th>
-                            <th>Member Name <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th>Family Name <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th>Ministry Group <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th>Last Attended <i class="fa-solid fa-sort sort-icon"></i></th>
-                            <th>Actions</th>
+                            <th>Status</th>
+                            <th>Member Name</th>
+                            <th>Group / Tag</th>
+                            <th>Last Attended</th>
+                            <th>AI Insights & Automations</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="row-highlight">
-                            <td><div class="custom-checkbox checked"><i class="fa-solid fa-check" style="font-size:10px;"></i></div></td>
-                            <td>
-                                <div class="status-toggle">
-                                    <div class="status-btn active-check"><i class="fa-solid fa-check"></i></div>
-                                    <div class="status-btn inactive"><i class="fa-solid fa-xmark"></i></div>
-                                </div>
-                            </td>
-                            <td><i class="fa-solid fa-circle-check" style="color:var(--accent-yellow);"></i></td>
+                        <tr style="background: rgba(0,0,0,0.03);">
+                            <td><div class="custom-checkbox checked"></div></td>
+                            <td><div class="status-toggle"><div class="status-btn active-check"><i class="fa-solid fa-check"></i></div><div class="status-btn inactive"><i class="fa-solid fa-xmark"></i></div></div></td>
                             <td style="font-weight: 500;">Alice Green</td>
-                            <td>Green Family</td>
                             <td>Choir</td>
-                            <td>Sep 15</td>
-                            <td><i class="fa-solid fa-ellipsis"></i></td>
+                            <td>Sep 17</td>
+                            <td><span class="auto-badge neutral"><i class="fa-solid fa-check"></i> Consistent</span></td>
                         </tr>
                         <tr>
                             <td><div class="custom-checkbox"></div></td>
-                            <td>
-                                <div class="status-toggle">
-                                    <div class="status-btn active-check"><i class="fa-solid fa-check"></i></div>
-                                    <div class="status-btn inactive"><i class="fa-solid fa-xmark"></i></div>
-                                </div>
-                            </td>
-                            <td><i class="fa-solid fa-circle-check" style="color:var(--accent-yellow);"></i></td>
+                            <td><div class="status-toggle"><div class="status-btn inactive"><i class="fa-solid fa-check"></i></div><div class="status-btn active-x"><i class="fa-solid fa-xmark"></i></div></div></td>
                             <td style="font-weight: 500;">David Garcia</td>
-                            <td>Garcia Family</td>
-                            <td>Ushers</td>
-                            <td>Sep 15</td>
-                            <td><i class="fa-solid fa-ellipsis"></i></td>
-                        </tr>
-                        <tr>
-                            <td><div class="custom-checkbox"></div></td>
-                            <td>
-                                <div class="status-toggle">
-                                    <div class="status-btn inactive"><i class="fa-solid fa-check"></i></div>
-                                    <div class="status-btn active-x"><i class="fa-solid fa-xmark"></i></div>
-                                </div>
-                            </td>
-                            <td><i class="fa-solid fa-circle-xmark" style="color:#8a8d91;"></i></td>
-                            <td style="font-weight: 500;">Eva Garcia</td>
-                            <td>Garcia Family</td>
-                            <td>Nursery</td>
-                            <td>Sep 08</td>
-                            <td><i class="fa-solid fa-ellipsis"></i></td>
-                        </tr>
-                        <tr>
-                            <td><div class="custom-checkbox"></div></td>
-                            <td>
-                                <div class="status-toggle">
-                                    <div class="status-btn active-check"><i class="fa-solid fa-check"></i></div>
-                                    <div class="status-btn inactive"><i class="fa-solid fa-xmark"></i></div>
-                                </div>
-                            </td>
-                            <td><i class="fa-solid fa-circle-check" style="color:var(--accent-yellow);"></i></td>
-                            <td style="font-weight: 500;">Frank Thomas</td>
-                            <td>Thomas Family</td>
                             <td>Men's Fellowship</td>
-                            <td>Sep 15</td>
-                            <td><i class="fa-solid fa-ellipsis"></i></td>
-                        </tr>
-                        <tr>
-                            <td><div class="custom-checkbox"></div></td>
-                            <td>
-                                <div class="status-toggle">
-                                    <div class="status-btn active-check"><i class="fa-solid fa-check"></i></div>
-                                    <div class="status-btn inactive"><i class="fa-solid fa-xmark"></i></div>
-                                </div>
-                            </td>
-                            <td><i class="fa-solid fa-circle-check" style="color:var(--accent-yellow);"></i></td>
-                            <td style="font-weight: 500;">Gina Thomas</td>
-                            <td>Thomas Family</td>
-                            <td>Women's Ministry</td>
-                            <td>Sep 15</td>
-                            <td><i class="fa-solid fa-ellipsis"></i></td>
-                        </tr>
-                        <tr>
-                            <td><div class="custom-checkbox"></div></td>
-                            <td>
-                                <div class="status-toggle">
-                                    <div class="status-btn inactive"><i class="fa-solid fa-check"></i></div>
-                                    <div class="status-btn active-x"><i class="fa-solid fa-xmark"></i></div>
-                                </div>
-                            </td>
-                            <td><i class="fa-solid fa-circle-xmark" style="color:#8a8d91;"></i></td>
-                            <td style="font-weight: 500;">Henry Miller</td>
-                            <td>Miller Family</td>
-                            <td>Finance</td>
-                            <td>Aug 25</td>
-                            <td><i class="fa-solid fa-ellipsis"></i></td>
+                            <td style="color:#991b1b; font-weight:600;">Aug 25</td>
+                            <td><span class="auto-badge alert"><i class="fa-solid fa-bell"></i> Missed 3 Weeks: Care Task Created</span></td>
                         </tr>
                     </tbody>
                 </table>
-
-                <div class="profile-popover">
-                    <div class="popover-header">
-                        <img src="https://i.pravatar.cc/150?img=5" alt="Alice Green">
-                        <div>
-                            <h4>Alice Green</h4>
-                            <p>UX/UI Designer</p>
-                        </div>
-                        <i class="fa-solid fa-xmark close-btn"></i>
-                    </div>
-                    <div class="popover-body">
-                        <p><strong>Email:</strong> alice@anexample.com</p>
-                        <p><strong>Phone:</strong> 907-334-3888</p>
-                        <p style="margin-top: 10px;"><strong>Family connections:</strong> Eva Garcia, and Gina Family</p>
-                        <p style="margin-top: 10px;"><strong>2 most recent attendance:</strong><br>Sep 15, 2024, Sep 15, 2024<br>Sep 15, 2024, Sep 15, 2024</p>
-                        <button class="popover-btn">Edit</button>
-                    </div>
-                </div>
-
             </div>
 
             <div class="flex-col">
-                
                 <div class="glass-panel chart-card">
-                    <h3>Sunday Attendance Trend</h3>
-                    <div class="bar-chart-container">
-                        <div class="bar-wrapper">
-                            <span class="bar-label-top">100</span>
-                            <div class="bar" style="height: 60px;"></div>
-                            <span class="bar-label-bottom">Sep 15</span>
-                        </div>
-                        <div class="bar-wrapper">
-                            <span class="bar-label-top">159</span>
-                            <div class="bar" style="height: 100px;"></div>
-                            <span class="bar-label-bottom">Sep 10</span>
-                        </div>
-                        <div class="bar-wrapper">
-                            <span class="bar-label-top">130</span>
-                            <div class="bar" style="height: 80px;"></div>
-                            <span class="bar-label-bottom">Sep 21</span>
-                        </div>
-                        <div class="bar-wrapper">
-                            <span class="bar-label-top">215</span>
-                            <div class="bar highlight" style="height: 120px;"></div>
-                            <span class="bar-label-bottom" style="background:var(--accent-yellow); color:white; padding:2px 6px; border-radius:10px;">Sep 22</span>
-                        </div>
-                        <div class="bar-wrapper">
-                            <span class="bar-label-top">99</span>
-                            <div class="bar" style="height: 60px;"></div>
-                            <span class="bar-label-bottom">Sep 23</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel chart-card">
-                    <h3>Overall Service Attendance</h3>
+                    <h3>Service Check-in Ratio</h3>
                     <div class="donut-container">
-                        <svg width="140" height="140" viewBox="0 0 140 140">
-                            <circle cx="70" cy="70" r="60" fill="none" stroke="#e0e0e0" stroke-width="12" />
-                            <circle cx="70" cy="70" r="60" fill="none" stroke="#dcb34a" stroke-width="12" stroke-dasharray="346.8 377" stroke-linecap="round" transform="rotate(-90 70 70)" />
-                        </svg>
-                        <div class="donut-text">
-                            <h2>92%</h2>
-                            <p>Present</p>
-                        </div>
+                        <svg width="140" height="140" viewBox="0 0 140 140"><circle cx="70" cy="70" r="60" fill="none" stroke="#e0e0e0" stroke-width="12" /><circle cx="70" cy="70" r="60" fill="none" class="donut-circle" stroke="#dcb34a" stroke-width="12" stroke-dasharray="346.8 377" stroke-linecap="round" transform="rotate(-90 70 70)" /></svg>
+                        <div class="donut-text"><h2 id="donut-pct">92%</h2><p>Present</p></div>
                     </div>
                 </div>
-
             </div>
         </div>
     </main>
 
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui-helpers.js"></script>
+    <script>
+        if (!ShepherdAuth.requireAuth()) throw new Error('Redirecting');
+        ShepherdAuth.injectUserIntoHeader();
+
+        async function loadAttendanceData() {
+            try {
+                // Fetch attendance analytics and absentees
+                const [analytics, absentees, services] = await Promise.all([
+                    ShepherdAPI.get('/reports/attendance'),
+                    ShepherdAPI.get('/attendance/absentees?weeks=3'),
+                    ShepherdAPI.get('/attendance/services')
+                ]);
+
+                // Update KPIs
+                const kpiNumbers = document.querySelectorAll('.kpi-number');
+                if (kpiNumbers.length >= 3) {
+                    kpiNumbers[0].innerHTML = `${analytics.total_records} <span>Recent Total</span>`;
+                    kpiNumbers[1].innerHTML = `${analytics.first_time_guests_total} <span>Guests</span>`;
+                    kpiNumbers[2].innerHTML = `${absentees.length} <span>Care Alerts Sent</span>`;
+                }
+
+                // Populate Services Dropdown (assuming a custom select or standard select)
+                // For this UI, it looks like a custom div `.control-input`. We'll just update its text if services exist.
+                if (services.length > 0) {
+                    const svcSelect = document.querySelector('.left-controls .control-input');
+                    if(svcSelect) {
+                        svcSelect.innerHTML = `<span class="label-small">Select Event</span>${services[0].name} <i class="fa-solid fa-chevron-down"></i>`;
+                    }
+                }
+
+                // Populate the Data Table with Absentees for "At-Risk" focus
+                const tbody = document.querySelector('.data-table tbody');
+                if (absentees.length > 0) {
+                    tbody.innerHTML = absentees.slice(0, 10).map(a => `
+                        <tr>
+                            <td><div class="custom-checkbox"></div></td>
+                            <td><div class="status-toggle"><div class="status-btn inactive"><i class="fa-solid fa-check"></i></div><div class="status-btn active-x"><i class="fa-solid fa-xmark"></i></div></div></td>
+                            <td style="font-weight: 500;">${a.member_name}</td>
+                            <td>${a.membership_status}</td>
+                            <td style="color:#991b1b; font-weight:600;">${a.last_attended ? new Date(a.last_attended).toLocaleDateString() : 'Never'}</td>
+                            <td><span class="auto-badge alert"><i class="fa-solid fa-bell"></i> Missed ${a.weeks_absent} Weeks</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+            } catch (err) {
+                ShepherdUI.showToast('Failed to load attendance: ' + err.message, 'error');
+            }
+        }
+
+        loadAttendanceData();
+    </script>
 </body>
 </html>
