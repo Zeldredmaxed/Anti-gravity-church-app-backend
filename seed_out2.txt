@@ -1,0 +1,577 @@
+﻿python : Traceback (most 
+recent call last):
+At line:1 char:22
++ $env:PYTHONUTF8='1'; 
+python seed_demo_data.py 
+2>&1 | Out-String | Set ...
++                      ~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Tra  
+  ceback (most recent ca   
+ ll last)::String) [],     
+RemoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\default.py", 
+line 941, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 147, in execute
+    self._adapt_connection.
+_handle_exception(error)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 298, in 
+_handle_exception
+    raise error
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 129, in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 132, in await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 196, in 
+greenlet_spawn
+    value = await result
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 48, in 
+execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 40, in 
+_execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 132, in 
+_execute
+    return await future
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 115, in 
+run
+    result = function()
+sqlite3.OperationalError: 
+no such column: 
+volunteer_roles.teams
+
+The above exception was 
+the direct cause of the 
+following exception:
+
+Traceback (most recent 
+call last):
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+870, in main
+    vol_roles = await creat
+e_volunteer_roles(session, 
+church.id)
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+165, in 
+create_volunteer_roles
+    existing = (await 
+session.execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\ext\asyncio\session.py",
+ line 461, in execute
+    result = await 
+greenlet_spawn(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 201, in 
+greenlet_spawn
+    result = context.throw(
+*sys.exc_info())
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\session.py", line 
+2362, in execute
+    return 
+self._execute_internal(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\session.py", line 
+2247, in _execute_internal
+    result: Result[Any] = c
+ompile_state_cls.orm_execut
+e_statement(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\context.py", line 
+305, in 
+orm_execute_statement
+    result = conn.execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1418, in execute
+    return meth(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\sql\elements.py", line 
+515, in 
+_execute_on_connection
+    return connection._exec
+ute_clauseelement(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1640, in 
+_execute_clauseelement
+    ret = 
+self._execute_context(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1846, in _execute_context
+    return 
+self._exec_single_context(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1986, in 
+_exec_single_context
+    self._handle_dbapi_exce
+ption(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+2355, in 
+_handle_dbapi_exception
+    raise sqlalchemy_except
+ion.with_traceback(exc_info
+[2]) from e
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\default.py", 
+line 941, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 147, in execute
+    self._adapt_connection.
+_handle_exception(error)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 298, in 
+_handle_exception
+    raise error
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 129, in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 132, in await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 196, in 
+greenlet_spawn
+    value = await result
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 48, in 
+execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 40, in 
+_execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 132, in 
+_execute
+    return await future
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 115, in 
+run
+    result = function()
+sqlalchemy.exc.OperationalE
+rror: 
+(sqlite3.OperationalError) 
+no such column: 
+volunteer_roles.teams
+[SQL: SELECT 
+volunteer_roles.id, 
+volunteer_roles.church_id, 
+volunteer_roles.name, volun
+teer_roles.description, 
+volunteer_roles.teams, volu
+nteer_roles.capacity_needed
+, 
+volunteer_roles.is_active 
+FROM volunteer_roles 
+WHERE 
+volunteer_roles.church_id 
+= ? AND 
+volunteer_roles.name = ?]
+[parameters: (1, 'Bass 
+Guitar')]
+(Background on this error 
+at: https://sqlalche.me/e/2
+0/e3q8)
+=================================================================
+Anti-Gravity ChMS -- Demo Data Seed Script
+=================================================================
+
+[*] Ensuring database schema is up-to-date...
+  [OK] Schema sync complete
+
+[*] Setting up foundation data...
+  Γ£à Using existing church: New Birth Praise Center (id=1)
+  Γ£à Using existing admin user: Pastor Williams (id=1)
+  ≡ƒÆ░ Funds ready: General Tithe Fund, Building Fund, Missions Fund, Youth Ministry Fund, Benevolence Fund
+  Γ¢¬ Created service: Sunday Morning Worship (id=1)
+
+Γ¥î SEED FAILED: (sqlite3.OperationalError) no such column: volunteer_roles.teams
+[SQL: SELECT volunteer_roles.id, volunteer_roles.church_id, volunteer_roles.name, volunteer_roles.description, volunteer_roles.teams, volunteer_roles.capacity_needed, volunteer_roles.is_active 
+FROM volunteer_roles 
+WHERE volunteer_roles.church_id = ? AND volunteer_roles.name = ?]
+[parameters: (1, 'Bass Guitar')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent 
+call last):
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\default.py", 
+line 941, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 147, in execute
+    self._adapt_connection.
+_handle_exception(error)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 298, in 
+_handle_exception
+    raise error
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 129, in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 132, in await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 196, in 
+greenlet_spawn
+    value = await result
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 48, in 
+execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 40, in 
+_execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 132, in 
+_execute
+    return await future
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 115, in 
+run
+    result = function()
+sqlite3.OperationalError: 
+no such column: 
+volunteer_roles.teams
+
+The above exception was 
+the direct cause of the 
+following exception:
+
+Traceback (most recent 
+call last):
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+938, in <module>
+    asyncio.run(main())
+  File "C:\Python\Python310
+\lib\asyncio\runners.py", 
+line 44, in run
+    return loop.run_until_c
+omplete(main)
+  File "C:\Python\Python310
+\lib\asyncio\base_events.py
+", line 641, in 
+run_until_complete
+    return future.result()
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+870, in main
+    vol_roles = await creat
+e_volunteer_roles(session, 
+church.id)
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+165, in 
+create_volunteer_roles
+    existing = (await 
+session.execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\ext\asyncio\session.py",
+ line 461, in execute
+    result = await 
+greenlet_spawn(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 201, in 
+greenlet_spawn
+    result = context.throw(
+*sys.exc_info())
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\session.py", line 
+2362, in execute
+    return 
+self._execute_internal(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\session.py", line 
+2247, in _execute_internal
+    result: Result[Any] = c
+ompile_state_cls.orm_execut
+e_statement(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\context.py", line 
+305, in 
+orm_execute_statement
+    result = conn.execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1418, in execute
+    return meth(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\sql\elements.py", line 
+515, in 
+_execute_on_connection
+    return connection._exec
+ute_clauseelement(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1640, in 
+_execute_clauseelement
+    ret = 
+self._execute_context(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1846, in _execute_context
+    return 
+self._exec_single_context(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1986, in 
+_exec_single_context
+    self._handle_dbapi_exce
+ption(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+2355, in 
+_handle_dbapi_exception
+    raise sqlalchemy_except
+ion.with_traceback(exc_info
+[2]) from e
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\default.py", 
+line 941, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 147, in execute
+    self._adapt_connection.
+_handle_exception(error)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 298, in 
+_handle_exception
+    raise error
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 129, in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 132, in await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 196, in 
+greenlet_spawn
+    value = await result
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 48, in 
+execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 40, in 
+_execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 132, in 
+_execute
+    return await future
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 115, in 
+run
+    result = function()
+sqlalchemy.exc.OperationalE
+rror: 
+(sqlite3.OperationalError) 
+no such column: 
+volunteer_roles.teams
+[SQL: SELECT 
+volunteer_roles.id, 
+volunteer_roles.church_id, 
+volunteer_roles.name, volun
+teer_roles.description, 
+volunteer_roles.teams, volu
+nteer_roles.capacity_needed
+, 
+volunteer_roles.is_active 
+FROM volunteer_roles 
+WHERE 
+volunteer_roles.church_id 
+= ? AND 
+volunteer_roles.name = ?]
+[parameters: (1, 'Bass 
+Guitar')]
+(Background on this error 
+at: https://sqlalche.me/e/2
+0/e3q8)
+

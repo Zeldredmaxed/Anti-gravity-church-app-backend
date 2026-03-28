@@ -1,0 +1,51 @@
+﻿=================================================================
+python : Traceback (most 
+recent call last):
+At line:1 char:1
++ python seed_demo_data.py 
+2>&1 | Out-File -Encoding 
+utf8 seed_output.l ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~
+    + CategoryInfo         
+     : NotSpecified: (Tra  
+  ceback (most recent ca   
+ ll last)::String) [],     
+RemoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+911, in <module>
+    asyncio.run(main())
+  File "C:\Python\Python310
+\lib\asyncio\runners.py", 
+line 44, in run
+    return loop.run_until_c
+omplete(main)
+  File "C:\Python\Python310
+\lib\asyncio\base_events.py
+", line 641, in 
+run_until_complete
+    return future.result()
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\s
+eed_demo_data.py", line 
+832, in main
+    print("\U0001f331 
+Anti-Gravity ChMS ù Demo 
+Data Seed Script")
+  File "C:\Python\Python310
+\lib\encodings\cp1252.py", 
+line 19, in encode
+    return codecs.charmap_e
+ncode(input,self.errors,enc
+oding_table)[0]
+UnicodeEncodeError: 
+'charmap' codec can't 
+encode character 
+'\U0001f331' in position 
+0: character maps to 
+<undefined>

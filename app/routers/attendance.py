@@ -476,17 +476,20 @@ async def attendance_chart_data(
     church_id = current_user.church_id
     cutoff = date.today() - timedelta(weeks=weeks)
 
+    is_postgres = db.bind.dialect.name == "postgresql"
+    week_expr = func.to_char(AttendanceRecord.date, 'IYYY-IW') if is_postgres else func.strftime('%Y-%W', AttendanceRecord.date)
+
     result = await db.execute(
         select(
-            func.strftime('%Y-%W', AttendanceRecord.date).label("week"),
+            week_expr.label("week"),
             func.count(AttendanceRecord.id).label("count"),
         )
         .where(
             AttendanceRecord.church_id == church_id,
             AttendanceRecord.date >= cutoff,
         )
-        .group_by(func.strftime('%Y-%W', AttendanceRecord.date))
-        .order_by(func.strftime('%Y-%W', AttendanceRecord.date))
+        .group_by(week_expr)
+        .order_by(week_expr)
     )
 
     return [AttendanceChartPoint(date=row.week, count=row.count) for row in result.all()]

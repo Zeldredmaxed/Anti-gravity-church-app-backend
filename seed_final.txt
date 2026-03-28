@@ -1,0 +1,85 @@
+﻿=================================================================
+Anti-Gravity ChMS -- Demo Data Seed Script
+=================================================================
+  [OK] Old database backed up to newbirth_church.db.backup
+
+[*] Creating fresh database with current schema...
+  [OK] All tables created from current models
+
+[*] Setting up foundation data...
+  ≡ƒÅ¢∩╕Å  Created church: New Birth Fellowship (id=1)
+  ≡ƒæñ Created admin user: Pastor Jeremiah Cole (id=1)
+  ≡ƒÆ░ Funds ready: General Tithe Fund, Building Fund, Missions Fund, Youth Ministry Fund, Benevolence Fund
+  Γ¢¬ Created service: Sunday Morning Worship (id=1)
+  ≡ƒÄ╡ Volunteer roles ready: Bass Guitar, Nursery Team, Usher, Sound Tech
+
+  ≡ƒºö Seeding Profile 1: Marcus Sterling (Engaged Leader)...
+    Γ£à Marcus Sterling seeded (member_id=1)
+       ΓåÆ Group: 'Men's Dawn Breakers' (group_id=1)
+       ΓåÆ 6 recurring donations ($500/mo)
+       ΓåÆ 12 volunteer hours, 8 attendance records
+
+  ≡ƒæ⌐ Seeding Profile 2: Chloe Vance (At-Risk Member)...
+    Γ£à Chloe Vance seeded (member_id=2)
+       ΓåÆ Health Score: ≡ƒö┤ 18 (At-Risk)
+       ΓåÆ Missed last 4 Sundays, 8 prior attendance records
+       ΓåÆ Auto-generated follow-up task (pending)
+
+  ≡ƒºæ Seeding Profile 3: Julian Hayes (First-Time Guest)...
+    Γ£à Julian Hayes seeded (member_id=3)
+       ΓåÆ First-time guest attendance (last Sunday)
+       ΓåÆ URGENT care case (care_case_id=1)
+       ΓåÆ Prayer request + pastoral follow-up task
+
+  ≡ƒæ⌐ΓÇì≡ƒÆ╝ Seeding Profile 4: Evelyn Cho (Big Donor)...
+    Γ£à Evelyn Cho seeded (member_id=4)
+       ΓåÆ $15,000 Building Fund donation (spike for charts!)
+       ΓåÆ $800 in regular offerings (4 months)
+       ΓåÆ Pledge: $25K campaign, 60% fulfilled
+       ΓåÆ Only 3 attendance records (low attendance, high giving)
+
+  ≡ƒæ¿ΓÇì≡ƒæ⌐ΓÇì≡ƒæºΓÇì≡ƒæª Seeding Profile 5: The Miller Family...
+    Γ£à Miller Family seeded (family_id=1)
+       ΓåÆ Sam (id=5), Jessica (id=6)
+       ΓåÆ Leo (id=7, age 4), Maya (id=8, age 2)
+       ΓåÆ 2 child check-in sessions (Pre-K + Nursery)
+       ΓåÆ Jessica's volunteer application: PENDING (Nursery Team)
+
+  ≡ƒôè Seeding 12-month historical giving (for chart testing)...
+    Γ£à 12 months of historical giving seeded (for trend charts)
+
+=================================================================
+≡ƒÄë SEED COMPLETE ΓÇö Summary
+=================================================================
+
+  Church:      New Birth Fellowship (id=1)
+  Admin User:  Pastor Jeremiah Cole (admin@newbirthfellowship.org)
+  
+  ≡ƒæñ Members Seeded:
+     1. Marcus Sterling  ΓÇö ≡ƒƒó 95 (Engaged Leader, Bass Guitar, $500/mo tithe)
+     2. Chloe Vance      ΓÇö ≡ƒö┤ 18 (At-Risk, missed 4 weeks, auto-task created)
+     3. Julian Hayes     ΓÇö ≡ƒƒí 45 (First-time guest, URGENT care case)
+     4. Evelyn Cho       ΓÇö ≡ƒƒí 60 (Big donor, $15K Building Fund, low attendance)
+     5. Sam Miller       ΓÇö ≡ƒƒó 82 (Family head, weekly attender)
+     6. Jessica Miller   ΓÇö ≡ƒƒó 78 (Pending nursery volunteer application)
+     7. Leo Miller (4)   ΓÇö Child, Pre-K check-in
+     8. Maya Miller (2)  ΓÇö Child, Nursery check-in
+
+  ≡ƒôè Dashboard Impact:
+     ΓÇó KPI Cards:      Members, Giving (MTD), Attendance, Groups, Care, Volunteers, Prayers ΓÇö all populated
+     ΓÇó Giving Chart:   12 months of historical data + $15K spike from Evelyn
+     ΓÇó Attendance:     ~30+ records across profiles
+     ΓÇó Care Board:     1 URGENT / NEW case (Julian)
+     ΓÇó Volunteer Board: 1 pending application (Jessica), 12 hours logged (Marcus)
+     ΓÇó Absentee List:  Chloe Vance (4 weeks missed)
+     ΓÇó First-Time:     Julian Hayes (last Sunday)
+     ΓÇó Family View:    Miller Family (4 members, 2 child check-ins)
+     ΓÇó Prayer Board:   1 urgent prayer request
+     ΓÇó Funds:          General ($3,800+), Building ($15,000+)
+     ΓÇó Pledges:        1 active ($25K campaign, 60% fulfilled)
+
+  ≡ƒöæ Login:
+     Email:    admin@newbirthfellowship.org
+     Password: Admin123!
+
+

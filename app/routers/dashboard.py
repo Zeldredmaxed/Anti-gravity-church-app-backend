@@ -178,9 +178,12 @@ async def get_giving_chart(
     church_id = current_user.church_id
     cutoff = date.today() - timedelta(days=months * 30)
 
+    is_postgres = db.bind.dialect.name == "postgresql"
+    month_expr = func.to_char(Donation.date, 'YYYY-MM') if is_postgres else func.strftime('%Y-%m', Donation.date)
+
     result = await db.execute(
         select(
-            func.strftime('%Y-%m', Donation.date).label("month"),
+            month_expr.label("month"),
             func.sum(Donation.amount).label("total"),
         )
         .where(
@@ -188,8 +191,8 @@ async def get_giving_chart(
             Donation.date >= cutoff,
             Donation.status == "completed",
         )
-        .group_by(func.strftime('%Y-%m', Donation.date))
-        .order_by(func.strftime('%Y-%m', Donation.date))
+        .group_by(month_expr)
+        .order_by(month_expr)
     )
 
     return [ChartPoint(date=row.month, value=float(row.total or 0)) for row in result.all()]
@@ -205,17 +208,20 @@ async def get_attendance_chart(
     church_id = current_user.church_id
     cutoff = date.today() - timedelta(weeks=weeks)
 
+    is_postgres = db.bind.dialect.name == "postgresql"
+    week_expr = func.to_char(AttendanceRecord.date, 'IYYY-IW') if is_postgres else func.strftime('%Y-%W', AttendanceRecord.date)
+
     result = await db.execute(
         select(
-            func.strftime('%Y-%W', AttendanceRecord.date).label("week"),
+            week_expr.label("week"),
             func.count(AttendanceRecord.id).label("count"),
         )
         .where(
             AttendanceRecord.church_id == church_id,
             AttendanceRecord.date >= cutoff,
         )
-        .group_by(func.strftime('%Y-%W', AttendanceRecord.date))
-        .order_by(func.strftime('%Y-%W', AttendanceRecord.date))
+        .group_by(week_expr)
+        .order_by(week_expr)
     )
 
     return [ChartPoint(date=row.week, value=float(row.count or 0)) for row in result.all()]
@@ -231,17 +237,20 @@ async def get_member_growth(
     church_id = current_user.church_id
     cutoff = date.today() - timedelta(days=months * 30)
 
+    is_postgres = db.bind.dialect.name == "postgresql"
+    month_expr = func.to_char(Member.created_at, 'YYYY-MM') if is_postgres else func.strftime('%Y-%m', Member.created_at)
+
     result = await db.execute(
         select(
-            func.strftime('%Y-%m', Member.created_at).label("month"),
+            month_expr.label("month"),
             func.count(Member.id).label("count"),
         )
         .where(
             Member.church_id == church_id,
             Member.created_at >= cutoff,
         )
-        .group_by(func.strftime('%Y-%m', Member.created_at))
-        .order_by(func.strftime('%Y-%m', Member.created_at))
+        .group_by(month_expr)
+        .order_by(month_expr)
     )
 
     return [ChartPoint(date=row.month, value=float(row.count or 0)) for row in result.all()]
