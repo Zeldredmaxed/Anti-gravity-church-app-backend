@@ -126,7 +126,12 @@
         .event-details h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px;}
         .event-details p { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;}
 
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -178,13 +183,14 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Overview</div>
-        <div class="sub-nav-item">Analytics</div>
-        <div class="sub-nav-item">Activity Feed</div>
+        <div class="sub-nav-item active" data-target="tab-overview">Overview</div>
+        <div class="sub-nav-item" data-target="tab-analytics">Analytics</div>
+        <div class="sub-nav-item" data-target="tab-activity-feed">Activity Feed</div>
     </nav>
 
     <main>
-        <div class="kpi-grid">
+        <div id="tab-overview" class="tab-pane active">
+            <div class="kpi-grid">
             <div class="glass-panel kpi-card">
                 <div class="kpi-header">
                     <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
@@ -417,7 +423,21 @@
 
             </div>
         </div>
+        </div>
 
+        <div id="tab-analytics" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Analytics</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-activity-feed" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Activity Feed</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
     </main>
 
     <script src="js/api-client.js"></script>
@@ -615,5 +635,29 @@
         });
     </script>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

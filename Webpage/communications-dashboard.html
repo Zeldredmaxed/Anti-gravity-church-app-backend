@@ -123,7 +123,12 @@
         .send-btn { background: var(--dark-card-bg); color: var(--accent-yellow); border: none; padding: 10px 28px; border-radius: 20px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s;}
         .send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
 
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -164,14 +169,15 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Compose Message</div>
-        <div class="sub-nav-item">Audience Segments</div>
-        <div class="sub-nav-item">Sent History</div>
-        <div class="sub-nav-item">Scheduled</div>
+        <div class="sub-nav-item active" data-target="tab-compose-message">Compose Message</div>
+        <div class="sub-nav-item" data-target="tab-audience-segments">Audience Segments</div>
+        <div class="sub-nav-item" data-target="tab-sent-history">Sent History</div>
+        <div class="sub-nav-item" data-target="tab-scheduled">Scheduled</div>
     </nav>
 
     <main>
-        <h1 class="page-title">Communications</h1>
+        <div id="tab-compose-message" class="tab-pane active">
+            <h1 class="page-title">Communications</h1>
 
         <div class="split-layout">
             
@@ -265,6 +271,28 @@
 
             </div>
 
+        </div>
+        </div>
+
+        <div id="tab-audience-segments" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Audience Segments</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-sent-history" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Sent History</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-scheduled" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Scheduled</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
         </div>
     </main>
 
@@ -373,6 +401,30 @@
                 sendBtn.disabled = false;
             }
         }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

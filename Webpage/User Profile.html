@@ -75,7 +75,12 @@
         .family-info { flex: 1; }
         .family-name { font-size: 13px; font-weight: 500; }
         .family-rel { font-size: 11px; color: var(--text-muted); }
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
     <header>
@@ -110,16 +115,17 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Personal Info</div>
-        <div class="sub-nav-item">Skills & Interests</div>
-        <div class="sub-nav-item">Engagement</div>
-        <div class="sub-nav-item">Giving History</div>
-        <div class="sub-nav-item">Activity Timeline</div>
-        <div class="sub-nav-item">Notes</div>
+        <div class="sub-nav-item active" data-target="tab-personal-info">Personal Info</div>
+        <div class="sub-nav-item" data-target="tab-skills--interests">Skills & Interests</div>
+        <div class="sub-nav-item" data-target="tab-engagement">Engagement</div>
+        <div class="sub-nav-item" data-target="tab-giving-history">Giving History</div>
+        <div class="sub-nav-item" data-target="tab-activity-timeline">Activity Timeline</div>
+        <div class="sub-nav-item" data-target="tab-notes">Notes</div>
     </nav>
 
     <main>
-        <div class="profile-header">
+        <div id="tab-personal-info" class="tab-pane active">
+            <div class="profile-header">
             <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="profile-avatar-large">
             <div class="profile-info">
                 <h1>David Johnson</h1>
@@ -168,6 +174,42 @@
                         <div class="timeline-item"><div class="timeline-title">Discipleship Track</div><div class="timeline-date">Pending Registration</div></div>
                     </div>
                 </div>
+            </div>
+        </div>
+        </div>
+
+        <div id="tab-skills--interests" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Skills & Interests</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-engagement" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Engagement</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-giving-history" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Giving History</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-activity-timeline" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Activity Timeline</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-notes" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Notes</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
             </div>
         </div>
     </main>
@@ -305,6 +347,30 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadProfile();
             ShepherdUI.initCommandPalette();
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
         });
     </script>
 </body>

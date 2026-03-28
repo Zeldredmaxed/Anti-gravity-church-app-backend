@@ -106,7 +106,12 @@
         .donut-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .donut-text h2 { font-size: 28px; font-weight: 600; }
         .donut-text p { font-size: 11px; color: var(--text-muted); }
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -143,15 +148,16 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Services List</div>
-        <div class="sub-nav-item">Live Check-In</div>
-        <div class="sub-nav-item">Bulk Entry</div>
-        <div class="sub-nav-item">Attendance Trends</div>
-        <div class="sub-nav-item">Absentee Report</div>
+        <div class="sub-nav-item active" data-target="tab-services-list">Services List</div>
+        <div class="sub-nav-item" data-target="tab-live-check-in">Live Check-In</div>
+        <div class="sub-nav-item" data-target="tab-bulk-entry">Bulk Entry</div>
+        <div class="sub-nav-item" data-target="tab-attendance-trends">Attendance Trends</div>
+        <div class="sub-nav-item" data-target="tab-absentee-report">Absentee Report</div>
     </nav>
 
     <main>
-        <div class="page-header">
+        <div id="tab-services-list" class="tab-pane active">
+            <div class="page-header">
             <h1 class="page-title">Service Attendance & Follow-ups</h1>
             <div class="controls-row">
                 <div class="left-controls">
@@ -242,6 +248,35 @@
                 </div>
             </div>
         </div>
+        </div>
+
+        <div id="tab-live-check-in" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Live Check-In</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-bulk-entry" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Bulk Entry</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-attendance-trends" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Attendance Trends</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-absentee-report" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Absentee Report</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
     </main>
 
     <script src="js/api-client.js"></script>
@@ -298,6 +333,30 @@
         }
 
         loadAttendanceData();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

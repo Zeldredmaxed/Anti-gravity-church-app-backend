@@ -93,7 +93,12 @@
         .avatar-stack img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--glass-bg); object-fit: cover; margin-left: -10px; }
         .avatar-stack img:first-child { margin-left: 0; }
         .btn-assign { background: var(--accent-yellow); color: #333; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -139,13 +144,14 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Active Groups</div>
-        <div class="sub-nav-item">Directory</div>
-        <div class="sub-nav-item">Discipleship Tracks</div>
+        <div class="sub-nav-item active" data-target="tab-active-groups">Active Groups</div>
+        <div class="sub-nav-item" data-target="tab-directory">Directory</div>
+        <div class="sub-nav-item" data-target="tab-discipleship-tracks">Discipleship Tracks</div>
     </nav>
 
     <main>
-        <div class="page-header">
+        <div id="tab-active-groups" class="tab-pane active">
+            <div class="page-header">
             <div class="title-area">
                 <h1 class="page-title">Groups & Discipleship</h1>
             </div>
@@ -193,6 +199,21 @@
                     </div>
                     <button class="btn-assign">Manage</button>
                 </div>
+            </div>
+        </div>
+        </div>
+
+        <div id="tab-directory" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Directory</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-discipleship-tracks" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Discipleship Tracks</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
             </div>
         </div>
     </main>
@@ -288,5 +309,29 @@
         loadGroups();
     </script>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

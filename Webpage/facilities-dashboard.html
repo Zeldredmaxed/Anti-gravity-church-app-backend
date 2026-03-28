@@ -111,7 +111,12 @@
 
         .btn-submit { background: var(--accent-yellow); color: var(--text-dark); border: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;}
 
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -152,14 +157,15 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Rooms & Spaces</div>
-        <div class="sub-nav-item">Master Calendar</div>
-        <div class="sub-nav-item">Pending Requests</div>
-        <div class="sub-nav-item">Equipment Inventory</div>
+        <div class="sub-nav-item active" data-target="tab-rooms--spaces">Rooms & Spaces</div>
+        <div class="sub-nav-item" data-target="tab-master-calendar">Master Calendar</div>
+        <div class="sub-nav-item" data-target="tab-pending-requests">Pending Requests</div>
+        <div class="sub-nav-item" data-target="tab-equipment-inventory">Equipment Inventory</div>
     </nav>
 
     <main>
-        <div class="page-header">
+        <div id="tab-rooms--spaces" class="tab-pane active">
+            <div class="page-header">
             <h1 class="page-title">Facilities & Room Booking</h1>
             <button class="btn-add"><i class="fa-solid fa-plus"></i> Add Room</button>
         </div>
@@ -307,6 +313,28 @@
             </div>
 
         </div>
+        </div>
+
+        <div id="tab-master-calendar" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Master Calendar</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-pending-requests" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Pending Requests</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-equipment-inventory" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Equipment Inventory</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
     </main>
 
     <script src="js/api-client.js"></script>
@@ -380,6 +408,30 @@
         });
 
         loadRooms();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

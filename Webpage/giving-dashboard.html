@@ -157,7 +157,12 @@
         .toggle-switch.active { background: var(--toggle-active); }
         .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .toggle-switch.active::after { transform: translateX(20px); }
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -203,15 +208,16 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Donations</div>
-        <div class="sub-nav-item">Funds</div>
-        <div class="sub-nav-item">Pledges</div>
-        <div class="sub-nav-item">Statements</div>
-        <div class="sub-nav-item">Payment Methods</div>
+        <div class="sub-nav-item active" data-target="tab-donations">Donations</div>
+        <div class="sub-nav-item" data-target="tab-funds">Funds</div>
+        <div class="sub-nav-item" data-target="tab-pledges">Pledges</div>
+        <div class="sub-nav-item" data-target="tab-statements">Statements</div>
+        <div class="sub-nav-item" data-target="tab-payment-methods">Payment Methods</div>
     </nav>
 
     <main>
-        <h1 class="page-title">Giving</h1>
+        <div id="tab-donations" class="tab-pane active">
+            <h1 class="page-title">Giving</h1>
 
         <div class="kpi-grid">
             <div class="kpi-card">
@@ -365,6 +371,35 @@
                 </div>
             </div>
         </div>
+        </div>
+
+        <div id="tab-funds" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Funds</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-pledges" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Pledges</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-statements" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Statements</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-payment-methods" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Payment Methods</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
     </main>
 
     <script src="js/api-client.js"></script>
@@ -503,5 +538,29 @@
         loadDonations();
     </script>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

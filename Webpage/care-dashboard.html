@@ -96,7 +96,12 @@
         .history-item { position: relative; font-size: 12px;}
         .history-item::before { content: ''; position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--dark-card-bg); }
         .history-date { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-bottom: 2px;}
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -142,13 +147,14 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Cases Board</div>
-        <div class="sub-nav-item">Notes</div>
-        <div class="sub-nav-item">Tasks</div>
+        <div class="sub-nav-item active" data-target="tab-cases-board">Cases Board</div>
+        <div class="sub-nav-item" data-target="tab-notes">Notes</div>
+        <div class="sub-nav-item" data-target="tab-tasks">Tasks</div>
     </nav>
 
     <main>
-        <div class="top-section">
+        <div id="tab-cases-board" class="tab-pane active">
+            <div class="top-section">
             <div class="welcome-area">
                 <h1 class="page-title">Care & Prayer Dashboard</h1>
                 <div class="kpi-row">
@@ -214,6 +220,21 @@
                         <div style="line-height:1.4;">Automated SMS sent.</div>
                     </div>
                 </div>
+            </div>
+        </div>
+        </div>
+
+        <div id="tab-notes" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Notes</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-tasks" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Tasks</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
             </div>
         </div>
     </main>
@@ -300,5 +321,29 @@
         loadCareCases();
     </script>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -127,7 +127,12 @@
         .link-text p { font-size: 12px; color: var(--text-muted); }
         .btn-view-link { font-size: 12px; font-weight: 600; color: #ef4444; background: transparent; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 16px; cursor: pointer;}
 
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -165,13 +170,14 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">My Tasks</div>
-        <div class="sub-nav-item">Assigned by Me</div>
-        <div class="sub-nav-item">Completed</div>
+        <div class="sub-nav-item active" data-target="tab-my-tasks">My Tasks</div>
+        <div class="sub-nav-item" data-target="tab-assigned-by-me">Assigned by Me</div>
+        <div class="sub-nav-item" data-target="tab-completed">Completed</div>
     </nav>
 
     <main>
-        <div class="page-header">
+        <div id="tab-my-tasks" class="tab-pane active">
+            <div class="page-header">
             <h1 class="page-title">Tasks</h1>
             <button class="btn-add"><i class="fa-solid fa-plus"></i> New Task</button>
         </div>
@@ -296,6 +302,21 @@
             </div>
 
         </div>
+        </div>
+
+        <div id="tab-assigned-by-me" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Assigned by Me</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-completed" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Completed</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
     </main>
 
     <script src="js/api-client.js"></script>
@@ -340,6 +361,30 @@
             }
         }
         loadTasks();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

@@ -133,7 +133,12 @@
         .booking-info h4 { font-size: 13px; font-weight: 500; }
         .booking-info p { font-size: 11px; color: var(--text-muted); }
 
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -179,10 +184,10 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Calendar</div>
-        <div class="sub-nav-item">Upcoming</div>
-        <div class="sub-nav-item">Past</div>
-        <div class="sub-nav-item">Facilities</div>
+        <div class="sub-nav-item active" data-target="tab-calendar">Calendar</div>
+        <div class="sub-nav-item" data-target="tab-upcoming">Upcoming</div>
+        <div class="sub-nav-item" data-target="tab-past">Past</div>
+        <div class="sub-nav-item" data-target="tab-facilities">Facilities</div>
     </nav>
 
     <div class="sub-header flex-between">
@@ -310,6 +315,30 @@
             }
         }
         loadEvents();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

@@ -68,7 +68,12 @@
         .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
         .status-pill.green { background: #dcfce7; color: #166534; }
         .status-pill.yellow { background: #fef08a; color: #854d0e; }
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
     <header>
@@ -103,14 +108,15 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Roster</div>
-        <div class="sub-nav-item">Schedules</div>
-        <div class="sub-nav-item">Applications</div>
-        <div class="sub-nav-item">Hours Logging</div>
+        <div class="sub-nav-item active" data-target="tab-roster">Roster</div>
+        <div class="sub-nav-item" data-target="tab-schedules">Schedules</div>
+        <div class="sub-nav-item" data-target="tab-applications">Applications</div>
+        <div class="sub-nav-item" data-target="tab-hours-logging">Hours Logging</div>
     </nav>
 
     <main>
-        <h1 class="page-title">Volunteers</h1>
+        <div id="tab-roster" class="tab-pane active">
+            <h1 class="page-title">Volunteers</h1>
         <div class="kpi-row">
             <div class="glass-panel kpi-card">
                 <span class="kpi-title">Active Volunteers</span>
@@ -186,6 +192,28 @@
                 </tbody>
             </table>
         </div>
+        </div>
+
+        <div id="tab-schedules" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Schedules</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-applications" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Applications</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-hours-logging" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Hours Logging</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
     </main>
 
     <script src="js/api-client.js"></script>
@@ -236,6 +264,30 @@
             }
         }
         loadVolunteers();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

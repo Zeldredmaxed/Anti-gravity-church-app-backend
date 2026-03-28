@@ -70,7 +70,12 @@
         .save-area { margin-top: auto; display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px;}
         .btn-secondary { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 10px 24px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; }
         .btn-primary { background: var(--dark-card-bg); color: white; border: none; padding: 10px 24px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
     <header>
@@ -105,16 +110,17 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Personal Preferences</div>
-        <div class="sub-nav-item">Church Profile</div>
-        <div class="sub-nav-item">User Management</div>
-        <div class="sub-nav-item">2FA Security</div>
-        <div class="sub-nav-item">Automations</div>
-        <div class="sub-nav-item">Audit Log</div>
+        <div class="sub-nav-item active" data-target="tab-personal-preferences">Personal Preferences</div>
+        <div class="sub-nav-item" data-target="tab-church-profile">Church Profile</div>
+        <div class="sub-nav-item" data-target="tab-user-management">User Management</div>
+        <div class="sub-nav-item" data-target="tab-2fa-security">2FA Security</div>
+        <div class="sub-nav-item" data-target="tab-automations">Automations</div>
+        <div class="sub-nav-item" data-target="tab-audit-log">Audit Log</div>
     </nav>
 
     <main>
-        <h1 class="page-title">Settings</h1>
+        <div id="tab-personal-preferences" class="tab-pane active">
+            <h1 class="page-title">Settings</h1>
 
         <div class="content-grid">
             <div class="settings-area">
@@ -159,6 +165,42 @@
                     <p id="settingsRole">Loading...</p>
                     <a href="User Profile.html" style="text-decoration:none;"><button class="btn-edit"><i class="fa-solid fa-pencil"></i> View Profile</button></a>
                 </div>
+            </div>
+        </div>
+        </div>
+
+        <div id="tab-church-profile" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Church Profile</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-user-management" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">User Management</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-2fa-security" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">2FA Security</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-automations" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Automations</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-audit-log" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Audit Log</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
             </div>
         </div>
     </main>
@@ -221,6 +263,30 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             ShepherdUI.initCommandPalette();
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
         });
     </script>
 </body>

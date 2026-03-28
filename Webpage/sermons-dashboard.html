@@ -123,7 +123,12 @@
         /* Upload Modal (Hidden by default, mocked up here) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 999; justify-content: center; align-items: center; }
         .modal-container { background: #fdfaf6; width: 100%; max-width: 500px; border-radius: 24px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid var(--glass-border);}
-    </style>
+    
+        /* === TAB PANES (DYNAMIC SWITCHING) === */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 
@@ -164,14 +169,15 @@
     </header>
 
     <nav class="sub-nav">
-        <div class="sub-nav-item active">Sermon Library</div>
-        <div class="sub-nav-item">Live Stream <span style="background:#dc2626; color:white; padding:2px 6px; border-radius:10px; font-size:9px; margin-left:4px;">LIVE</span></div>
-        <div class="sub-nav-item">Drafts & Uploads</div>
-        <div class="sub-nav-item">My Notes</div>
+        <div class="sub-nav-item active" data-target="tab-sermon-library">Sermon Library</div>
+        <div class="sub-nav-item" data-target="tab-live-stream-<span-style="background:#dc2626;-color:white;-padding:2px-6px;-border-radius:10px;-font-size:9px;-margin-left:4px;">live<span>">Live Stream <span style="background:#dc2626; color:white; padding:2px 6px; border-radius:10px; font-size:9px; margin-left:4px;">LIVE</span></div>
+        <div class="sub-nav-item" data-target="tab-drafts--uploads">Drafts & Uploads</div>
+        <div class="sub-nav-item" data-target="tab-my-notes">My Notes</div>
     </nav>
 
     <main>
-        <div class="page-header">
+        <div id="tab-sermon-library" class="tab-pane active">
+            <div class="page-header">
             <div class="title-area">
                 <h1 class="page-title">Sermons</h1>
             </div>
@@ -198,6 +204,28 @@
             <!-- Sermon cards populate here -->
             <div style="font-size: 14px; color: var(--text-muted); padding: 20px;">
                 <i class="fa-solid fa-circle-notch fa-spin"></i> Loading sermons...
+            </div>
+        </div>
+        </div>
+
+        <div id="tab-live-stream-<span-style="background:#dc2626;-color:white;-padding:2px-6px;-border-radius:10px;-font-size:9px;-margin-left:4px;">live<span>" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Live Stream <span style="background:#dc2626; color:white; padding:2px 6px; border-radius:10px; font-size:9px; margin-left:4px;">LIVE</span></h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-drafts--uploads" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">Drafts & Uploads</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
+            </div>
+        </div>
+
+        <div id="tab-my-notes" class="tab-pane">
+            <h1 class="page-title" style="margin-bottom: 24px;">My Notes</h1>
+            <div class="glass-panel" style="padding: 24px;">
+                <p style="color: var(--text-muted);"><i class="fa-solid fa-person-digging"></i> This section is currently under construction / coming soon.</p>
             </div>
         </div>
     </main>
@@ -369,6 +397,30 @@
                 console.error(e);
             }
         }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.sub-nav-item');
+            const panes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and panes
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panes.forEach(p => p.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+
+                    // Find and activate the corresponding content pane
+                    const targetId = tab.getAttribute('data-target');
+                    if (targetId && document.getElementById(targetId)) {
+                        document.getElementById(targetId).classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
