@@ -17,11 +17,16 @@ from app.models.alert import Alert  # noqa: F401
 from app.models.sermon import Sermon, SermonNote  # noqa: F401
 from app.models.scripture import ServiceScripture  # noqa: F401
 from app.models.child_checkin import CheckinSession  # noqa: F401
-from app.models.volunteer import VolunteerRole, VolunteerSchedule, VolunteerAvailability  # noqa: F401
+from app.models.volunteer import (  # noqa: F401
+    VolunteerRole, VolunteerSchedule, VolunteerAvailability,
+    VolunteerApplication, VolunteerHoursLog,
+)
 from app.models.asset import Asset  # noqa: F401
 from app.models.automation import AutomationRule  # noqa: F401
 from app.models.campus import Campus  # noqa: F401
 from app.models.discipleship import DiscipleshipStep, MemberDiscipleshipProgress  # noqa: F401
-from app.models.store import Product # noqa: F401
+from app.models.store import Product  # noqa: F401
 from app.models.task import MinistryTask  # noqa: F401
-from app.models.care import CareCase  # noqa: F401
+from app.models.care import CareCase, CareNote  # noqa: F401
+from app.models.activity_log import MemberActivityLog  # noqa: F401
+from app.models.facility import FacilityRoom, RoomBooking  # noqa: F401

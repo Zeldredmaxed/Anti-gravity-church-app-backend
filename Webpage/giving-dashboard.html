@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaithWorks CRM - Giving</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables (Master Design System) === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --accent-gray: #8a8d91;
+            --card-radius: 20px;
+            --dark-card-bg: #2d2e30;
+            
+            --status-green-bg: #dcfce7;
+            --status-green-text: #166534;
+            --status-yellow-bg: #f3f4f6;
+            --status-yellow-text: #6b7280;
+            --status-red-bg: #fee2e2;
+            --status-red-text: #991b1b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 30px;
+            background-attachment: fixed;
+        }
+
+        /* === Header (Standardized across all pages) === */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo { 
+            font-size: 20px; 
+            font-weight: 600; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+        
+        .nav-pills {
+            display: flex;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 30px;
+            padding: 5px;
+            gap: 5px;
+        }
+        .nav-pill {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+        .nav-pill:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .nav-pill.active {
+            background: #333;
+            color: white;
+        }
+
+        .header-actions { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            position: relative;
+        }
+        .icon-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex; justify-content: center; align-items: center;
+            border: none; cursor: pointer;
+            position: relative;
+        }
+        .notification-dot {
+            position: absolute; top: 10px; right: 10px;
+            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
+        }
+        .avatar { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            cursor: pointer;
+        }
+
+        /* === Main Content Layout === */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        h1.page-title { font-size: 28px; font-weight: 600; margin-bottom: -10px;}
+
+        /* === KPI Cards === */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .kpi-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            position: relative;
+        }
+
+        .kpi-title { font-size: 15px; font-weight: 500; color: var(--text-dark); margin-bottom: 8px;}
+        .kpi-value { font-size: 32px; font-weight: 600; }
+        
+        .kpi-badge {
+            position: absolute; top: 24px; right: 24px;
+            background: rgba(220, 179, 74, 0.25); font-size: 12px; font-weight: 600;
+            padding: 4px 8px; border-radius: 8px;
+        }
+
+        .progress-bar {
+            width: 100%; height: 6px; background: rgba(0,0,0,0.05);
+            border-radius: 10px; margin-top: 16px; overflow: hidden;
+        }
+        .progress-fill { height: 100%; background: var(--accent-yellow); border-radius: 10px; }
+
+        /* === Main Lower Section === */
+        .lower-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .left-column { display: flex; flex-direction: column; gap: 20px; }
+
+        /* === Chart Section === */
+        .chart-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius); padding: 24px;
+        }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-title { font-size: 16px; font-weight: 500; }
+        .chart-filters { font-size: 13px; color: var(--text-muted); }
+        .chart-filters span { margin: 0 6px; cursor: pointer;}
+        .chart-filters .active { color: var(--text-dark); background: var(--accent-yellow); padding: 4px 12px; border-radius: 15px; font-weight: 500;}
+
+        .chart-area { width: 100%; height: 100px; position: relative;}
+        .chart-area svg { width: 100%; height: 100%; overflow: visible; }
+        .chart-line { fill: none; stroke: var(--accent-yellow); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round;}
+        .chart-fill { fill: url(#chart-gradient); opacity: 0.5; }
+        .chart-point { fill: white; stroke: var(--accent-yellow); stroke-width: 3px; }
+
+        /* === Table Section === */
+        .table-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius); padding: 24px; flex: 1; display: flex; flex-direction: column;
+        }
+
+        .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+        .left-controls { display: flex; gap: 12px; }
+        .control-dropdown {
+            background: white; border: 1px solid var(--glass-border); padding: 8px 16px;
+            border-radius: 20px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        
+        .right-controls { display: flex; gap: 12px; }
+        .btn { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; }
+        .btn-outline { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); }
+        .btn-solid { background: #9ca3af; color: white; }
+        .btn-gold { background: var(--accent-yellow); color: var(--text-dark); display: flex; align-items: center; gap: 6px;}
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; text-align: left; }
+        th { font-size: 12px; color: var(--text-dark); font-weight: 500; padding: 0 16px 8px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+        th i { font-size: 10px; color: #a1a1aa; margin-left: 4px;}
+        
+        td { padding: 14px 16px; font-size: 13px; background: rgba(255,255,255,0.4); }
+        tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+        .donor-cell { display: flex; align-items: center; gap: 12px; font-weight: 500;}
+        .donor-cell img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+        
+        .method-icon { font-size: 20px; }
+        .method-icon.mc { color: #eb001b; }
+        .method-icon.check { color: #10b981; }
+        .method-icon.visa { color: #1a1f71; font-weight: bold; font-family: Arial, sans-serif; font-style: italic; font-size:14px;}
+        .method-icon.pp { color: #003087; }
+        .method-icon.ach { color: #4b5563; font-weight: bold; font-size: 12px;}
+
+        .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; display: inline-block;}
+        .status-completed { background: var(--status-green-bg); color: var(--status-green-text); }
+        .status-pending { background: var(--status-yellow-bg); color: var(--status-yellow-text); }
+        .status-failed { background: var(--status-red-bg); color: var(--status-red-text); }
+
+        /* Highlighted Row */
+        tr.highlighted td {
+            background: rgba(255, 255, 255, 0.8);
+            border-top: 1px solid var(--accent-yellow);
+            border-bottom: 1px solid var(--accent-yellow);
+            box-shadow: 0 4px 15px rgba(220, 179, 74, 0.4);
+        }
+        tr.highlighted td:first-child { border-left: 1px solid var(--accent-yellow); }
+        tr.highlighted td:last-child { border-right: 1px solid var(--accent-yellow); }
+
+        .custom-checkbox {
+            width: 16px; height: 16px; border: 1px solid #d1d5db; border-radius: 4px;
+            display: flex; justify-content: center; align-items: center; background: white;
+        }
+        tr.highlighted .custom-checkbox { background: var(--text-dark); border-color: var(--text-dark); }
+        tr.highlighted .custom-checkbox::after { content: '\f00c'; font-family: 'FontAwesome'; color: white; font-size: 10px; }
+
+        .table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; font-size: 12px; color: var(--text-muted);}
+        .pagination { display: flex; gap: 15px; align-items: center; }
+        .pagination i { cursor: pointer; }
+        .pagination span { background: white; padding: 4px 10px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: var(--text-dark); font-weight: 500;}
+
+        /* === Sidebar Form (Add Donation) === */
+        .sidebar-card {
+            background: rgba(180, 180, 185, 0.3); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: var(--card-radius);
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .form-header {
+            background: linear-gradient(90deg, #dcb160 0%, #dcb34a 100%);
+            padding: 24px; font-size: 18px; font-weight: 600; color: var(--text-dark);
+        }
+
+        .form-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; flex: 1;}
+        
+        .form-row { display: flex; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; position: relative;}
+        .form-group label { font-size: 12px; font-weight: 500; color: var(--text-dark); }
+        
+        .input-box {
+            background: white; border: 1px solid #e5e7eb; padding: 10px 12px;
+            border-radius: 8px; font-size: 13px; font-weight: 500; outline: none;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .input-box i { color: #9ca3af; font-size: 12px;}
+
+        /* Mocking the Open Dropdowns from Image */
+        .mock-dropdown {
+            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+            overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .md-item { padding: 8px 12px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between;}
+        .md-item.selected { background: rgba(220, 179, 74, 0.25); font-weight: 500; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: auto; }
+        .btn-cancel { flex: 1; background: #9ca3af; color: white; padding: 12px; border-radius: 20px; border: none; font-weight: 500; cursor: pointer;}
+        .btn-save { flex: 1; background: var(--accent-yellow); color: var(--text-dark); padding: 12px; border-radius: 20px; border: none; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer;}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="dashboard.html" class="logo">
+            <i class="fa-solid fa-church"></i> FaithWorks CRM
+        </a>
+        <nav class="nav-pills">
+            <a href="dashboard.html" class="nav-pill">Dashboard</a>
+            <a href="members-dashboard.html" class="nav-pill">People</a>
+            <a href="giving-dashboard.html" class="nav-pill active">Giving</a>
+            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="groups-dashboard.html" class="nav-pill">Groups</a>
+            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
+            <a href="care-dashboard.html" class="nav-pill">Help</a>
+        </nav>
+        <div class="header-actions">
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="icon-btn">
+                <i class="fa-regular fa-envelope"></i>
+                <div class="notification-dot"></div>
+            </button>
+            <a href="User Profile.html">
+                <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">Giving</h1>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-badge">15%</div>
+                <div class="kpi-title">Total Giving</div>
+                <div class="kpi-value">$18,450</div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Tithe</div>
+                <div class="kpi-value">$9,100</div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 45%;"></div></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Offering</div>
+                <div class="kpi-value">$4,950</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Missions</div>
+                <div class="kpi-value">$4,400</div>
+            </div>
+        </div>
+
+        <div class="lower-layout">
+            <div class="left-column">
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">Giving Over Time</div>
+                        <div class="chart-filters">
+                            <span>Weekly</span> | <span class="active">Monthly</span> | <span>Yearly</span>
+                        </div>
+                    </div>
+                    <div class="chart-area">
+                        <svg viewBox="0 0 800 100" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="chart-gradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stop-color="#dcb34a" stop-opacity="0.4"/>
+                                    <stop offset="100%" stop-color="#dcb34a" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <path class="chart-fill" d="M0,80 L150,60 L280,40 L380,65 L500,75 L650,45 L800,30 L800,100 L0,100 Z"></path>
+                            <path class="chart-line" d="M0,80 L150,60 L280,40 L380,65 L500,75 L650,45 L800,30"></path>
+                            <circle class="chart-point" cx="280" cy="40" r="4"></circle>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-controls">
+                        <div class="left-controls">
+                            <div class="control-dropdown">Category <i class="fa-solid fa-chevron-down"></i></div>
+                            <div class="control-dropdown"><i class="fa-regular fa-calendar" style="color:#9ca3af;"></i> Oct 22 - 2023 <i class="fa-solid fa-chevron-right" style="color:#9ca3af;"></i></div>
+                        </div>
+                        <div class="right-controls">
+                            <button class="btn btn-outline">Export Statement</button>
+                            <button class="btn btn-solid">New Pledge</button>
+                            <button class="btn btn-gold"><i class="fa-solid fa-plus"></i> Add Donation</button>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="40"><div class="custom-checkbox"></div></th>
+                                <th>Donor Name <i class="fa-solid fa-sort"></i></th>
+                                <th>Category <i class="fa-solid fa-sort"></i></th>
+                                <th>Amount <i class="fa-solid fa-sort"></i></th>
+                                <th>Date <i class="fa-solid fa-sort"></i></th>
+                                <th>Method <i class="fa-solid fa-sort"></i></th>
+                                <th>Fund <i class="fa-solid fa-sort"></i></th>
+                                <th>Status <i class="fa-solid fa-sort"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><div class="custom-checkbox"></div></td>
+                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=1" alt="Mary"> Mary Johnson</div></td>
+                                <td>Tithe</td>
+                                <td>$200.00</td>
+                                <td>Oct 20, 2023</td>
+                                <td><i class="fa-brands fa-cc-mastercard method-icon mc"></i></td>
+                                <td>General Fund</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="custom-checkbox"></div></td>
+                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=11" alt="John"> John Smith</div></td>
+                                <td>Offering</td>
+                                <td>$50.00</td>
+                                <td>Oct 19, 2023</td>
+                                <td><i class="fa-solid fa-check method-icon check"></i></td>
+                                <td>Local Missions</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                            </tr>
+                            <tr class="highlighted">
+                                <td><div class="custom-checkbox"></div></td>
+                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=12" alt="David"> David Lee</div></td>
+                                <td>Tithe</td>
+                                <td>$1,500.00</td>
+                                <td>Oct 15, 2023</td>
+                                <td class="method-icon visa">VISA</td>
+                                <td>Building Fund</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="custom-checkbox"></div></td>
+                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=9" alt="Sarah"> Sarah Brown</div></td>
+                                <td>Missions</td>
+                                <td>$350.00</td>
+                                <td>Oct 12, 2023</td>
+                                <td><i class="fa-brands fa-cc-paypal method-icon pp"></i></td>
+                                <td>Global Missions</td>
+                                <td><span class="status-badge status-failed">Failed</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="custom-checkbox"></div></td>
+                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=14" alt="Thomas"> Pastor Thomas</div></td>
+                                <td>Offering</td>
+                                <td>$100.00</td>
+                                <td>Oct 10, 2023</td>
+                                <td><i class="fa-solid fa-money-bill-1 method-icon check"></i></td>
+                                <td>Benevolence</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="custom-checkbox"></div></td>
+                                <td><div class="donor-cell"><img src="https://i.pravatar.cc/150?img=20" alt="Lisa"> Lisa Chen</div></td>
+                                <td>Pledge</td>
+                                <td>$500.00</td>
+                                <td>Oct 5, 2023</td>
+                                <td class="method-icon ach">ACH</td>
+                                <td>Building Fund</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="table-footer">
+                        <div class="pagination">
+                            <i class="fa-solid fa-chevron-left" style="color:#9ca3af;"></i>
+                            <span>1</span>
+                            <i class="fa-solid fa-chevron-right" style="color:#9ca3af;"></i>
+                        </div>
+                        <div>Showing 1-10 of 250 transactions</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <div class="form-header">Add New Donation</div>
+                <div class="form-body">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Donor</label>
+                            <div class="input-box">John Smith <i class="fa-solid fa-magnifying-glass"></i><i class="fa-solid fa-chevron-down" style="margin-left:-8px;"></i></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <div class="input-box">Oct 22, 2023 <i class="fa-regular fa-calendar"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <div class="input-box">$150.00</div>
+                            
+                            <label style="margin-top:8px;">Category</label>
+                            <div class="mock-dropdown">
+                                <div class="md-item">Tithe</div>
+                                <div class="md-item">Offering</div>
+                                <div class="md-item selected">Missions <i class="fa-solid fa-check"></i></div>
+                                <div class="md-item">Pledge</div>
+                                <div class="md-item">Gift</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Method</label>
+                            <div class="mock-dropdown">
+                                <div class="md-item">Mastercard</div>
+                                <div class="md-item">Visa</div>
+                                <div class="md-item">Check</div>
+                                <div class="md-item selected">Cash <i class="fa-solid fa-check"></i></div>
+                                <div class="md-item">Paypal</div>
+                            </div>
+                            
+                            <label style="margin-top:8px;">Fund</label>
+                            <div class="mock-dropdown">
+                                <div class="md-item selected">General Fund</div>
+                                <div class="md-item">Building Fund</div>
+                                <div class="md-item">Benevolence</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <div class="input-box" style="justify-content: flex-start; color:var(--text-muted); font-weight:400;">Giving for the local food bank</div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-cancel">Cancel</button>
+                        <button class="btn-save"><i class="fa-solid fa-plus"></i> Save Donation</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

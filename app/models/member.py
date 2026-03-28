@@ -67,6 +67,7 @@ class Member(Base):
     gender = Column(String(20), nullable=True)
     marital_status = Column(String(20), nullable=True)
     photo_url = Column(String(500), nullable=True)
+    avatar_url = Column(String(500), nullable=True)  # Dashboard-facing alias
 
     # Church Info
     membership_status = Column(
@@ -87,9 +88,13 @@ class Member(Base):
     membership_class_date = Column(Date, nullable=True)
     spiritual_gifts = Column(JSON, nullable=True)
     
+    # ── Skills & Interests Engine (NEW) ──
+    skills_tags = Column(JSON, nullable=True)  # ["Preaching", "Sound Tech", "Counseling"]
+    interests = Column(JSON, nullable=True)     # ["Youth Ministry", "Music", "Outreach"]
+
     # Health Metrics
     health_score = Column(Integer, nullable=True)  # 0-100 score
-    health_status = Column(String(20), nullable=True) # e.g. from HealthStatus enum
+    health_status = Column(String(20), nullable=True)
 
     # Background Check
     background_check_status = Column(String(50), nullable=True)
@@ -122,6 +127,7 @@ class Member(Base):
     attendance_records = relationship("AttendanceRecord", back_populates="member", lazy="dynamic")
     pledges = relationship("Pledge", back_populates="member", lazy="dynamic")
     group_memberships = relationship("GroupMembership", back_populates="member", lazy="dynamic")
+    activity_logs = relationship("MemberActivityLog", back_populates="member", lazy="dynamic")
 
 
 class MemberNote(Base):

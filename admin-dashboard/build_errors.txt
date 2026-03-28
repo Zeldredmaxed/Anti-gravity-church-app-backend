@@ -1,7 +1,0 @@
-﻿src/api/client.ts(4,15): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
-src/App.tsx(1,46): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
-src/components/Layout.tsx(2,34): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
-src/components/Sidebar.tsx(2,25): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
-src/components/Sidebar.tsx(54,23): error TS7031: Binding element 'isActive' implicitly has an 'any' type.
-src/pages/Login.tsx(2,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
-src/pages/Login.tsx(4,1): error TS6133: 'apiClient' is declared but its value is never read.

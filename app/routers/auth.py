@@ -1,10 +1,12 @@
 """Auth router: registration, login, token refresh, profile — multi-tenant."""
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from pydantic import BaseModel as PydanticBaseModel
 
 from app.database import get_db
 from app.models.user import User, AuditLog, UserRole
@@ -20,6 +22,14 @@ from app.utils.security import (
 from app.schemas.user import JoinChurchRequest
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+class PreferencesUpdate(PydanticBaseModel):
+    language_preference: Optional[str] = None
+    notification_email: Optional[bool] = None
+    notification_sms: Optional[bool] = None
+    notification_push: Optional[bool] = None
+    phone_number: Optional[str] = None
 
 
 async def _track_login(db: AsyncSession, user_id: int):
@@ -166,8 +176,21 @@ async def login(
     )
     db.add(audit)
 
-    # Track login streak
+    # Track login streak and last_login_at
     await _track_login(db, user.id)
+    user.last_login_at = datetime.now(timezone.utc)
+    db.add(user)
+
+    # Check if 2FA is enabled
+    if user.is_2fa_enabled:
+        # Return partial response requiring 2FA verification
+        token_data = {"sub": str(user.id), "church_id": user.church_id, "role": user.role}
+        return {
+            "requires_2fa": True,
+            "access_token": create_access_token(token_data),
+            "refresh_token": create_refresh_token(token_data),
+            "message": "2FA verification required",
+        }
 
     token_data = {"sub": str(user.id), "church_id": user.church_id, "role": user.role}
     return TokenResponse(
@@ -290,3 +313,37 @@ async def get_my_streak(
         "total_logins": streak.total_logins,
         "last_login_date": streak.last_login_date.isoformat() if streak.last_login_date else None,
     }}
+
+
+@router.put("/me/preferences")
+async def update_preferences(
+    data: PreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update language, notification preferences, and phone number."""
+    if data.language_preference is not None:
+        current_user.language_preference = data.language_preference
+
+    if data.phone_number is not None:
+        current_user.phone_number = data.phone_number
+
+    # Update notification prefs (merge with existing)
+    prefs = current_user.notification_prefs or {"email": True, "sms": False, "push": True}
+    if data.notification_email is not None:
+        prefs["email"] = data.notification_email
+    if data.notification_sms is not None:
+        prefs["sms"] = data.notification_sms
+    if data.notification_push is not None:
+        prefs["push"] = data.notification_push
+    current_user.notification_prefs = prefs
+
+    db.add(current_user)
+    await db.flush()
+    await db.refresh(current_user)
+
+    return {
+        "language_preference": current_user.language_preference,
+        "notification_prefs": current_user.notification_prefs,
+        "phone_number": current_user.phone_number,
+    }

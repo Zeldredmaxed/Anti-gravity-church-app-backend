@@ -1,11 +1,14 @@
-"""Care Cases router - handle tracking pastoral care cases."""
+"""Care Cases router - handle tracking pastoral care cases with notes and notification actions."""
 
+from datetime import datetime
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from pydantic import BaseModel, ConfigDict
 
 from app.database import get_db
-from app.models.care import CareCase
+from app.models.care import CareCase, CareNote
 from app.models.user import User
 from app.schemas.care import CareCaseCreate, CareCaseUpdate, CareCaseResponse
 from app.utils.security import get_current_user, require_role
@@ -162,3 +165,135 @@ async def delete_care_case(
     case.is_deleted = True
     db.add(case)
     await db.flush()
+
+
+# ── Care Notes (Follow-up tracking) ──
+
+class CareNoteCreate(BaseModel):
+    content: str
+    action_taken: Optional[str] = None  # "Phone Call", "Home Visit", "SMS Sent"
+
+
+class CareNoteResponse(BaseModel):
+    id: int
+    care_case_id: int
+    author_id: int
+    content: str
+    action_taken: Optional[str] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/{case_id}/notes", response_model=list[CareNoteResponse])
+async def list_care_notes(
+    case_id: int,
+    current_user: User = Depends(require_role("admin", "pastor", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get all follow-up notes for a care case."""
+    result = await db.execute(
+        select(CareNote)
+        .where(CareNote.care_case_id == case_id)
+        .order_by(CareNote.created_at.desc())
+    )
+    return result.scalars().all()
+
+
+@router.post("/{case_id}/notes", response_model=CareNoteResponse, status_code=201)
+async def add_care_note(
+    case_id: int,
+    data: CareNoteCreate,
+    current_user: User = Depends(require_role("admin", "pastor", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add a follow-up note to a care case."""
+    case = (await db.execute(select(CareCase).where(
+        CareCase.id == case_id, CareCase.church_id == current_user.church_id
+    ))).scalar_one_or_none()
+    if not case:
+        raise HTTPException(status_code=404, detail="Care case not found")
+
+    note = CareNote(
+        care_case_id=case_id,
+        author_id=current_user.id,
+        content=data.content,
+        action_taken=data.action_taken,
+    )
+    db.add(note)
+    await db.flush()
+    await db.refresh(note)
+    return note
+
+
+# ── Action Endpoints (SMS / Email) ──
+
+class SendSMSRequest(BaseModel):
+    phone_number: str
+    message: str
+
+
+class SendEmailRequest(BaseModel):
+    email: str
+    subject: str
+    body: str
+
+
+@router.post("/{case_id}/actions/send-sms")
+async def send_sms_action(
+    case_id: int,
+    data: SendSMSRequest,
+    current_user: User = Depends(require_role("admin", "pastor", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Send an SMS from the care case and log the action as a note."""
+    case = (await db.execute(select(CareCase).where(
+        CareCase.id == case_id, CareCase.church_id == current_user.church_id
+    ))).scalar_one_or_none()
+    if not case:
+        raise HTTPException(status_code=404, detail="Care case not found")
+
+    from app.services.notification_service import send_sms
+    result = await send_sms(to=data.phone_number, body=data.message)
+
+    # Log as care note
+    note = CareNote(
+        care_case_id=case_id,
+        author_id=current_user.id,
+        content=f"SMS sent to {data.phone_number}: {data.message}",
+        action_taken="SMS Sent",
+    )
+    db.add(note)
+    await db.flush()
+
+    return {"sms_result": result, "note_logged": True}
+
+
+@router.post("/{case_id}/actions/send-email")
+async def send_email_action(
+    case_id: int,
+    data: SendEmailRequest,
+    current_user: User = Depends(require_role("admin", "pastor", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Send an email from the care case and log the action as a note."""
+    case = (await db.execute(select(CareCase).where(
+        CareCase.id == case_id, CareCase.church_id == current_user.church_id
+    ))).scalar_one_or_none()
+    if not case:
+        raise HTTPException(status_code=404, detail="Care case not found")
+
+    from app.services.notification_service import send_email
+    result = await send_email(to=data.email, subject=data.subject, html_body=data.body)
+
+    # Log as care note
+    note = CareNote(
+        care_case_id=case_id,
+        author_id=current_user.id,
+        content=f"Email sent to {data.email}: {data.subject}",
+        action_taken="Email Sent",
+    )
+    db.add(note)
+    await db.flush()
+
+    return {"email_result": result, "note_logged": True}

@@ -3,7 +3,7 @@
 import enum
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, Integer, String, Boolean, DateTime, Enum, Text, ForeignKey
+    Column, Integer, String, Boolean, DateTime, Enum, Text, ForeignKey, JSON
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -37,6 +37,20 @@ class User(Base):
     role = Column(String(20), default=UserRole.MEMBER.value, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     member_id = Column(Integer, ForeignKey("members.id"), nullable=True)
+
+    # ── 2FA ──
+    totp_secret = Column(String(255), nullable=True)  # Encrypted TOTP secret
+    is_2fa_enabled = Column(Boolean, default=False)
+
+    # ── Preferences ──
+    language_preference = Column(String(10), default="en")
+    notification_prefs = Column(JSON, default=lambda: {"email": True, "sms": False, "push": True})
+    phone_number = Column(String(20), nullable=True)  # For SMS delivery
+
+    # ── Tracking ──
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Timestamps
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

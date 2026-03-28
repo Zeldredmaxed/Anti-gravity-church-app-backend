@@ -1,7 +1,7 @@
-"""Security utilities: JWT tokens, password hashing, role enforcement, tenant isolation."""
+"""Security utilities: JWT tokens, password hashing, role enforcement, tenant isolation, fine-grained RBAC."""
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List
+from typing import Optional, List, Dict, Set
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -14,6 +14,82 @@ from app.database import get_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+
+# ── Fine-Grained Permission System ──────────────────────────────────────────
+# Maps roles to specific permissions. Checked via require_permission().
+ROLE_PERMISSIONS: Dict[str, Set[str]] = {
+    "admin": {
+        "members:read", "members:write", "members:delete",
+        "finance:read", "finance:write", "finance:export",
+        "attendance:read", "attendance:write",
+        "events:read", "events:write", "events:delete",
+        "groups:read", "groups:write", "groups:delete",
+        "volunteers:read", "volunteers:write", "volunteers:manage",
+        "care:read", "care:write", "care:assign",
+        "tasks:read", "tasks:write", "tasks:assign",
+        "settings:read", "settings:write",
+        "reports:read", "reports:export",
+        "dashboard:read",
+        "facilities:read", "facilities:write",
+        "communications:send",
+    },
+    "pastor": {
+        "members:read", "members:write",
+        "finance:read", "finance:export",
+        "attendance:read", "attendance:write",
+        "events:read", "events:write",
+        "groups:read", "groups:write",
+        "volunteers:read", "volunteers:write", "volunteers:manage",
+        "care:read", "care:write", "care:assign",
+        "tasks:read", "tasks:write", "tasks:assign",
+        "settings:read",
+        "reports:read", "reports:export",
+        "dashboard:read",
+        "facilities:read", "facilities:write",
+        "communications:send",
+    },
+    "staff": {
+        "members:read", "members:write",
+        "attendance:read", "attendance:write",
+        "events:read", "events:write",
+        "groups:read", "groups:write",
+        "volunteers:read", "volunteers:write",
+        "care:read", "care:write",
+        "tasks:read", "tasks:write",
+        "dashboard:read",
+        "facilities:read",
+        "reports:read",
+    },
+    "ministry_leader": {
+        "members:read",
+        "attendance:read", "attendance:write",
+        "events:read",
+        "groups:read", "groups:write",
+        "volunteers:read",
+        "care:read", "care:write",
+        "tasks:read", "tasks:write",
+        "dashboard:read",
+    },
+    "finance_team": {
+        "finance:read", "finance:write", "finance:export",
+        "members:read",
+        "reports:read", "reports:export",
+        "dashboard:read",
+    },
+    "volunteer": {
+        "members:read",
+        "events:read",
+        "groups:read",
+        "volunteers:read",
+        "dashboard:read",
+    },
+    "member": {
+        "events:read",
+        "groups:read",
+        "dashboard:read",
+    },
+}
 
 
 def hash_password(password: str) -> str:
@@ -109,3 +185,25 @@ def require_role(*allowed_roles: str):
         return current_user
 
     return _check_role
+
+
+def require_permission(*required_permissions: str):
+    """Dependency factory: enforce fine-grained permission checks.
+
+    Usage:
+        @router.get("/finance", dependencies=[Depends(require_permission("finance:read"))])
+    """
+
+    async def _check_permission(current_user=Depends(get_current_user)):
+        user_role = current_user.role or "member"
+        user_perms = ROLE_PERMISSIONS.get(user_role, set())
+
+        missing = [p for p in required_permissions if p not in user_perms]
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Missing permissions: {', '.join(missing)}",
+            )
+        return current_user
+
+    return _check_permission

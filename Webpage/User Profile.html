@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaithWorks CRM - User Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === Global Styles & Variables (Master Design System) === */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e4e7e9 0%, #fdf5e6 50%, #f5dbaf 100%);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-dark: #202124;
+            --text-muted: #5f6368;
+            --accent-yellow: #dcb34a;
+            --accent-gray: #8a8d91;
+            --card-radius: 20px;
+            --dark-card-bg: #2d2e30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 30px;
+            background-attachment: fixed;
+        }
+
+        /* === Header (Standardized across all pages) === */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo { 
+            font-size: 20px; 
+            font-weight: 600; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+        
+        .nav-pills {
+            display: flex;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 30px;
+            padding: 5px;
+            gap: 5px;
+        }
+        .nav-pill {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+        .nav-pill:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .nav-pill.active {
+            background: #333;
+            color: white;
+        }
+
+        .header-actions { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            position: relative;
+        }
+        .icon-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex; justify-content: center; align-items: center;
+            border: none; cursor: pointer;
+            position: relative;
+        }
+        .notification-dot {
+            position: absolute; top: 10px; right: 10px;
+            width: 8px; height: 8px; background: #dcb34a; border-radius: 50%;
+        }
+        .avatar { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            cursor: pointer;
+        }
+
+        /* === Main Content === */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* === Profile Header === */
+        .profile-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .profile-info {
+            flex: 1;
+            padding-top: 10px;
+        }
+
+        .profile-info h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .profile-role {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-yellow);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-yellow);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dark);
+        }
+
+        /* === Content Grid === */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        /* === Left Column - Info Cards === */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-header .edit-link {
+            font-size: 13px;
+            color: var(--accent-yellow);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        /* === Activity Section === */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 12px;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-yellow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .activity-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* === Right Column === */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .groups-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+        }
+
+        .groups-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .group-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+
+        .group-item:last-child {
+            border-bottom: none;
+        }
+
+        .group-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(220, 179, 74, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--accent-yellow);
+            font-size: 16px;
+        }
+
+        .group-info {
+            flex: 1;
+        }
+
+        .group-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .group-role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* === Skills/Tags === */
+        .skills-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+        }
+
+        .skills-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            padding: 6px 14px;
+            background: rgba(220, 179, 74, 0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="dashboard.html" class="logo">
+            <i class="fa-solid fa-church"></i> FaithWorks CRM
+        </a>
+        <nav class="nav-pills">
+            <a href="dashboard.html" class="nav-pill">Dashboard</a>
+            <a href="members-dashboard.html" class="nav-pill">People</a>
+            <a href="giving-dashboard.html" class="nav-pill">Giving</a>
+            <a href="attendance.html" class="nav-pill">Services</a>
+            <a href="groups-dashboard.html" class="nav-pill">Groups</a>
+            <a href="settings-dashboard.html" class="nav-pill">Settings</a>
+            <a href="care-dashboard.html" class="nav-pill">Help</a>
+        </nav>
+        <div class="header-actions">
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="icon-btn">
+                <i class="fa-regular fa-envelope"></i>
+                <div class="notification-dot"></div>
+            </button>
+            <a href="User Profile.html">
+                <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="avatar">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="profile-header">
+            <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="profile-avatar-large">
+            
+            <div class="profile-info">
+                <h1>Pastor David</h1>
+                <p class="profile-role">Senior Pastor at FaithWorks Church</p>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">12</span>
+                        <span class="stat-label">Years of Service</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">3</span>
+                        <span class="stat-label">Ministries</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">156</span>
+                        <span class="stat-label">Sermons</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="btn btn-primary"><i class="fa-solid fa-pencil"></i> Edit Profile</button>
+                <button class="btn btn-secondary"><i class="fa-solid fa-envelope"></i> Message</button>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            
+            <div class="left-column">
+                <div class="info-card">
+                    <div class="card-header">
+                        <h2>Personal Information</h2>
+                        <span class="edit-link">Edit</span>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Full Name</span>
+                            <span class="info-value">David Michael Johnson</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">pastor.david@faithworks.org</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">+1 (555) 123-4567</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Date of Birth</span>
+                            <span class="info-value">March 15, 1975</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value">123 Faith Street, Grace City, CA 90210</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Since</span>
+                            <span class="info-value">January 2012</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fa-solid fa-microphone"></i></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Preached Sunday Sermon</div>
+                                <div class="activity-desc">"Walking in Faith" - John 3:16</div>
+                            </div>
+                            <div class="activity-time">2 days ago</div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fa-solid fa-user-plus"></i></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Baptized New Members</div>
+                                <div class="activity-desc">5 new members baptized</div>
+                            </div>
+                            <div class="activity-time">1 week ago</div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Led Leadership Meeting</div>
+                                <div class="activity-desc">Quarterly strategic planning</div>
+                            </div>
+                            <div class="activity-time">2 weeks ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="groups-card">
+                    <h3>My Groups</h3>
+                    
+                    <div class="group-item">
+                        <div class="group-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="group-info">
+                            <div class="group-name">Leadership Team</div>
+                            <div class="group-role">Team Leader</div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-item">
+                        <div class="group-icon"><i class="fa-solid fa-hands-praying"></i></div>
+                        <div class="group-info">
+                            <div class="group-name">Prayer Warriors</div>
+                            <div class="group-role">Member</div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-item">
+                        <div class="group-icon"><i class="fa-solid fa-book-bible"></i></div>
+                        <div class="group-info">
+                            <div class="group-name">Bible Study</div>
+                            <div class="group-role">Teacher</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skills-card">
+                    <h3>Skills & Interests</h3>
+                    <div class="skills-list">
+                        <span class="skill-tag">Preaching</span>
+                        <span class="skill-tag">Counseling</span>
+                        <span class="skill-tag">Leadership</span>
+                        <span class="skill-tag">Teaching</span>
+                        <span class="skill-tag">Mentoring</span>
+                        <span class="skill-tag">Worship</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

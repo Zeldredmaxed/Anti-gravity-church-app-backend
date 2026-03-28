@@ -47,6 +47,12 @@ from app.routers.discipleship import router as discipleship_router
 from app.routers.tasks import router as tasks_router
 from app.routers.volunteers import router as volunteers_router
 from app.routers.care import router as care_router
+from app.routers.dashboard import router as dashboard_router
+from app.routers.two_factor import router as two_factor_router
+from app.routers.activity import router as activity_router
+from app.routers.facilities import router as facilities_router
+from app.routers.statements import router as statements_router
+from app.routers.stripe_webhooks import router as stripe_webhooks_router
 from sqlalchemy import text
 from app.database import engine
 import app.models.store  # Ensure Base metadata collects the Product model during migration
@@ -104,6 +110,35 @@ async def lifespan(app: FastAPI):
         "ALTER TABLE posts ADD COLUMN media_urls JSON;",
         "ALTER TABLE posts ADD COLUMN post_type VARCHAR(30) DEFAULT 'text';",
         "ALTER TABLE posts ADD COLUMN visibility VARCHAR(20) DEFAULT 'members_only';",
+        # ── Users table (2FA, prefs, tracking) ──
+        "ALTER TABLE users ADD COLUMN totp_secret VARCHAR(255);",
+        "ALTER TABLE users ADD COLUMN is_2fa_enabled BOOLEAN DEFAULT FALSE;",
+        "ALTER TABLE users ADD COLUMN language_preference VARCHAR(10) DEFAULT 'en';",
+        "ALTER TABLE users ADD COLUMN notification_prefs JSON;",
+        "ALTER TABLE users ADD COLUMN phone_number VARCHAR(20);",
+        "ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE;",
+        # ── Members table (skills/interests) ──
+        "ALTER TABLE members ADD COLUMN skills_tags JSON;",
+        "ALTER TABLE members ADD COLUMN interests JSON;",
+        "ALTER TABLE members ADD COLUMN avatar_url VARCHAR(500);",
+        # ── Donations table (payment gateway) ──
+        "ALTER TABLE donations ADD COLUMN status VARCHAR(20) DEFAULT 'completed';",
+        "ALTER TABLE donations ADD COLUMN stripe_payment_intent_id VARCHAR(255);",
+        "ALTER TABLE donations ADD COLUMN receipt_url VARCHAR(500);",
+        # ── Care cases (member link, priority) ──
+        "ALTER TABLE care_cases ADD COLUMN member_id INTEGER;",
+        "ALTER TABLE care_cases ADD COLUMN priority VARCHAR(20) DEFAULT 'medium';",
+        # ── Tasks (care linkage, action type) ──
+        "ALTER TABLE ministry_tasks ADD COLUMN care_case_id INTEGER;",
+        "ALTER TABLE ministry_tasks ADD COLUMN action_type VARCHAR(50) DEFAULT 'other';",
+        # ── Volunteer roles (teams, capacity) ──
+        "ALTER TABLE volunteer_roles ADD COLUMN teams VARCHAR(255);",
+        "ALTER TABLE volunteer_roles ADD COLUMN capacity_needed INTEGER;",
+        "ALTER TABLE volunteer_roles ADD COLUMN is_active BOOLEAN DEFAULT TRUE;",
+        # ── Volunteer schedules (shift times) ──
+        "ALTER TABLE volunteer_schedules ADD COLUMN start_time TIMESTAMP WITH TIME ZONE;",
+        "ALTER TABLE volunteer_schedules ADD COLUMN end_time TIMESTAMP WITH TIME ZONE;",
+        "ALTER TABLE volunteer_schedules ADD COLUMN user_id INTEGER;",
     ]
     
     for query in migrations:
@@ -195,6 +230,12 @@ app.include_router(discipleship_router, prefix=API_PREFIX)
 app.include_router(tasks_router, prefix=API_PREFIX)
 app.include_router(volunteers_router, prefix=API_PREFIX)
 app.include_router(care_router, prefix=API_PREFIX)
+app.include_router(dashboard_router, prefix=API_PREFIX)
+app.include_router(two_factor_router, prefix=API_PREFIX)
+app.include_router(activity_router, prefix=API_PREFIX)
+app.include_router(facilities_router, prefix=API_PREFIX)
+app.include_router(statements_router, prefix=API_PREFIX)
+app.include_router(stripe_webhooks_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})
@@ -207,11 +248,14 @@ async def root():
     return {
         "name": settings.CHURCH_NAME,
         "service": "Church Management System",
-        "version": "3.0.0",
+        "version": "4.0.0",
         "status": "operational",
         "features": [
             "multi-tenant", "chat", "feed", "shorts", "events",
             "prayers", "notifications", "crm", "giving", "attendance",
+            "2fa", "facilities", "stripe", "sms", "email",
+            "activity-timeline", "care-notes", "volunteer-hours",
+            "dashboard-analytics", "giving-statements",
         ],
         "docs": "/docs",
     }

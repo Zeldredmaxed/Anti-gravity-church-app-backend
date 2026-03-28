@@ -31,6 +31,13 @@ class PaymentMethod(str, enum.Enum):
     OTHER = "other"
 
 
+class DonationStatus(str, enum.Enum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+
+
 class PledgeStatus(str, enum.Enum):
     ACTIVE = "active"
     COMPLETED = "completed"
@@ -56,6 +63,11 @@ class Donation(Base):
     notes = Column(Text, nullable=True)
     recorded_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    # ── Payment Gateway Fields (NEW) ──
+    status = Column(String(20), default=DonationStatus.COMPLETED.value, nullable=False)
+    stripe_payment_intent_id = Column(String(255), nullable=True)
+    receipt_url = Column(String(500), nullable=True)
 
     # Relationships
     donor = relationship("Member", back_populates="donations")

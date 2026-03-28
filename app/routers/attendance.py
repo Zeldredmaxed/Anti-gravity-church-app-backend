@@ -25,6 +25,23 @@ from pydantic import BaseModel, Field
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
 
 
+# ── Bulk Attendance Schema ──
+class BulkAttendanceRecord(BaseModel):
+    member_id: int
+    status: str = "present"  # present, absent, late
+
+
+class BulkAttendanceRequest(BaseModel):
+    service_id: int
+    date: date
+    records: list[BulkAttendanceRecord]
+
+
+class AttendanceChartPoint(BaseModel):
+    date: str
+    count: int
+
+
 # ── Haversine distance (miles) ────────────────────────────────────
 def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate distance between two lat/lng points in miles."""
@@ -402,3 +419,74 @@ async def sunday_stats_for_user(
         "on_track": count > last_year_count,
         "dates": [d.isoformat() for d in dates],
     }}
+
+
+# ═══════════════════════════════════════════════════════════════════
+# BULK ATTENDANCE ENTRY & CHART DATA
+# ═══════════════════════════════════════════════════════════════════
+
+@router.post("/bulk", status_code=201)
+async def bulk_attendance(
+    data: BulkAttendanceRequest,
+    current_user: User = Depends(require_role("admin", "pastor", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Rapid bulk attendance entry — accepts {service_id, date, records: [{member_id, status}]}."""
+    svc = (await db.execute(select(Service).where(Service.id == data.service_id))).scalar_one_or_none()
+    if not svc:
+        raise HTTPException(status_code=404, detail="Service not found")
+
+    created = 0
+    skipped = 0
+    for rec in data.records:
+        # Check for existing record on same date + service + member
+        existing = (await db.execute(select(AttendanceRecord).where(
+            AttendanceRecord.member_id == rec.member_id,
+            AttendanceRecord.service_id == data.service_id,
+            AttendanceRecord.date == data.date,
+        ))).scalar_one_or_none()
+
+        if existing:
+            skipped += 1
+            continue
+
+        if rec.status == "present" or rec.status == "late":
+            record = AttendanceRecord(
+                church_id=current_user.church_id,
+                member_id=rec.member_id,
+                service_id=data.service_id,
+                date=data.date,
+                check_in_time=datetime.now(timezone.utc),
+                checked_in_by=current_user.id,
+            )
+            db.add(record)
+            created += 1
+
+    await db.flush()
+    return {"created": created, "skipped": skipped, "service_id": data.service_id, "date": data.date.isoformat()}
+
+
+@router.get("/chart-data", response_model=list[AttendanceChartPoint])
+async def attendance_chart_data(
+    weeks: int = Query(12, ge=1, le=52),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get weekly attendance totals for chart rendering."""
+    church_id = current_user.church_id
+    cutoff = date.today() - timedelta(weeks=weeks)
+
+    result = await db.execute(
+        select(
+            func.to_char(AttendanceRecord.date, 'IYYY-IW').label("week"),
+            func.count(AttendanceRecord.id).label("count"),
+        )
+        .where(
+            AttendanceRecord.church_id == church_id,
+            AttendanceRecord.date >= cutoff,
+        )
+        .group_by(func.to_char(AttendanceRecord.date, 'IYYY-IW'))
+        .order_by(func.to_char(AttendanceRecord.date, 'IYYY-IW'))
+    )
+
+    return [AttendanceChartPoint(date=row.week, count=row.count) for row in result.all()]
