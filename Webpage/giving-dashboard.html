@@ -40,6 +40,7 @@
         .nav-pill.active { background: #333; color: white; }
         
         .dropdown-container { position: relative; }
+        .dropdown-menu::before { content: ""; position: absolute; top: -15px; left: 0; right: 0; height: 15px; }
         .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 10px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 16px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 8px 0; z-index: 100;}
         .dropdown-container:hover .dropdown-menu { display: block; }
         .dropdown-item { padding: 10px 20px; font-size: 13px; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
