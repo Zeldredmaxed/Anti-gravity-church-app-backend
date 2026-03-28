@@ -5,7 +5,6 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 from app.database import get_db
-from app.dependencies import get_current_user
 from app.models.user import User
 from app.models.volunteer import VolunteerRole, VolunteerSchedule, VolunteerAvailability
 from pydantic import BaseModel, ConfigDict
