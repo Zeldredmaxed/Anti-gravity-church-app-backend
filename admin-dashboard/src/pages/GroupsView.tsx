@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, Plus, ChevronDown, MoreHorizontal, 
-  Users, UserCheck, Calendar, X 
+  Users, Calendar, X 
 } from 'lucide-react';
 import './GroupsView.css';
 import { groupsService } from '../api/services/groups.service';

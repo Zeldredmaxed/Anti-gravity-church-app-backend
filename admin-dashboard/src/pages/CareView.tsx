@@ -4,7 +4,8 @@ import {
   Filter, ChevronDown, ChevronLeft, ChevronRight,
   Activity, Heart, FileText, Mail, Phone, Calendar
 } from 'lucide-react';
-import { careService, CareResponse } from '../api/services/care.service';
+import { careService } from '../api/services/care.service';
+import type { CareResponse } from '../api/services/care.service';
 import './CareView.css';
 
 // Types
@@ -22,7 +23,7 @@ interface CareRequest {
   subType: string;
   dateSubmitted: string;
   summary: string;
-  assignedLeader: Leader | null;
+  assignedLeader: CareLeader | null;
   status: 'NEW' | 'IN-PROGRESS' | 'NEEDS LEADER';
 }
 
@@ -80,6 +81,8 @@ const MOCK_REQUESTS: CareRequest[] = [
     subType: 'Meals',
     dateSubmitted: 'Sep 22, 2024',
     summary: 'Need meal train setup after giving birth to a baby boy.',
+    assignedLeader: null,
+    status: 'NEW'
   }
 ];
 

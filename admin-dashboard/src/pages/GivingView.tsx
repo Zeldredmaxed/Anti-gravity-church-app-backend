@@ -3,9 +3,6 @@ import './GivingView.css';
 import { givingService, type Donation } from '../api/services/giving.service';
 
 export const GivingView: React.FC = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [selectedCategory, setSelectedCategory] = useState('All Categories');
-    
     const [donations, setDonations] = useState<Donation[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalGiving, setTotalGiving] = useState(0);
@@ -105,13 +102,6 @@ export const GivingView: React.FC = () => {
                         <table>
                             <thead>
                                 <tr>
-                                    <th width="40"><div className="custom-checkbox"></div></th>
-                                    <th>Donor Name <i className="fa-solid fa-sort"></i></th>
-                                    <th>Category <i className="fa-solid fa-sort"></i></th>
-                                    <th>Amount <i className="fa-solid fa-sort"></i></th>
-                                    <th>Date <i className="fa-solid fa-sort"></i></th>
-                                    <th>Method <i className="fa-solid fa-sort"></i></th>
-                                    <th>Fund <i className="fa-solid fa-sort"></i></th>
                                     <th>Status <i className="fa-solid fa-sort"></i></th>
                                 </tr>
                             </thead>

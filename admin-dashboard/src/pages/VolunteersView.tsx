@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, ChevronDown, Calendar, ChevronRight, 
   Menu, Users, UsersRound, CalendarDays 
 } from 'lucide-react';
 import './VolunteersView.css';
 
-import { volunteersService, Volunteer } from '../api/services/volunteers.service';
+import { volunteersService } from '../api/services/volunteers.service';
+import type { Volunteer } from '../api/services/volunteers.service';
 const availableVolunteers = [
   { id: 'val1', name: 'John Doe', avatar: 'https://i.pravatar.cc/150?img=11', opacity: 1 },
   { id: 'val2', name: 'Jane Doe', avatar: 'https://i.pravatar.cc/150?img=9', opacity: 1 },

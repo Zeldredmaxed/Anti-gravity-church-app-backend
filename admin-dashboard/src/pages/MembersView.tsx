@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './MembersView.css';
-import { clsx } from 'clsx';
 import { membersService, type Member } from '../api/services/members.service';
 
 export function MembersView() {
@@ -121,18 +120,14 @@ export function MembersView() {
         <table className="members-table">
           <thead>
             <tr>
-              <th width="40">
+              <th style={{ width: "40px" }}>
                 <div className="custom-checkbox"></div>
               </th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Join Date</th>
-              <th>Primary Group</th>
-              <th>Ministry</th>
-              <th>Baptism Status</th>
-              <th>Membership Status</th>
-              <th></th>
+              <th style={{ width: "30%" }}>Name</th>
+              <th style={{ width: "25%" }}>Contact</th>
+              <th style={{ width: "15%" }}>Role</th>
+              <th style={{ width: "15%" }}>Join Date</th>
+              <th style={{ width: "15%" }}>Actions</th>
             </tr>
           </thead>
           <tbody>

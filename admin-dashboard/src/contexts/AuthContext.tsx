@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
 
 export interface User {
@@ -27,7 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (token) {
       // Fetch current user details
       apiClient.get<User>('/auth/me')
-        .then(userData => {
+        .then(response => {
+          const userData = response.data;
           if (userData.role === 'admin' || userData.role === 'pastor') {
             setUser(userData);
           } else {
