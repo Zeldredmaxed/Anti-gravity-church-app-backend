@@ -82,6 +82,14 @@ async def broadcast_alert(
     if current_user.role not in ("admin", "pastor"):
         raise HTTPException(status_code=403, detail="Admin only")
 
+    # Accept body from multiple field names the frontend may send
+    body_text = (
+        data.get("body")
+        or data.get("message")
+        or data.get("content")
+        or ""
+    )
+
     users = (await db.execute(
         select(User).where(User.church_id == current_user.church_id)
     )).scalars().all()
@@ -92,7 +100,7 @@ async def broadcast_alert(
             user_id=u.id,
             alert_type=data.get("type", "announcement"),
             title=data.get("title", "Announcement"),
-            body=data.get("body", ""),
+            body=body_text,
             entity_type="broadcast",
             entity_id=0,
         )
@@ -100,7 +108,7 @@ async def broadcast_alert(
         count += 1
 
     await db.commit()
-    return {"data": {"sent_count": count}}
+    return {"message": "Broadcast sent successfully", "recipients": count}
 
 
 # ── /notifications/* aliases for frontend compatibility ──────────

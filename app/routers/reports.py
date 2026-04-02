@@ -127,7 +127,7 @@ async def giving_analytics(
         lapsed_donors=0, first_time_donors=0, recurring_donors=recurring)
 
 
-@router.get("/attendance", response_model=AttendanceAnalytics)
+@router.get("/attendance")
 async def attendance_analytics(
     start_date: Optional[date] = None, end_date: Optional[date] = None,
     db: AsyncSession = Depends(get_db),
@@ -163,9 +163,10 @@ async def attendance_analytics(
             service_id=s.id, service_name=s.name,
             avg_attendance=round(svc_count / max(days, 1), 1), total_records=svc_count))
 
-    return AttendanceAnalytics(total_records=total, avg_attendance=round(avg, 1),
+    result = AttendanceAnalytics(total_records=total, avg_attendance=round(avg, 1),
         peak_attendance=peak_count, peak_date=peak_date,
         by_service=by_service, first_time_guests_total=ftg)
+    return {"data": result.model_dump()}
 
 
 @router.get("/financial", response_model=list[FinancialSummary])
@@ -270,10 +271,12 @@ async def analytics_overview(
         "total_members": total_members,
         "new_members_this_month": new_members,
         "total_giving_this_month": float(month_giving),
+        "giving_this_month": float(month_giving),
         "posts_this_month": posts_this_month,
         "messages_this_month": messages_this_month,
         "upcoming_events": upcoming_events,
         "active_prayer_requests": prayer_count,
+        "active_prayers": prayer_count,
         "engagement_score": engagement,
     }
 
@@ -311,7 +314,7 @@ async def analytics_engagement(
             "prayer_requests": prayers,
         })
 
-    return {"weekly_engagement": weeks}
+    return {"data": weeks}
 
 
 @router.get("/analytics/giving-trends")
@@ -360,7 +363,7 @@ async def analytics_giving_trends(
         })
 
     summary = {"year": year, "monthly_trends": months}
-    return summary
+    return {"data": summary}
 
 
 @router.get("/tax-statements")
@@ -455,13 +458,15 @@ async def analytics_growth(
         })
 
     return {
-        "funnel": {
-            "visitors": visitors,
-            "prospects": prospects,
-            "active_members": active,
-            "inactive_members": inactive,
-        },
-        "monthly_growth": list(reversed(monthly)),
+        "data": {
+            "funnel": {
+                "visitors": visitors,
+                "prospects": prospects,
+                "active_members": active,
+                "inactive_members": inactive,
+            },
+            "monthly_growth": list(reversed(monthly)),
+        }
     }
 
 

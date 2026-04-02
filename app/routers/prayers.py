@@ -249,10 +249,12 @@ async def mark_answered(
     p.is_answered = True
     p.answered_testimony = data.testimony
     db.add(p)
-    return {"message": "Marked as answered", "testimony": data.testimony}
+    await db.commit()
+    await db.refresh(p)
+    return {"id": p.id, "is_answered": True, "status": "answered"}
 
 
-@router.delete("/{prayer_id}", status_code=204)
+@router.delete("/{prayer_id}")
 async def delete_prayer(
     prayer_id: int,
     current_user: User = Depends(get_current_user),
@@ -266,3 +268,5 @@ async def delete_prayer(
         raise HTTPException(status_code=403, detail="Cannot delete this prayer request")
     p.is_deleted = True
     db.add(p)
+    await db.commit()
+    return {"message": "Prayer deleted"}

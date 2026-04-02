@@ -18,6 +18,27 @@ from app.utils.security import get_current_user, require_role
 router = APIRouter(prefix="/events", tags=["Events & RSVP"])
 
 
+def _event_to_response(e, my_rsvp_status=None):
+    """Build an EventResponse from an Event ORM object."""
+    return EventResponse(
+        id=e.id, church_id=e.church_id, title=e.title,
+        description=e.description, event_type=e.event_type,
+        type=e.event_type,
+        location=e.location,
+        start_datetime=e.start_datetime, start_date=e.start_datetime,
+        end_datetime=e.end_datetime, end_date=e.end_datetime,
+        is_recurring=e.is_recurring,
+        recurrence_rule=e.recurrence_rule, max_capacity=e.max_capacity,
+        rsvp_count=e.rsvp_count or 0,
+        registration_required=e.registration_required,
+        cover_image_url=e.cover_image_url, is_published=e.is_published,
+        is_cancelled=e.is_cancelled,
+        status="cancelled" if e.is_cancelled else "upcoming",
+        created_by=e.created_by,
+        created_at=e.created_at,
+        my_rsvp=my_rsvp_status)
+
+
 @router.get("", response_model=list[EventResponse])
 async def list_events(
     limit: int = Query(20, ge=1, le=100),
@@ -43,17 +64,7 @@ async def list_events(
         my_rsvp = (await db.execute(select(EventRSVP).where(
             EventRSVP.event_id == e.id, EventRSVP.user_id == current_user.id
         ))).scalar_one_or_none()
-        items.append(EventResponse(
-            id=e.id, church_id=e.church_id, title=e.title,
-            description=e.description, event_type=e.event_type,
-            location=e.location, start_datetime=e.start_datetime,
-            end_datetime=e.end_datetime, is_recurring=e.is_recurring,
-            recurrence_rule=e.recurrence_rule, max_capacity=e.max_capacity,
-            rsvp_count=e.rsvp_count, registration_required=e.registration_required,
-            cover_image_url=e.cover_image_url, is_published=e.is_published,
-            is_cancelled=e.is_cancelled, created_by=e.created_by,
-            created_at=e.created_at,
-            my_rsvp=my_rsvp.status if my_rsvp else None))
+        items.append(_event_to_response(e, my_rsvp.status if my_rsvp else None))
     return items
 
 
@@ -62,24 +73,16 @@ async def create_event(
     data: EventCreate,
     current_user: User = Depends(require_role("admin", "pastor", "staff")),
     db: AsyncSession = Depends(get_db)):
+    db_data = data.to_db_dict()
     event = Event(
         church_id=current_user.church_id,
         created_by=current_user.id,
-        **data.model_dump(),
+        **db_data,
     )
     db.add(event)
     await db.commit()
     await db.refresh(event)
-    return EventResponse(
-        id=event.id, church_id=event.church_id, title=event.title,
-        description=event.description, event_type=event.event_type,
-        location=event.location, start_datetime=event.start_datetime,
-        end_datetime=event.end_datetime, is_recurring=event.is_recurring,
-        recurrence_rule=event.recurrence_rule, max_capacity=event.max_capacity,
-        rsvp_count=0, registration_required=event.registration_required,
-        cover_image_url=event.cover_image_url, is_published=event.is_published,
-        is_cancelled=event.is_cancelled, created_by=event.created_by,
-        created_at=event.created_at)
+    return _event_to_response(event)
 
 
 @router.get("/{event_id}", response_model=EventResponse)
@@ -95,17 +98,7 @@ async def get_event(
     my_rsvp = (await db.execute(select(EventRSVP).where(
         EventRSVP.event_id == e.id, EventRSVP.user_id == current_user.id
     ))).scalar_one_or_none()
-    return EventResponse(
-        id=e.id, church_id=e.church_id, title=e.title,
-        description=e.description, event_type=e.event_type,
-        location=e.location, start_datetime=e.start_datetime,
-        end_datetime=e.end_datetime, is_recurring=e.is_recurring,
-        recurrence_rule=e.recurrence_rule, max_capacity=e.max_capacity,
-        rsvp_count=e.rsvp_count, registration_required=e.registration_required,
-        cover_image_url=e.cover_image_url, is_published=e.is_published,
-        is_cancelled=e.is_cancelled, created_by=e.created_by,
-        created_at=e.created_at,
-        my_rsvp=my_rsvp.status if my_rsvp else None)
+    return _event_to_response(e, my_rsvp.status if my_rsvp else None)
 
 
 @router.put("/{event_id}", response_model=EventResponse)
@@ -118,21 +111,12 @@ async def update_event(
     ))).scalar_one_or_none()
     if not e:
         raise HTTPException(status_code=404, detail="Event not found")
-    for field, value in data.model_dump(exclude_unset=True).items():
+    for field, value in data.to_db_dict().items():
         setattr(e, field, value)
     db.add(e)
     await db.commit()
     await db.refresh(e)
-    return EventResponse(
-        id=e.id, church_id=e.church_id, title=e.title,
-        description=e.description, event_type=e.event_type,
-        location=e.location, start_datetime=e.start_datetime,
-        end_datetime=e.end_datetime, is_recurring=e.is_recurring,
-        recurrence_rule=e.recurrence_rule, max_capacity=e.max_capacity,
-        rsvp_count=e.rsvp_count, registration_required=e.registration_required,
-        cover_image_url=e.cover_image_url, is_published=e.is_published,
-        is_cancelled=e.is_cancelled, created_by=e.created_by,
-        created_at=e.created_at)
+    return _event_to_response(e)
 
 
 @router.delete("/{event_id}", status_code=204)
@@ -268,4 +252,3 @@ async def get_event_volunteers(
     schedules = (await db.execute(query)).scalars().all()
     
     return schedules
-

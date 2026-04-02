@@ -47,10 +47,11 @@ async def list_groups(
 async def create_group(data: GroupCreate,
     current_user: User = Depends(require_role("admin", "pastor", "staff")),
     db: AsyncSession = Depends(get_db)):
-    group = Group(**data.model_dump()); db.add(group); await db.commit(); await db.refresh(group)
+    group = Group(**data.to_db_dict()); db.add(group); await db.commit(); await db.refresh(group)
     return GroupResponse(
         id=group.id, name=group.name, description=group.description,
-        group_type=group.group_type, leader_id=group.leader_id, leader_name=None,
+        group_type=group.group_type, type=group.group_type,
+        leader_id=group.leader_id, leader_name=None,
         meeting_day=group.meeting_day, meeting_time=group.meeting_time,
         meeting_location=group.meeting_location, is_active=group.is_active,
         max_capacity=group.max_capacity, member_count=0, campus=group.campus,

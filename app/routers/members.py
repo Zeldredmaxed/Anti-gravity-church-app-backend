@@ -25,7 +25,7 @@ from app.dependencies import PaginationParams
 router = APIRouter(prefix="/members", tags=["Members"])
 
 
-@router.get("", response_model=MemberListResponse)
+@router.get("")
 async def list_members(
     search: Optional[str] = Query(None, description="Search by name, email, or phone"),
     membership_status: Optional[str] = Query(None),
@@ -62,13 +62,25 @@ async def list_members(
     result = await db.execute(query)
     members = result.scalars().all()
 
-    return MemberListResponse(
-        items=[MemberResponse.model_validate(m) for m in members],
-        total=total,
-        page=pagination.page,
-        per_page=pagination.per_page,
-        pages=(total + pagination.per_page - 1) // pagination.per_page,
-    )
+    # Build response with frontend-expected fields
+    member_items = []
+    for m in members:
+        item = MemberResponse.model_validate(m).model_dump()
+        # Add computed fields the frontend expects
+        item["full_name"] = f"{m.first_name} {m.last_name}".strip()
+        item["username"] = m.email.split("@")[0] if m.email else f"member{m.id}"
+        item["avatar_url"] = m.photo_url
+        item["role"] = m.membership_status or "member"
+        item["joined_at"] = m.join_date.isoformat() if m.join_date else (m.created_at.isoformat() if m.created_at else None)
+        member_items.append(item)
+
+    return {
+        "data": member_items,
+        "total": total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "pages": (total + pagination.per_page - 1) // pagination.per_page,
+    }
 
 
 @router.post("", response_model=MemberResponse, status_code=201)
