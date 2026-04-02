@@ -107,14 +107,16 @@ async def update_my_church(
 
 
 @router.get("", response_model=list[ChurchPublicResponse])
-async def list_churches(q: str | None = None, db: AsyncSession = Depends(get_db)):
+@router.get("/", response_model=list[ChurchPublicResponse], include_in_schema=False)
+async def list_churches(q: str | None = None, search: str | None = None, db: AsyncSession = Depends(get_db)):
     """Public: list or search active churches (for discovery/directory/member signup)."""
+    search_term = q or search  # Accept both ?q= and ?search=
     query = select(Church).where(Church.is_active == True)
-    if q:
+    if search_term:
         query = query.where(
             or_(
-                Church.name.ilike(f"%{q}%"),
-                Church.subdomain.ilike(f"%{q}%")
+                Church.name.ilike(f"%{search_term}%"),
+                Church.subdomain.ilike(f"%{search_term}%")
             )
         )
     query = query.order_by(Church.name).limit(50)
