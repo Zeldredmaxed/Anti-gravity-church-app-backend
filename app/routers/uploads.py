@@ -107,7 +107,7 @@ async def upload_file(
     try:
         if resource == "video":
             result = cloudinary.uploader.upload_large(
-                content,
+                file.file,
                 resource_type=resource,
                 folder=folder or "church-media",
                 use_filename=True,
@@ -116,7 +116,7 @@ async def upload_file(
             )
         else:
             result = cloudinary.uploader.upload(
-                content,
+                file.file,
                 resource_type=resource,
                 folder=folder or "church-media",
                 use_filename=True,
@@ -178,7 +178,7 @@ async def upload_multiple_files(
         try:
             if resource == "video":
                 result = cloudinary.uploader.upload_large(
-                    content,
+                    file.file,
                     resource_type=resource,
                     folder=folder or "church-media",
                     use_filename=True,
@@ -187,7 +187,7 @@ async def upload_multiple_files(
                 )
             else:
                 result = cloudinary.uploader.upload(
-                    content,
+                    file.file,
                     resource_type=resource,
                     folder=folder or "church-media",
                     use_filename=True,
