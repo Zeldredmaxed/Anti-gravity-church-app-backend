@@ -12,7 +12,7 @@ from app.models.user import User, AuditLog
 from app.models.church import RegistrationKey
 from app.models.member import Member
 from app.models.donation import Donation
-from app.models.task import MinistryTask, TaskStatus
+from app.models.task import Task, TaskStatus
 from app.models.prayer import PrayerRequest
 
 from app.schemas.user import UserResponse, UserRegister, UserRoleUpdate, AuditLogResponse
@@ -152,9 +152,9 @@ async def get_dashboard_metrics(
 
     # 3. Action Items
     pending_tasks = (await db.execute(
-        select(func.count(MinistryTask.id)).where(
-            MinistryTask.church_id == current_user.church_id,
-            MinistryTask.status == TaskStatus.PENDING.value
+        select(func.count(Task.id)).where(
+            Task.church_id == current_user.church_id,
+            Task.status == TaskStatus.PENDING.value
         )
     )).scalar() or 0
     

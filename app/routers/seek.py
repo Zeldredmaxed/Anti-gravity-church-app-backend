@@ -8,7 +8,7 @@ from sqlalchemy import or_, func
 from app.database import get_db
 from app.models.user import User
 from app.models.church import Church
-from app.models.social import FlockMember
+from app.models.social import Follower
 from app.utils.security import get_current_user
 
 router = APIRouter(tags=["Seek"])
@@ -39,12 +39,12 @@ async def seek_users(
             church = (await db.execute(select(Church).where(Church.id == u.church_id))).scalar_one_or_none()
 
         is_following = (await db.execute(
-            select(FlockMember).where(
-                FlockMember.follower_id == current_user.id, FlockMember.followed_id == u.id
+            select(Follower).where(
+                Follower.follower_id == current_user.id, Follower.followed_id == u.id
             )
         )).scalar_one_or_none() is not None
 
-        fc = (await db.execute(select(func.count()).where(FlockMember.followed_id == u.id))).scalar() or 0
+        fc = (await db.execute(select(func.count()).where(Follower.followed_id == u.id))).scalar() or 0
 
         items.append({
             "id": u.id,

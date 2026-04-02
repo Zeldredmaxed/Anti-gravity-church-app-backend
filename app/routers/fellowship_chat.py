@@ -14,7 +14,7 @@ from app.schemas.chat import (
 )
 from app.utils.security import get_current_user
 
-router = APIRouter(prefix="/fellowship-chat", tags=["Fellowship Chat"])
+router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 def _build_participant(p, user_name=None):

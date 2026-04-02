@@ -347,7 +347,7 @@ async def search_members_for_compose(
     db: AsyncSession = Depends(get_db),
 ):
     """Search members/users for compose-message flow."""
-    from app.models.social import FlockMember
+    from app.models.social import Follower
     from app.models.church import Church
 
     term = f"%{q}%"
@@ -364,7 +364,7 @@ async def search_members_for_compose(
             church = (await db.execute(select(Church).where(Church.id == u.church_id))).scalar_one_or_none()
 
         fc = (await db.execute(
-            select(func.count()).where(FlockMember.followed_id == u.id)
+            select(func.count()).where(Follower.followed_id == u.id)
         )).scalar() or 0
 
         # Post count

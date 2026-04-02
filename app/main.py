@@ -22,7 +22,7 @@ from app.routers.admin import router as admin_router
 from app.routers.fellowship_chat import router as fellowship_chat_router
 from app.routers.feed import router as feed_router
 from app.routers.websocket import router as ws_router
-from app.routers.glory_clips import router as glory_clips_router
+from app.routers.clips import router as clips_router
 from app.routers.events import router as events_router
 from app.routers.prayers import router as prayers_router
 from app.routers.alerts import router as alerts_router, notifications_router
@@ -32,7 +32,6 @@ from app.routers.scriptures import router as scriptures_router
 from app.routers.social import router as social_router
 from app.routers.seek import router as seek_router
 from app.routers.store import router as store_router
-from app.routers.chat import router as chat_router
 from app.routers.payment_methods import router as payment_methods_router
 from app.routers.support import router as support_router
 from app.routers.uploads import router as uploads_router
@@ -65,80 +64,7 @@ async def lifespan(app: FastAPI):
     await init_db()
     
     # Run critical one-time migrations
-    migrations = [
-        # ── Users table ──
-        "ALTER TABLE users ALTER COLUMN church_id DROP NOT NULL;",
-        "ALTER TABLE users ADD COLUMN username VARCHAR(50);",
-        "ALTER TABLE users ADD COLUMN date_of_birth TIMESTAMP WITH TIME ZONE;",
-        "ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255);",
-        "ALTER TABLE users ADD COLUMN testimony_summary TEXT;",
-        "ALTER TABLE users RENAME COLUMN bio TO testimony_summary;",
-        "ALTER TABLE users ADD COLUMN is_anointed BOOLEAN DEFAULT FALSE;",
-        "ALTER TABLE users ADD COLUMN website VARCHAR(255);",
-        "ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);",
-        # ── Churches table ──
-        "ALTER TABLE churches ADD COLUMN description TEXT;",
-        "ALTER TABLE churches ADD COLUMN logo_url VARCHAR(500);",
-        "ALTER TABLE churches ADD COLUMN address VARCHAR(500);",
-        "ALTER TABLE churches ADD COLUMN phone VARCHAR(20);",
-        "ALTER TABLE churches ADD COLUMN email VARCHAR(255);",
-        "ALTER TABLE churches ADD COLUMN website VARCHAR(255);",
-        "ALTER TABLE churches ADD COLUMN pastor_name VARCHAR(255);",
-        "ALTER TABLE churches ADD COLUMN youtube_channel_id VARCHAR(50);",
-        "ALTER TABLE churches ADD COLUMN latitude FLOAT;",
-        "ALTER TABLE churches ADD COLUMN longitude FLOAT;",
-        "ALTER TABLE churches ADD COLUMN settings JSON;",
-        # ── Sermons table ──
-        "ALTER TABLE sermons ADD COLUMN transcript TEXT;",
-        # ── GloryClips table ──
-        "ALTER TABLE glory_clips ADD COLUMN thumbnail_url VARCHAR(500);",
-        "ALTER TABLE glory_clips ADD COLUMN duration_seconds INTEGER;",
-        "ALTER TABLE glory_clips ADD COLUMN view_count INTEGER DEFAULT 0;",
-        "ALTER TABLE glory_clips ADD COLUMN amen_count INTEGER DEFAULT 0;",
-        "ALTER TABLE glory_clips ADD COLUMN comment_count INTEGER DEFAULT 0;",
-        "ALTER TABLE glory_clips ADD COLUMN share_count INTEGER DEFAULT 0;",
-        "ALTER TABLE glory_clips ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;",
-        "ALTER TABLE glory_clips ADD COLUMN tags JSON;",
-        "ALTER TABLE glory_clips ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;",
-        # ── Posts table (feed) ──
-        "ALTER TABLE posts ADD COLUMN amen_count INTEGER DEFAULT 0;",
-        "ALTER TABLE posts ADD COLUMN comments_count INTEGER DEFAULT 0;",
-        "ALTER TABLE posts ADD COLUMN shares_count INTEGER DEFAULT 0;",
-        "ALTER TABLE posts ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE;",
-        "ALTER TABLE posts ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;",
-        "ALTER TABLE posts ADD COLUMN media_urls JSON;",
-        "ALTER TABLE posts ADD COLUMN post_type VARCHAR(30) DEFAULT 'text';",
-        "ALTER TABLE posts ADD COLUMN visibility VARCHAR(20) DEFAULT 'members_only';",
-        # ── Users table (2FA, prefs, tracking) ──
-        "ALTER TABLE users ADD COLUMN totp_secret VARCHAR(255);",
-        "ALTER TABLE users ADD COLUMN is_2fa_enabled BOOLEAN DEFAULT FALSE;",
-        "ALTER TABLE users ADD COLUMN language_preference VARCHAR(10) DEFAULT 'en';",
-        "ALTER TABLE users ADD COLUMN notification_prefs JSON;",
-        "ALTER TABLE users ADD COLUMN phone_number VARCHAR(20);",
-        "ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE;",
-        # ── Members table (skills/interests) ──
-        "ALTER TABLE members ADD COLUMN skills_tags JSON;",
-        "ALTER TABLE members ADD COLUMN interests JSON;",
-        "ALTER TABLE members ADD COLUMN avatar_url VARCHAR(500);",
-        # ── Donations table (payment gateway) ──
-        "ALTER TABLE donations ADD COLUMN status VARCHAR(20) DEFAULT 'completed';",
-        "ALTER TABLE donations ADD COLUMN stripe_payment_intent_id VARCHAR(255);",
-        "ALTER TABLE donations ADD COLUMN receipt_url VARCHAR(500);",
-        # ── Care cases (member link, priority) ──
-        "ALTER TABLE care_cases ADD COLUMN member_id INTEGER;",
-        "ALTER TABLE care_cases ADD COLUMN priority VARCHAR(20) DEFAULT 'medium';",
-        # ── Tasks (care linkage, action type) ──
-        "ALTER TABLE ministry_tasks ADD COLUMN care_case_id INTEGER;",
-        "ALTER TABLE ministry_tasks ADD COLUMN action_type VARCHAR(50) DEFAULT 'other';",
-        # ── Volunteer roles (teams, capacity) ──
-        "ALTER TABLE volunteer_roles ADD COLUMN teams VARCHAR(255);",
-        "ALTER TABLE volunteer_roles ADD COLUMN capacity_needed INTEGER;",
-        "ALTER TABLE volunteer_roles ADD COLUMN is_active BOOLEAN DEFAULT TRUE;",
-        # ── Volunteer schedules (shift times) ──
-        "ALTER TABLE volunteer_schedules ADD COLUMN start_time TIMESTAMP WITH TIME ZONE;",
-        "ALTER TABLE volunteer_schedules ADD COLUMN end_time TIMESTAMP WITH TIME ZONE;",
-        "ALTER TABLE volunteer_schedules ADD COLUMN user_id INTEGER;",
-    ]
+    migrations = []
     
     for query in migrations:
         try:
@@ -206,14 +132,13 @@ app.include_router(reports_router, prefix=API_PREFIX)
 app.include_router(admin_router, prefix=API_PREFIX)
 app.include_router(fellowship_chat_router, prefix=API_PREFIX)
 app.include_router(feed_router, prefix=API_PREFIX)
-app.include_router(glory_clips_router, prefix=API_PREFIX)
+app.include_router(clips_router, prefix=API_PREFIX)
 app.include_router(events_router, prefix=API_PREFIX)
 app.include_router(prayers_router, prefix=API_PREFIX)
 app.include_router(alerts_router, prefix=API_PREFIX)
 app.include_router(sermons_router, prefix=API_PREFIX)
 app.include_router(bible_router, prefix=API_PREFIX)
 app.include_router(scriptures_router, prefix=API_PREFIX)
-app.include_router(chat_router, prefix=API_PREFIX)
 app.include_router(payment_methods_router, prefix=API_PREFIX)
 app.include_router(support_router, prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)

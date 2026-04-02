@@ -9,8 +9,8 @@ from app.models.donation import Donation, Pledge  # noqa: F401
 from app.models.attendance import Service, AttendanceRecord, GroupAttendance  # noqa: F401
 from app.models.group import Group, GroupMembership  # noqa: F401
 from app.models.chat import Conversation, ConversationParticipant, Message  # noqa: F401
-from app.models.feed import Post, PostAmen, PostComment  # noqa: F401
-from app.models.glory_clip import GloryClip, GloryClipAmen, GloryClipComment, GloryClipView  # noqa: F401
+from app.models.feed import Post, PostLike, PostComment  # noqa: F401
+from app.models.clip import Clip, ClipLike, ClipComment, ClipView  # noqa: F401
 from app.models.event import Event, EventRSVP  # noqa: F401
 from app.models.prayer import PrayerRequest, PrayerResponseEntry  # noqa: F401
 from app.models.alert import Alert  # noqa: F401
@@ -26,11 +26,11 @@ from app.models.automation import AutomationRule  # noqa: F401
 from app.models.campus import Campus  # noqa: F401
 from app.models.discipleship import DiscipleshipStep, MemberDiscipleshipProgress  # noqa: F401
 from app.models.store import Product  # noqa: F401
-from app.models.task import MinistryTask  # noqa: F401
+from app.models.task import Task  # noqa: F401
 from app.models.care import CareCase, CareNote  # noqa: F401
 from app.models.activity_log import MemberActivityLog  # noqa: F401
 from app.models.facility import FacilityRoom, RoomBooking  # noqa: F401
-from app.models.social import FlockMember, Meditation, Mention, Report  # noqa: F401
-from app.models.login_streak import UserLoginDay, UserStreak  # noqa: F401
-from app.models.sunday_checkin import SundayCheckIn  # noqa: F401
+from app.models.social import Follower, Bookmark, Mention, Report  # noqa: F401
+from app.models.login_streak import LoginDay, LoginStreak  # noqa: F401
+from app.models.sunday_checkin import CheckIn  # noqa: F401
 from app.models.music import ArtistProfile, Song, MusicDonation, SkipSubscription  # noqa: F401

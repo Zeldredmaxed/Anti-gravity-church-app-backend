@@ -10,7 +10,7 @@ from pydantic import BaseModel as PydanticBaseModel
 
 from app.database import get_db
 from app.models.user import User, AuditLog, UserRole
-from app.models.login_streak import UserLoginDay, UserStreak
+from app.models.login_streak import LoginDay, LoginStreak
 from app.schemas.user import (
     UserRegister, UserLogin, TokenResponse, TokenRefresh,
     UserResponse, UserUpdate, UserRoleUpdate,
@@ -37,25 +37,25 @@ async def _track_login(db: AsyncSession, user_id: int):
     today = date.today()
 
     # Upsert the daily record (skip if already logged in today)
-    existing_day = (await db.execute(select(UserLoginDay).where(
-        UserLoginDay.user_id == user_id, UserLoginDay.login_date == today
+    existing_day = (await db.execute(select(LoginDay).where(
+        LoginDay.user_id == user_id, LoginDay.login_date == today
     ))).scalar_one_or_none()
     if existing_day:
         return  # Already counted for today
 
     try:
         async with db.begin_nested():
-            db.add(UserLoginDay(user_id=user_id, login_date=today))
+            db.add(LoginDay(user_id=user_id, login_date=today))
     except IntegrityError:
         return  # Race condition matched, another request inserted first
 
     # Update streak record
-    streak = (await db.execute(select(UserStreak).where(
-        UserStreak.user_id == user_id
+    streak = (await db.execute(select(LoginStreak).where(
+        LoginStreak.user_id == user_id
     ))).scalar_one_or_none()
 
     if not streak:
-        db.add(UserStreak(
+        db.add(LoginStreak(
             user_id=user_id, current_streak=1, longest_streak=1,
             total_logins=1, last_login_date=today,
         ))
@@ -298,8 +298,8 @@ async def get_my_streak(
     """Return the authenticated user's login streak stats."""
     await _track_login(db, current_user.id)
     
-    streak = (await db.execute(select(UserStreak).where(
-        UserStreak.user_id == current_user.id
+    streak = (await db.execute(select(LoginStreak).where(
+        LoginStreak.user_id == current_user.id
     ))).scalar_one_or_none()
 
     if not streak:

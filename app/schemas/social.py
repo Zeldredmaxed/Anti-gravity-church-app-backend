@@ -1,4 +1,4 @@
-"""Pydantic schemas for social features: followers, mentions, saves, reports."""
+"""Pydantic schemas for social features: followers, mentions, bookmarks, reports."""
 
 from pydantic import BaseModel
 from typing import Optional, List
@@ -6,7 +6,7 @@ from datetime import datetime
 from .user import UserResponse
 
 
-class FlockMemberResponse(BaseModel):
+class FollowerResponse(BaseModel):
     id: int
     follower_id: int
     followed_id: int
@@ -15,12 +15,12 @@ class FlockMemberResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class FlockListResponse(BaseModel):
+class FollowerListResponse(BaseModel):
     user: UserResponse
     created_at: datetime
 
 
-class MeditationResponse(BaseModel):
+class BookmarkResponse(BaseModel):
     id: int
     user_id: int
     entity_type: str
@@ -30,7 +30,7 @@ class MeditationResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class MeditationCreate(BaseModel):
+class BookmarkCreate(BaseModel):
     entity_type: str
     entity_id: int
 

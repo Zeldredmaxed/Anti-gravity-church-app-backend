@@ -7,7 +7,7 @@ from typing import Optional
 from datetime import datetime, timezone
 
 from app.database import get_db
-from app.models.task import MinistryTask, TaskStatus, TaskType
+from app.models.task import Task, TaskStatus, TaskType
 from app.models.user import User
 from app.models.member import Member
 from app.schemas.task import TaskCreate, TaskUpdate, TaskStatusUpdate, TaskResponse, TaskListResponse
@@ -17,7 +17,7 @@ from app.models.alert import create_alert
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
-async def _enrich_task(db: AsyncSession, task: MinistryTask) -> dict:
+async def _enrich_task(db: AsyncSession, task: Task) -> dict:
     # Get names for display mapping
     assignee = (await db.execute(select(User).where(User.id == task.assigned_to))).scalar_one_or_none()
     creator = (await db.execute(select(User).where(User.id == task.assigned_by))).scalar_one_or_none()
@@ -43,16 +43,16 @@ async def get_my_tasks(
     current_user: User = Depends(get_current_user)
 ):
     """Get tasks assigned to the current user."""
-    query = select(MinistryTask).where(
-        MinistryTask.church_id == current_user.church_id,
-        MinistryTask.assigned_to == current_user.id
+    query = select(Task).where(
+        Task.church_id == current_user.church_id,
+        Task.assigned_to == current_user.id
     )
     if status:
-        query = query.where(MinistryTask.status == status.value)
+        query = query.where(Task.status == status.value)
         
     query = query.order_by(
-        MinistryTask.due_date.asc().nulls_last(),
-        MinistryTask.created_at.desc()
+        Task.due_date.asc().nulls_last(),
+        Task.created_at.desc()
     ).offset(pagination.offset).limit(pagination.per_page)
     
     tasks = (await db.execute(query)).scalars().all()
@@ -68,14 +68,14 @@ async def get_tasks_assigned_by_me(
     current_user: User = Depends(get_current_user)
 ):
     """Get tasks the current user has assigned to others."""
-    query = select(MinistryTask).where(
-        MinistryTask.church_id == current_user.church_id,
-        MinistryTask.assigned_by == current_user.id
+    query = select(Task).where(
+        Task.church_id == current_user.church_id,
+        Task.assigned_by == current_user.id
     )
     if status:
-        query = query.where(MinistryTask.status == status.value)
+        query = query.where(Task.status == status.value)
         
-    query = query.order_by(MinistryTask.created_at.desc()).offset(pagination.offset).limit(pagination.per_page)
+    query = query.order_by(Task.created_at.desc()).offset(pagination.offset).limit(pagination.per_page)
     tasks = (await db.execute(query)).scalars().all()
     
     return [await _enrich_task(db, t) for t in tasks]
@@ -95,7 +95,7 @@ async def create_task(
     if not assignee:
         raise HTTPException(status_code=404, detail="Assignee not found or not in your church")
         
-    task = MinistryTask(
+    task = Task(
         church_id=current_user.church_id,
         assigned_by=current_user.id,
         assigned_to=data.assigned_to,
@@ -132,8 +132,8 @@ async def get_task(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    task = (await db.execute(select(MinistryTask).where(
-        MinistryTask.id == task_id, MinistryTask.church_id == current_user.church_id
+    task = (await db.execute(select(Task).where(
+        Task.id == task_id, Task.church_id == current_user.church_id
     ))).scalar_one_or_none()
     
     if not task:
@@ -149,8 +149,8 @@ async def update_task(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    task = (await db.execute(select(MinistryTask).where(
-        MinistryTask.id == task_id, MinistryTask.church_id == current_user.church_id
+    task = (await db.execute(select(Task).where(
+        Task.id == task_id, Task.church_id == current_user.church_id
     ))).scalar_one_or_none()
     
     if not task:
@@ -187,8 +187,8 @@ async def update_task_status(
     current_user: User = Depends(get_current_user)
 ):
     """Update the status of a task. Can be done by assignee or creator."""
-    task = (await db.execute(select(MinistryTask).where(
-        MinistryTask.id == task_id, MinistryTask.church_id == current_user.church_id
+    task = (await db.execute(select(Task).where(
+        Task.id == task_id, Task.church_id == current_user.church_id
     ))).scalar_one_or_none()
     
     if not task:

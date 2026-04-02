@@ -1,4 +1,4 @@
-"""Shorts system models — cross-church video platform."""
+"""Clips (short video) models — cross-church video platform."""
 
 import enum
 from datetime import datetime, timezone
@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class GloryClipCategory(str, enum.Enum):
+class ClipCategory(str, enum.Enum):
     WORSHIP = "worship"
     TESTIMONY = "testimony"
     SERMON_CLIP = "sermon_clip"
@@ -27,21 +27,21 @@ class ModerationStatus(str, enum.Enum):
     REJECTED = "rejected"
 
 
-class GloryClip(Base):
-    __tablename__ = "glory_clips"
+class Clip(Base):
+    __tablename__ = "clips"
 
     id = Column(Integer, primary_key=True, index=True)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    church_id = Column(Integer, ForeignKey("churches.id"), nullable=False, index=True)  # Attribution, not isolation
+    church_id = Column(Integer, ForeignKey("churches.id"), nullable=False, index=True)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     video_url = Column(String(500), nullable=False)
     thumbnail_url = Column(String(500), nullable=True)
     duration_seconds = Column(Integer, nullable=True)
-    category = Column(String(30), default=GloryClipCategory.OTHER.value, nullable=False)
+    category = Column(String(30), default=ClipCategory.OTHER.value, nullable=False)
     moderation_status = Column(String(20), default=ModerationStatus.APPROVED.value, nullable=False)
     view_count = Column(Integer, default=0)
-    amen_count = Column(Integer, default=0)
+    like_count = Column(Integer, default=0)
     comment_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
     is_featured = Column(Boolean, default=False)
@@ -54,57 +54,57 @@ class GloryClip(Base):
     # Relationships
     author = relationship("User")
     church = relationship("Church")
-    amens = relationship("GloryClipAmen", back_populates="glory_clip", cascade="all, delete-orphan")
-    comments = relationship("GloryClipComment", back_populates="glory_clip",
+    likes = relationship("ClipLike", back_populates="clip", cascade="all, delete-orphan")
+    comments = relationship("ClipComment", back_populates="clip",
                              lazy="dynamic", cascade="all, delete-orphan")
-    views = relationship("GloryClipView", back_populates="glory_clip", cascade="all, delete-orphan")
+    views = relationship("ClipView", back_populates="clip", cascade="all, delete-orphan")
 
 
-class GloryClipAmen(Base):
-    __tablename__ = "glory_clip_amens"
+class ClipLike(Base):
+    __tablename__ = "clip_likes"
     __table_args__ = (
-        UniqueConstraint("glory_clip_id", "user_id", name="uq_glory_clip_amen"),
+        UniqueConstraint("clip_id", "user_id", name="uq_clip_like"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    glory_clip_id = Column(Integer, ForeignKey("glory_clips.id", ondelete="CASCADE"),
-                       nullable=False, index=True)
+    clip_id = Column(Integer, ForeignKey("clips.id", ondelete="CASCADE"),
+                     nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    glory_clip = relationship("GloryClip", back_populates="amens")
+    clip = relationship("Clip", back_populates="likes")
     user = relationship("User")
 
 
-class GloryClipComment(Base):
-    __tablename__ = "glory_clip_comments"
+class ClipComment(Base):
+    __tablename__ = "clip_comments"
 
     id = Column(Integer, primary_key=True, index=True)
-    glory_clip_id = Column(Integer, ForeignKey("glory_clips.id", ondelete="CASCADE"),
-                       nullable=False, index=True)
+    clip_id = Column(Integer, ForeignKey("clips.id", ondelete="CASCADE"),
+                     nullable=False, index=True)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     content = Column(Text, nullable=False)
-    parent_id = Column(Integer, ForeignKey("glory_clip_comments.id"), nullable=True)
+    parent_id = Column(Integer, ForeignKey("clip_comments.id"), nullable=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    glory_clip = relationship("GloryClip", back_populates="comments")
+    clip = relationship("Clip", back_populates="comments")
     author = relationship("User")
-    replies = relationship("GloryClipComment", backref="parent", remote_side=[id])
+    replies = relationship("ClipComment", backref="parent", remote_side=[id])
 
 
-class GloryClipView(Base):
-    __tablename__ = "glory_clip_views"
+class ClipView(Base):
+    __tablename__ = "clip_views"
 
     id = Column(Integer, primary_key=True, index=True)
-    glory_clip_id = Column(Integer, ForeignKey("glory_clips.id", ondelete="CASCADE"),
-                       nullable=False, index=True)
+    clip_id = Column(Integer, ForeignKey("clips.id", ondelete="CASCADE"),
+                     nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     watched_seconds = Column(Integer, default=0)
     completed = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    glory_clip = relationship("GloryClip", back_populates="views")
+    clip = relationship("Clip", back_populates="views")

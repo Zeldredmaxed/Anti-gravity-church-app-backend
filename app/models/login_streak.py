@@ -7,11 +7,11 @@ from sqlalchemy import (
 from app.database import Base
 
 
-class UserLoginDay(Base):
+class LoginDay(Base):
     """Records each unique day a user logs in."""
-    __tablename__ = "user_login_days"
+    __tablename__ = "login_days"
     __table_args__ = (
-        UniqueConstraint("user_id", "login_date", name="uq_user_login_day"),
+        UniqueConstraint("user_id", "login_date", name="uq_login_day"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -20,11 +20,11 @@ class UserLoginDay(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
-class UserStreak(Base):
+class LoginStreak(Base):
     """Aggregated streak stats per user — updated on each login."""
-    __tablename__ = "user_streaks"
+    __tablename__ = "login_streaks"
     __table_args__ = (
-        UniqueConstraint("user_id", name="uq_user_streak"),
+        UniqueConstraint("user_id", name="uq_login_streak"),
     )
 
     id = Column(Integer, primary_key=True, index=True)

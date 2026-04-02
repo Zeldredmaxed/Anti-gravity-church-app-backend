@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, delete
 
 from app.database import get_db
-from app.models.feed import Post, PostAmen, PostComment
-from app.models.social import FlockMember, Meditation
+from app.models.feed import Post, PostLike, PostComment
+from app.models.social import Follower, Bookmark
 from app.models.user import User
 from app.schemas.feed import (
     PostCreate, PostUpdate, PostResponse, PostDetailResponse,
@@ -30,15 +30,15 @@ def _post_response(p, author_name=None, author_avatar=None, is_amened=False):
         "image_url": (p.media_urls or [None])[0] if p.media_urls else None,
         "post_type": p.post_type,
         "visibility": p.visibility,
-        "like_count": p.amen_count or 0,
-        "amen_count": p.amen_count or 0,
+        "like_count": p.like_count or 0,
+        "like_count": p.like_count or 0,
         "comment_count": p.comments_count or 0,
         "comments_count": p.comments_count or 0,
         "share_count": p.shares_count or 0,
         "shares_count": p.shares_count or 0,
         "is_pinned": p.is_pinned or False,
         "is_liked": is_amened,
-        "is_amened_by_me": is_amened,
+        "is_liked_by_me": is_amened,
         "created_at": p.created_at.isoformat() if p.created_at else None,
         "updated_at": p.updated_at.isoformat() if p.updated_at else None,
     }
@@ -62,8 +62,8 @@ async def get_my_posts(
     posts = (await db.execute(query)).scalars().all()
     items = []
     for p in posts:
-        is_amened = (await db.execute(select(PostAmen).where(
-            PostAmen.post_id == p.id, PostAmen.user_id == current_user.id
+        is_amened = (await db.execute(select(PostLike).where(
+            PostLike.post_id == p.id, PostLike.user_id == current_user.id
         ))).scalar_one_or_none() is not None
         items.append(_post_response(
             p,
@@ -101,18 +101,18 @@ async def get_feed(
 
     if filter == "following":
         followed_ids = (await db.execute(
-            select(FlockMember.followed_id).where(FlockMember.follower_id == current_user.id)
+            select(Follower.followed_id).where(Follower.follower_id == current_user.id)
         )).scalars().all()
         if followed_ids:
             query = query.where(Post.author_id.in_(followed_ids))
         else:
             return {"data": []}
     elif filter == "favourites":
-        from app.models.social import Meditation
+        from app.models.social import Bookmark
         saved_ids = (await db.execute(
-            select(Meditation.entity_id).where(
-                Meditation.user_id == current_user.id,
-                Meditation.entity_type == "post",
+            select(Bookmark.entity_id).where(
+                Bookmark.user_id == current_user.id,
+                Bookmark.entity_type == "post",
             )
         )).scalars().all()
         if saved_ids:
@@ -127,8 +127,8 @@ async def get_feed(
     items = []
     for p in posts:
         author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-        is_amened = (await db.execute(select(PostAmen).where(
-            PostAmen.post_id == p.id, PostAmen.user_id == current_user.id
+        is_amened = (await db.execute(select(PostLike).where(
+            PostLike.post_id == p.id, PostLike.user_id == current_user.id
         ))).scalar_one_or_none() is not None
         items.append(_post_response(
             p,
@@ -199,8 +199,8 @@ async def get_post(
         raise HTTPException(status_code=404, detail="Post not found")
 
     author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-    is_amened = (await db.execute(select(PostAmen).where(
-        PostAmen.post_id == p.id, PostAmen.user_id == current_user.id
+    is_amened = (await db.execute(select(PostLike).where(
+        PostLike.post_id == p.id, PostLike.user_id == current_user.id
     ))).scalar_one_or_none() is not None
 
     return {"data": _post_response(
@@ -223,22 +223,22 @@ async def toggle_like(
     if not p:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    existing = (await db.execute(select(PostAmen).where(
-        PostAmen.post_id == post_id, PostAmen.user_id == current_user.id
+    existing = (await db.execute(select(PostLike).where(
+        PostLike.post_id == post_id, PostLike.user_id == current_user.id
     ))).scalar_one_or_none()
 
     if existing:
         await db.delete(existing)
-        p.amen_count = max((p.amen_count or 0) - 1, 0)
+        p.like_count = max((p.like_count or 0) - 1, 0)
         liked = False
     else:
-        db.add(PostAmen(post_id=post_id, user_id=current_user.id))
-        p.amen_count = (p.amen_count or 0) + 1
+        db.add(PostLike(post_id=post_id, user_id=current_user.id))
+        p.like_count = (p.like_count or 0) + 1
         liked = True
 
     db.add(p)
     await db.flush()
-    return {"data": {"liked": liked, "like_count": p.amen_count}}
+    return {"data": {"liked": liked, "like_count": p.like_count}}
 
 
 # ── Also keep amen endpoints for backward compat ─────────────────
@@ -262,12 +262,12 @@ async def delete_post(
 
     # Cascade: remove saved/bookmarked items referencing this post
     await db.execute(
-        delete(Meditation).where(
-            Meditation.entity_type == "post",
-            Meditation.entity_id == post_id,
+        delete(Bookmark).where(
+            Bookmark.entity_type == "post",
+            Bookmark.entity_id == post_id,
         )
     )
-    # Hard-delete the post (ORM cascade removes amens, comments)
+    # Hard-delete the post (ORM cascade removes likes, comments)
     await db.delete(p)
     await db.flush()
     return Response(status_code=204)

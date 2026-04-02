@@ -8,11 +8,11 @@ from typing import List
 
 from app.database import get_db
 from app.models.user import User
-from app.models.social import FlockMember, Meditation, Report, ReportStatus
+from app.models.social import Follower, Bookmark, Report, ReportStatus
 from app.models.church import Church
 from app.models.feed import Post
 from app.schemas.social import (
-    FlockMemberResponse, FlockListResponse, MeditationCreate, MeditationResponse,
+    FollowerResponse, FollowerListResponse, BookmarkCreate, BookmarkResponse,
     ReportCreate, ReportResponse
 )
 from app.utils.security import get_current_user
@@ -40,17 +40,17 @@ async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db), cur
     is_following = False
     if current_user.id != user_id:
         existing = (await db.execute(
-            select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user_id)
+            select(Follower).where(Follower.follower_id == current_user.id, Follower.followed_id == user_id)
         )).scalar_one_or_none()
         if existing:
             is_following = True
             
     followers_count = (await db.execute(
-        select(func.count()).where(FlockMember.followed_id == user_id)
+        select(func.count()).where(Follower.followed_id == user_id)
     )).scalar() or 0
     
     following_count = (await db.execute(
-        select(func.count()).where(FlockMember.follower_id == user_id)
+        select(func.count()).where(Follower.follower_id == user_id)
     )).scalar() or 0
     
     post_count = (await db.execute(
@@ -84,7 +84,7 @@ async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_
         raise HTTPException(status_code=404, detail="User not found")
 
     existing = (await db.execute(
-        select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user_id)
+        select(Follower).where(Follower.follower_id == current_user.id, Follower.followed_id == user_id)
     )).scalar_one_or_none()
 
     if existing:
@@ -93,7 +93,7 @@ async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_
         await db.commit()
         return {"data": {"following": False}}
 
-    db.add(FlockMember(follower_id=current_user.id, followed_id=user_id))
+    db.add(Follower(follower_id=current_user.id, followed_id=user_id))
     await db.commit()
     return {"data": {"following": True}}
 
@@ -101,7 +101,7 @@ async def follow_user(user_id: int, db: AsyncSession = Depends(get_db), current_
 @router.delete("/social/flock/{user_id}", status_code=204)
 async def unfollow_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = (await db.execute(
-        select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user_id)
+        select(Follower).where(Follower.follower_id == current_user.id, Follower.followed_id == user_id)
     )).scalar_one_or_none()
     if not result:
         raise HTTPException(status_code=404, detail="Not following this user")
@@ -113,10 +113,10 @@ async def unfollow_user(user_id: int, db: AsyncSession = Depends(get_db), curren
 async def flock_stats(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get current user's follower/following counts."""
     followers_count = (await db.execute(
-        select(func.count()).where(FlockMember.followed_id == current_user.id)
+        select(func.count()).where(Follower.followed_id == current_user.id)
     )).scalar() or 0
     following_count = (await db.execute(
-        select(func.count()).where(FlockMember.follower_id == current_user.id)
+        select(func.count()).where(Follower.follower_id == current_user.id)
     )).scalar() or 0
     return {"data": {"followers_count": followers_count, "following_count": following_count}}
 
@@ -125,7 +125,7 @@ async def flock_stats(db: AsyncSession = Depends(get_db), current_user: User = D
 async def flock_suggestions(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Suggest users to follow — same church, not yet followed."""
     already_following = (await db.execute(
-        select(FlockMember.followed_id).where(FlockMember.follower_id == current_user.id)
+        select(Follower.followed_id).where(Follower.follower_id == current_user.id)
     )).scalars().all()
 
     exclude_ids = set(already_following) | {current_user.id}
@@ -142,7 +142,7 @@ async def flock_suggestions(db: AsyncSession = Depends(get_db), current_user: Us
         church = None
         if u.church_id:
             church = (await db.execute(select(Church).where(Church.id == u.church_id))).scalar_one_or_none()
-        fc = (await db.execute(select(func.count()).where(FlockMember.followed_id == u.id))).scalar() or 0
+        fc = (await db.execute(select(func.count()).where(Follower.followed_id == u.id))).scalar() or 0
         items.append({
             "id": u.id,
             "full_name": u.full_name,
@@ -158,12 +158,12 @@ async def flock_suggestions(db: AsyncSession = Depends(get_db), current_user: Us
 @router.get("/social/flock/{user_id}/followers")
 async def get_followers(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
-        select(FlockMember, User).join(User, FlockMember.follower_id == User.id).where(FlockMember.followed_id == user_id)
+        select(Follower, User).join(User, Follower.follower_id == User.id).where(Follower.followed_id == user_id)
     )
     items = []
     for member, user in result.all():
         is_following = (await db.execute(
-            select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user.id)
+            select(Follower).where(Follower.follower_id == current_user.id, Follower.followed_id == user.id)
         )).scalar_one_or_none() is not None
         items.append({
             "id": user.id, "full_name": user.full_name, "username": user.username,
@@ -175,12 +175,12 @@ async def get_followers(user_id: int, db: AsyncSession = Depends(get_db), curren
 @router.get("/social/shepherding/{user_id}/following")
 async def get_following(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
-        select(FlockMember, User).join(User, FlockMember.followed_id == User.id).where(FlockMember.follower_id == user_id)
+        select(Follower, User).join(User, Follower.followed_id == User.id).where(Follower.follower_id == user_id)
     )
     items = []
     for member, user in result.all():
         is_following = (await db.execute(
-            select(FlockMember).where(FlockMember.follower_id == current_user.id, FlockMember.followed_id == user.id)
+            select(Follower).where(Follower.follower_id == current_user.id, Follower.followed_id == user.id)
         )).scalar_one_or_none() is not None
         items.append({
             "id": user.id, "full_name": user.full_name, "username": user.username,
@@ -190,22 +190,22 @@ async def get_following(user_id: int, db: AsyncSession = Depends(get_db), curren
 
 
 # ══════════════════════════════════════════════════════════════════
-# SAVED ITEMS (Meditations) — /saved/* aliases
+# SAVED ITEMS (Bookmarks) — /saved/* aliases
 # ══════════════════════════════════════════════════════════════════
 
 @router.post("/saved", status_code=201)
-async def save_item(save_data: MeditationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def save_item(save_data: BookmarkCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     existing = (await db.execute(
-        select(Meditation).where(
-            Meditation.user_id == current_user.id,
-            Meditation.entity_type == save_data.entity_type,
-            Meditation.entity_id == save_data.entity_id,
+        select(Bookmark).where(
+            Bookmark.user_id == current_user.id,
+            Bookmark.entity_type == save_data.entity_type,
+            Bookmark.entity_id == save_data.entity_id,
         )
     )).scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Already saved")
 
-    m = Meditation(user_id=current_user.id, entity_type=save_data.entity_type, entity_id=save_data.entity_id)
+    m = Bookmark(user_id=current_user.id, entity_type=save_data.entity_type, entity_id=save_data.entity_id)
     db.add(m)
     await db.commit()
     await db.refresh(m)
@@ -215,10 +215,10 @@ async def save_item(save_data: MeditationCreate, db: AsyncSession = Depends(get_
 @router.delete("/saved/{item_id}")
 async def unsave_item(item_id: int, type: str = Query("post"), db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = (await db.execute(
-        select(Meditation).where(
-            Meditation.user_id == current_user.id,
-            Meditation.entity_type == type,
-            Meditation.entity_id == item_id,
+        select(Bookmark).where(
+            Bookmark.user_id == current_user.id,
+            Bookmark.entity_type == type,
+            Bookmark.entity_id == item_id,
         )
     )).scalar_one_or_none()
     if not result:
@@ -231,7 +231,7 @@ async def unsave_item(item_id: int, type: str = Query("post"), db: AsyncSession 
 @router.get("/saved")
 async def get_saved(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = (await db.execute(
-        select(Meditation).where(Meditation.user_id == current_user.id).order_by(Meditation.created_at.desc())
+        select(Bookmark).where(Bookmark.user_id == current_user.id).order_by(Bookmark.created_at.desc())
     )).scalars().all()
     items = [{"id": m.id, "item_id": m.entity_id, "item_type": m.entity_type,
               "created_at": m.created_at.isoformat() if m.created_at else None} for m in result]

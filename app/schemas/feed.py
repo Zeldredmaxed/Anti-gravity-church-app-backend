@@ -30,11 +30,11 @@ class PostResponse(BaseModel):
     media_urls: Optional[list[str]] = []
     post_type: str
     visibility: str
-    amen_count: int = 0
+    like_count: int = 0
     comments_count: int = 0
     shares_count: int = 0
     is_pinned: bool = False
-    is_amened_by_me: bool = False
+    is_liked_by_me: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 

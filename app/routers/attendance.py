@@ -9,7 +9,7 @@ import math
 
 from app.database import get_db
 from app.models.attendance import Service, AttendanceRecord, GroupAttendance
-from app.models.sunday_checkin import SundayCheckIn
+from app.models.sunday_checkin import CheckIn
 from app.models.church import Church
 from app.models.member import Member
 from app.models.user import User
@@ -306,14 +306,14 @@ async def sunday_checkin(
     today = date.today()
 
     # Prevent duplicate check-in for same day
-    existing = (await db.execute(select(SundayCheckIn).where(
-        SundayCheckIn.user_id == current_user.id,
-        SundayCheckIn.check_in_date == today,
+    existing = (await db.execute(select(CheckIn).where(
+        CheckIn.user_id == current_user.id,
+        CheckIn.check_in_date == today,
     ))).scalar_one_or_none()
     if existing:
         return {"data": {"message": "Already checked in today", "distance_miles": round(distance, 3)}}
 
-    checkin = SundayCheckIn(
+    checkin = CheckIn(
         user_id=current_user.id,
         church_id=current_user.church_id,
         check_in_date=today,
@@ -327,8 +327,8 @@ async def sunday_checkin(
 
     # Get updated year count
     year_count = (await db.execute(select(func.count()).where(
-        SundayCheckIn.user_id == current_user.id,
-        SundayCheckIn.year == today.year,
+        CheckIn.user_id == current_user.id,
+        CheckIn.year == today.year,
     ))).scalar() or 0
 
     return {"data": {
@@ -349,22 +349,22 @@ async def my_sundays(
 
     # This year's check-ins
     checkins = (await db.execute(
-        select(SundayCheckIn)
-        .where(SundayCheckIn.user_id == current_user.id, SundayCheckIn.year == target_year)
-        .order_by(SundayCheckIn.check_in_date.desc())
+        select(CheckIn)
+        .where(CheckIn.user_id == current_user.id, CheckIn.year == target_year)
+        .order_by(CheckIn.check_in_date.desc())
     )).scalars().all()
 
     # Last year's total for comparison
     last_year_count = (await db.execute(select(func.count()).where(
-        SundayCheckIn.user_id == current_user.id,
-        SundayCheckIn.year == target_year - 1,
+        CheckIn.user_id == current_user.id,
+        CheckIn.year == target_year - 1,
     ))).scalar() or 0
 
     # All-time best year
     best_year_row = (await db.execute(
-        select(SundayCheckIn.year, func.count().label("cnt"))
-        .where(SundayCheckIn.user_id == current_user.id)
-        .group_by(SundayCheckIn.year)
+        select(CheckIn.year, func.count().label("cnt"))
+        .where(CheckIn.user_id == current_user.id)
+        .group_by(CheckIn.year)
         .order_by(func.count().desc())
         .limit(1)
     )).first()
@@ -395,19 +395,19 @@ async def sunday_stats_for_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     count = (await db.execute(select(func.count()).where(
-        SundayCheckIn.user_id == user_id,
-        SundayCheckIn.year == target_year,
+        CheckIn.user_id == user_id,
+        CheckIn.year == target_year,
     ))).scalar() or 0
 
     last_year_count = (await db.execute(select(func.count()).where(
-        SundayCheckIn.user_id == user_id,
-        SundayCheckIn.year == target_year - 1,
+        CheckIn.user_id == user_id,
+        CheckIn.year == target_year - 1,
     ))).scalar() or 0
 
     dates = (await db.execute(
-        select(SundayCheckIn.check_in_date)
-        .where(SundayCheckIn.user_id == user_id, SundayCheckIn.year == target_year)
-        .order_by(SundayCheckIn.check_in_date.desc())
+        select(CheckIn.check_in_date)
+        .where(CheckIn.user_id == user_id, CheckIn.year == target_year)
+        .order_by(CheckIn.check_in_date.desc())
     )).scalars().all()
 
     return {"data": {

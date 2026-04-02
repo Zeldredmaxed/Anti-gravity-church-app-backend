@@ -32,8 +32,8 @@ class ActionType(str, enum.Enum):
     OTHER = "other"
 
 
-class MinistryTask(Base):
-    __tablename__ = "ministry_tasks"
+class Task(Base):
+    __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
     church_id = Column(Integer, ForeignKey("churches.id"), nullable=False, index=True)
