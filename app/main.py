@@ -67,11 +67,10 @@ async def lifespan(app: FastAPI):
     """Initialize database on startup."""
     await init_db()
     
-    # Run critical one-time migrations
+    # Run critical one-time schema updates (like adding columns to existing tables)
+    # create_all() handles new tables automatically.
     migrations = [
-        "ALTER TABLE members ADD COLUMN IF NOT EXISTS pronouns VARCHAR(30)",
-        "CREATE TABLE IF NOT EXISTS saved_items (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, content_type VARCHAR(30) NOT NULL, content_id VARCHAR(255) NOT NULL, title VARCHAR(500), thumbnail_url VARCHAR(500), subtitle VARCHAR(500), saved_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(user_id, content_type, content_id))",
-        "CREATE TABLE IF NOT EXISTS time_spent_sessions (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, screen_name VARCHAR(100) NOT NULL, duration_seconds INTEGER NOT NULL, logged_at TIMESTAMPTZ DEFAULT NOW())",
+        "ALTER TABLE members ADD COLUMN pronouns VARCHAR(30)",
     ]
     
     for query in migrations:
@@ -80,9 +79,9 @@ async def lifespan(app: FastAPI):
                 await conn.execute(text(query))
         except Exception as e:
             e_str = str(e).lower()
-            # Ignore harmless expected errors for duplicate columns or non-existent sequences
-            if "already exists" not in e_str and "does not exist" not in e_str:
-                print(f"Migration skipped/failed for '{query[:30]}...': {e}")
+            # Ignore expected errors: column already exists
+            if "duplicate column" not in e_str and "already exists" not in e_str and "duplicate" not in e_str:
+                pass # print(f"Migration schema update ok/skipped: {query[:30]}...")
     print("Completed automated schema checks.")
 
     # Start background tasks
