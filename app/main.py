@@ -275,7 +275,7 @@ async def seed_dummy_data_dangerous():
                     db.add(Follower(follower_id=owner_id, followed_id=dup.id)) # mutual follow
             
             # 4. Create an Artist & Song for Radio
-            artist = ArtistProfile(user_id=owner_id, artist_name="The Voices of Anti-Gravity", bio="Our Church Band", genre="Gospel")
+            artist = ArtistProfile(user_id=owner_id, artist_name="The Voices of Anti-Gravity", bio="Our Church Band")
             db.add(artist)
             await db.commit()
             await db.refresh(artist)
@@ -308,7 +308,7 @@ async def seed_dummy_data_dangerous():
             
             # 6. Create a Direct Message Conversation
             other_user = dummy_users[1] if dummy_users[0].id == owner_id else dummy_users[0]
-            convo = Conversation(church_id=church_id, type="direct")
+            convo = Conversation(church_id=church_id, type="direct", created_by=owner_id)
             db.add(convo)
             await db.commit()
             await db.refresh(convo)
