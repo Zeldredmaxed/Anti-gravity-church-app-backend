@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.services.auth import get_current_user
+from app.utils.security import get_current_user
 from app.models.user import User
 from app.models.user_activity import UserInteraction, UserContentView, RecentlyDeleted, InteractionType, ContentType
 from app.models.settings import ArchivedContent
