@@ -47,7 +47,7 @@ async def list_groups(
 async def create_group(data: GroupCreate,
     current_user: User = Depends(require_role("admin", "pastor", "staff")),
     db: AsyncSession = Depends(get_db)):
-    group = Group(**data.model_dump()); db.add(group); await db.flush(); await db.refresh(group)
+    group = Group(**data.model_dump()); db.add(group); await db.commit(); await db.refresh(group)
     return GroupResponse(
         id=group.id, name=group.name, description=group.description,
         group_type=group.group_type, leader_id=group.leader_id, leader_name=None,
@@ -92,7 +92,7 @@ async def update_group(group_id: int, data: GroupUpdate,
     if not g: raise HTTPException(status_code=404, detail="Group not found")
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(g, field, value)
-    db.add(g); await db.flush(); await db.refresh(g)
+    db.add(g); await db.commit(); await db.refresh(g)
     count = (await db.execute(select(func.count()).where(GroupMembership.group_id == g.id))).scalar() or 0
     return GroupResponse(
         id=g.id, name=g.name, description=g.description, group_type=g.group_type,
@@ -119,7 +119,7 @@ async def add_group_member(group_id: int, data: GroupMemberAdd,
     if existing: raise HTTPException(status_code=400, detail="Member already in group")
     gm = GroupMembership(group_id=group_id, member_id=data.member_id,
                           role=data.role, joined_date=date.today())
-    db.add(gm); await db.flush()
+    db.add(gm); await db.commit()
     return {"message": "Member added to group", "membership_id": gm.id}
 
 

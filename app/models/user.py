@@ -58,6 +58,7 @@ class User(Base):
     church = relationship("Church", back_populates="users")
     audit_logs = relationship("AuditLog", back_populates="user", lazy="dynamic")
     member_notes = relationship("MemberNote", back_populates="author", lazy="dynamic")
+    sessions = relationship("UserSession", back_populates="user", lazy="dynamic", cascade="all, delete-orphan")
 
 
 class AuditLog(Base):
@@ -75,3 +76,21 @@ class AuditLog(Base):
 
     # Relationships
     user = relationship("User", back_populates="audit_logs")
+
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    session_token = Column(String(500), unique=True, index=True, nullable=False)
+    device_info = Column(String(255), nullable=True) # e.g. "iPhone 13 - iOS Safari"
+    ip_address = Column(String(45), nullable=True)
+    location = Column(String(255), nullable=True)
+    
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_active_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+    user = relationship("User", back_populates="sessions")

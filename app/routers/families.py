@@ -56,7 +56,7 @@ async def create_family(
     """Create a new family/household."""
     family = Family(**data.model_dump())
     db.add(family)
-    await db.flush()
+    await db.commit()
     await db.refresh(family)
     return FamilyResponse(
         id=family.id,
@@ -137,7 +137,7 @@ async def update_family(
         setattr(family, field, value)
 
     db.add(family)
-    await db.flush()
+    await db.commit()
     await db.refresh(family)
 
     member_count = (await db.execute(
@@ -189,7 +189,7 @@ async def add_member_to_family(
         relationship_type=data.relationship_type,
     )
     db.add(rel)
-    await db.flush()
+    await db.commit()
 
     return {"message": "Member added to family", "relationship_id": rel.id}
 

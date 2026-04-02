@@ -52,7 +52,7 @@ async def create_user(data: UserRegister,
     if existing: raise HTTPException(status_code=400, detail="Email already registered")
     user = User(email=data.email, hashed_password=hash_password(data.password),
                 full_name=data.full_name, role=data.role)
-    db.add(user); await db.flush(); await db.refresh(user)
+    db.add(user); await db.commit(); await db.refresh(user)
     return user
 
 
@@ -63,7 +63,7 @@ async def update_user_role(user_id: int, data: UserRoleUpdate,
     user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
     if not user: raise HTTPException(status_code=404, detail="User not found")
     user.role = data.role; db.add(user)
-    await db.flush(); await db.refresh(user)
+    await db.commit(); await db.refresh(user)
     return user
 
 
@@ -76,7 +76,7 @@ async def deactivate_user(user_id: int,
     if user.id == current_user.id:
         raise HTTPException(status_code=400, detail="Cannot deactivate yourself")
     user.is_active = False; db.add(user)
-    await db.flush(); await db.refresh(user)
+    await db.commit(); await db.refresh(user)
     return user
 
 

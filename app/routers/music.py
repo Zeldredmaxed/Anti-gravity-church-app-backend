@@ -360,7 +360,7 @@ async def update_song(
         song.cover_url = data.cover_url
 
     db.add(song)
-    await db.flush()
+    await db.commit()
     await db.refresh(song)
     return {"data": _song_resp(song, artist.artist_name)}
 
@@ -401,7 +401,7 @@ async def register_artist(
         payout_email=data.payout_email or current_user.email,
     )
     db.add(artist)
-    await db.flush()
+    await db.commit()
     await db.refresh(artist)
     return {"data": {
         "id": artist.id,
@@ -549,7 +549,7 @@ async def donate_to_artist(
     song.donation_count = (song.donation_count or 0) + 1
     db.add(song)
 
-    await db.flush()
+    await db.commit()
     await db.refresh(donation)
 
     # Send download email (non-blocking — if SMTP isn't configured it just skips)
@@ -665,7 +665,7 @@ async def subscribe_skip_premium(
         expires_at=now + timedelta(days=30),
     )
     db.add(sub)
-    await db.flush()
+    await db.commit()
     await db.refresh(sub)
 
     return {"data": {

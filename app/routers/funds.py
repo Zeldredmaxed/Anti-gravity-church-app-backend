@@ -49,7 +49,7 @@ async def create_fund(
 
     fund = Fund(**data.model_dump())
     db.add(fund)
-    await db.flush()
+    await db.commit()
     await db.refresh(fund)
     return fund
 
@@ -115,7 +115,7 @@ async def update_fund(
         setattr(fund, field, value)
 
     db.add(fund)
-    await db.flush()
+    await db.commit()
     await db.refresh(fund)
     return fund
 
@@ -135,7 +135,7 @@ async def set_budget(
 
     budget = Budget(fund_id=fund_id, **data.model_dump())
     db.add(budget)
-    await db.flush()
+    await db.commit()
     await db.refresh(budget)
     return budget
 
@@ -174,7 +174,7 @@ async def record_expense(
     fund.current_balance = (fund.current_balance or Decimal("0")) - data.amount
     db.add(fund)
 
-    await db.flush()
+    await db.commit()
     await db.refresh(expense)
     return expense
 

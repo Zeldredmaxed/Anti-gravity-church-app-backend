@@ -57,6 +57,8 @@ import app.models.store  # Ensure Base metadata collects the Product model durin
 import app.routers.payment_methods  # Ensure PaymentMethod model is collected
 import app.routers.support  # Ensure SupportTicket model is collected
 import app.models.music  # Ensure music models are collected
+from app.routers.user_activity import router as user_activity_router
+from app.routers.support_center import router as support_center_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -159,6 +161,8 @@ app.include_router(activity_router, prefix=API_PREFIX)
 app.include_router(facilities_router, prefix=API_PREFIX)
 app.include_router(statements_router, prefix=API_PREFIX)
 app.include_router(stripe_webhooks_router, prefix=API_PREFIX)
+app.include_router(user_activity_router, prefix=API_PREFIX)
+app.include_router(support_center_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})

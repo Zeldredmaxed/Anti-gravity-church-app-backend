@@ -80,7 +80,7 @@ async def create_member(
     """Create a new member profile."""
     member = Member(**data.model_dump(), church_id=current_user.church_id, created_by=current_user.id)
     db.add(member)
-    await db.flush()
+    await db.commit()
     await db.refresh(member)
     return member
 
@@ -121,7 +121,7 @@ async def update_member(
         setattr(member, field, value)
 
     db.add(member)
-    await db.flush()
+    await db.commit()
     await db.refresh(member)
     return member
 
@@ -168,7 +168,7 @@ async def add_note(
         is_confidential=data.is_confidential,
     )
     db.add(note)
-    await db.flush()
+    await db.commit()
     await db.refresh(note)
     return note
 
@@ -265,7 +265,7 @@ async def import_members_csv(
         except Exception as e:
             errors.append({"row": i, "error": str(e)})
 
-    await db.flush()
+    await db.commit()
 
     return {"imported": imported, "errors": errors}
 

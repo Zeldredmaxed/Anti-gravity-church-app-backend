@@ -94,7 +94,7 @@ async def submit_prayer(
         **data.model_dump(),
     )
     db.add(prayer)
-    await db.flush()
+    await db.commit()
     await db.refresh(prayer)
     return _prayer_response(prayer,
         None if data.is_anonymous else current_user.full_name,
@@ -171,7 +171,7 @@ async def toggle_pray(
         await db.delete(existing)
         p.prayed_count = max((p.prayed_count or 1) - 1, 0)
         db.add(p)
-        await db.flush()
+        await db.commit()
         return {"data": {"has_prayed": False, "pray_count": p.prayed_count}}
     else:
         # Pray — create record, increment count
@@ -189,7 +189,7 @@ async def toggle_pray(
                 data={"link_type": "prayer", "link_id": prayer_id},
                 church_id=p.church_id)
 
-        await db.flush()
+        await db.commit()
         return {"data": {"has_prayed": True, "pray_count": p.prayed_count}}
 
 
@@ -222,7 +222,7 @@ async def respond_to_prayer(
             data={"link_type": "prayer", "link_id": prayer_id},
             church_id=p.church_id)
 
-    await db.flush()
+    await db.commit()
     await db.refresh(resp)
     return PrayerResponseSchema(
         id=resp.id, author_id=resp.responder_id,

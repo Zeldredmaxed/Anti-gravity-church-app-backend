@@ -99,7 +99,7 @@ async def broadcast_alert(
         db.add(alert)
         count += 1
 
-    await db.flush()
+    await db.commit()
     return {"data": {"sent_count": count}}
 
 

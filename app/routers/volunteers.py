@@ -138,7 +138,7 @@ async def create_volunteer_role(
         capacity_needed=data.capacity_needed,
     )
     db.add(role)
-    await db.flush()
+    await db.commit()
     await db.refresh(role)
     return role
 
@@ -212,7 +212,7 @@ async def apply_to_volunteer(
         message=data.message,
     )
     db.add(app)
-    await db.flush()
+    await db.commit()
     await db.refresh(app)
     return app
 
@@ -258,7 +258,7 @@ async def review_application(
     application.reviewed_at = datetime.now(timezone.utc)
     application.review_notes = data.review_notes
     db.add(application)
-    await db.flush()
+    await db.commit()
     await db.refresh(application)
     return application
 
@@ -283,7 +283,7 @@ async def log_volunteer_hours(
         logged_by=current_user.id,
     )
     db.add(log)
-    await db.flush()
+    await db.commit()
     await db.refresh(log)
     return log
 

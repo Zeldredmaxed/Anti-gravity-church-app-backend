@@ -160,7 +160,7 @@ async def create_post(
             post_type=data.post_type, visibility=data.visibility,
         )
         db.add(post)
-        await db.flush()
+        await db.commit()
         await db.refresh(post)
 
         if post.content:
@@ -237,7 +237,7 @@ async def toggle_like(
         liked = True
 
     db.add(p)
-    await db.flush()
+    await db.commit()
     return {"data": {"liked": liked, "like_count": p.like_count}}
 
 
@@ -269,7 +269,7 @@ async def delete_post(
     )
     # Hard-delete the post (ORM cascade removes likes, comments)
     await db.delete(p)
-    await db.flush()
+    await db.commit()
     return Response(status_code=204)
 
 
@@ -285,7 +285,7 @@ async def share_post(
         raise HTTPException(status_code=404, detail="Post not found")
     p.shares_count = (p.shares_count or 0) + 1
     db.add(p)
-    await db.flush()
+    await db.commit()
     return {"data": {"share_count": p.shares_count}}
 
 
@@ -339,7 +339,7 @@ async def add_comment(
     db.add(comment)
     p.comments_count = (p.comments_count or 0) + 1
     db.add(p)
-    await db.flush()
+    await db.commit()
     await db.refresh(comment)
     await process_mentions(db, comment.content, current_user.id, "post_comment", comment.id)
 

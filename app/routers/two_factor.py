@@ -37,7 +37,7 @@ async def setup_2fa(
     secret = pyotp.random_base32()
     current_user.totp_secret = secret
     db.add(current_user)
-    await db.flush()
+    await db.commit()
 
     totp = pyotp.TOTP(secret)
     provisioning_uri = totp.provisioning_uri(
@@ -77,7 +77,7 @@ async def verify_and_enable_2fa(
 
     current_user.is_2fa_enabled = True
     db.add(current_user)
-    await db.flush()
+    await db.commit()
 
     return {"message": "2FA enabled successfully"}
 
@@ -115,6 +115,6 @@ async def disable_2fa(
     current_user.is_2fa_enabled = False
     current_user.totp_secret = None
     db.add(current_user)
-    await db.flush()
+    await db.commit()
 
     return {"message": "2FA disabled successfully"}

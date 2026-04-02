@@ -60,6 +60,6 @@ async def submit_support_request(
         message=data.message,
     )
     db.add(ticket)
-    await db.flush()
+    await db.commit()
     await db.refresh(ticket)
     return {"data": {"id": ticket.id, "status": "open", "message": "Your request has been submitted."}}

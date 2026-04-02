@@ -107,7 +107,7 @@ async def create_conversation(
         created_by=current_user.id,
     )
     db.add(convo)
-    await db.flush()
+    await db.commit()
 
     # Add creator as participant
     all_ids = set(data.participant_user_ids) | {current_user.id}
@@ -116,7 +116,7 @@ async def create_conversation(
             conversation_id=convo.id, user_id=uid,
             role="admin" if uid == current_user.id else "member")
         db.add(p)
-    await db.flush()
+    await db.commit()
     await db.refresh(convo)
 
     return ConversationResponse(
@@ -193,7 +193,7 @@ async def send_message(
         convo.last_message_at = datetime.now(timezone.utc)
         db.add(convo)
 
-    await db.flush()
+    await db.commit()
     await db.refresh(msg)
 
     return MessageResponse(

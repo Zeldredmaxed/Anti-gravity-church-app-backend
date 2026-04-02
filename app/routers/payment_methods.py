@@ -131,7 +131,7 @@ async def add_payment_method(
         billing_address=data.billing_address.model_dump() if data.billing_address else None,
     )
     db.add(pm)
-    await db.flush()
+    await db.commit()
     await db.refresh(pm)
 
     return {"data": {
@@ -156,7 +156,7 @@ async def set_default(
     for m in all_methods:
         m.is_default = (m.id == pm_id)
         db.add(m)
-    await db.flush()
+    await db.commit()
     return {"data": {"id": pm_id, "is_default": True}}
 
 

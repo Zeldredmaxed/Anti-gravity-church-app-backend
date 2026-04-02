@@ -108,7 +108,7 @@ async def create_task(
     )
     
     db.add(task)
-    await db.flush()
+    await db.commit()
     await db.refresh(task)
     
     # Notify assignee if it's not self-assigned

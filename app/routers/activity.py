@@ -79,7 +79,7 @@ async def log_member_activity(
         logged_by=current_user.id,
     )
     db.add(log)
-    await db.flush()
+    await db.commit()
     await db.refresh(log)
     return log
 

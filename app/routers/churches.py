@@ -44,7 +44,7 @@ async def onboard_church(data: ChurchOnboardRequest, db: AsyncSession = Depends(
 
     church = Church(**data.church.model_dump())
     db.add(church)
-    await db.flush()
+    await db.commit()
     await db.refresh(church)
 
     # Consume the registration key
@@ -62,7 +62,7 @@ async def onboard_church(data: ChurchOnboardRequest, db: AsyncSession = Depends(
         role="admin",
     )
     db.add(admin)
-    await db.flush()
+    await db.commit()
     await db.refresh(admin)
 
     # Issue tokens
@@ -101,7 +101,7 @@ async def update_my_church(
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(church, field, value)
     db.add(church)
-    await db.flush()
+    await db.commit()
     await db.refresh(church)
     return church
 
@@ -170,7 +170,7 @@ async def update_church_settings(
             setattr(church, key, value)
 
     db.add(church)
-    await db.flush()
+    await db.commit()
     await db.refresh(church)
     return {"data": {"message": "Settings updated"}}
 

@@ -75,7 +75,7 @@ async def create_care_case(
         **data.model_dump()
     )
     db.add(case)
-    await db.flush()
+    await db.commit()
     await db.refresh(case)
     
     leader_name = None
@@ -121,7 +121,7 @@ async def update_care_case(
         setattr(case, field, value)
         
     db.add(case)
-    await db.flush()
+    await db.commit()
     await db.refresh(case)
     
     leader_name = None
@@ -164,7 +164,7 @@ async def delete_care_case(
         
     case.is_deleted = True
     db.add(case)
-    await db.flush()
+    await db.commit()
 
 
 # ── Care Notes (Follow-up tracking) ──
@@ -221,7 +221,7 @@ async def add_care_note(
         action_taken=data.action_taken,
     )
     db.add(note)
-    await db.flush()
+    await db.commit()
     await db.refresh(note)
     return note
 
@@ -264,7 +264,7 @@ async def send_sms_action(
         action_taken="SMS Sent",
     )
     db.add(note)
-    await db.flush()
+    await db.commit()
 
     return {"sms_result": result, "note_logged": True}
 
@@ -294,6 +294,6 @@ async def send_email_action(
         action_taken="Email Sent",
     )
     db.add(note)
-    await db.flush()
+    await db.commit()
 
     return {"email_result": result, "note_logged": True}

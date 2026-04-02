@@ -1,8 +1,8 @@
 """Auth router: registration, login, token refresh, profile — multi-tenant."""
 
 from datetime import date, datetime, timedelta, timezone
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional, List
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -15,6 +15,7 @@ from app.schemas.user import (
     UserRegister, UserLogin, TokenResponse, TokenRefresh,
     UserResponse, UserUpdate, UserRoleUpdate,
 )
+from app.models.user import UserSession
 from app.utils.security import (
     hash_password, verify_password, create_access_token,
     create_refresh_token, decode_token, get_current_user, require_role,
@@ -71,7 +72,7 @@ async def _track_login(db: AsyncSession, user_id: int):
         streak.last_login_date = today
         db.add(streak)
 
-    await db.flush()
+    await db.commit()
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
@@ -101,7 +102,7 @@ async def register(
         role=data.role,
     )
     db.add(user)
-    await db.flush()
+    await db.commit()
     
     if data.church_id:
         from app.models.member import Member
@@ -111,7 +112,7 @@ async def register(
         if not existing_m.scalar_one_or_none():
             m = Member(church_id=data.church_id, email=data.email, first_name=fn, last_name=ln)
             db.add(m)
-            await db.flush()
+            await db.commit()
     await db.refresh(user)
     return user
 
@@ -127,7 +128,7 @@ async def leave_church(
 
     current_user.church_id = None
     db.add(current_user)
-    await db.flush()
+    await db.commit()
 
     token_data = {"sub": str(current_user.id), "church_id": None, "role": current_user.role}
     return TokenResponse(
@@ -147,7 +148,7 @@ async def join_church(
     # or you might allow them to switch. For this SaaS, they can switch directly.
     current_user.church_id = data.church_id
     db.add(current_user)
-    await db.flush()
+    await db.commit()
 
     from app.models.member import Member
     fn = current_user.full_name.split(" ")[0] if current_user.full_name else "Guest"
@@ -156,7 +157,7 @@ async def join_church(
     if not existing_m.scalar_one_or_none():
         m = Member(church_id=data.church_id, email=current_user.email, first_name=fn, last_name=ln)
         db.add(m)
-        await db.flush()
+        await db.commit()
 
     token_data = {"sub": str(current_user.id), "church_id": current_user.church_id, "role": current_user.role}
     return TokenResponse(
@@ -168,6 +169,7 @@ async def join_church(
 @router.post("/login", response_model=TokenResponse)
 async def login(
     data: UserLogin,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Authenticate and receive JWT tokens with church_id claim."""
@@ -212,8 +214,22 @@ async def login(
         }
 
     token_data = {"sub": str(user.id), "church_id": user.church_id, "role": user.role}
+    access_token = create_access_token(token_data)
+    
+    # Track the active session
+    new_session = UserSession(
+        user_id=user.id,
+        session_token=access_token,
+        device_info=request.headers.get("User-Agent", "Unknown Device"),
+        ip_address=request.client.host if request.client else "Unknown",
+        location="Unknown",
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7) # Align with token expiration
+    )
+    db.add(new_session)
+    await db.commit()
+    
     return TokenResponse(
-        access_token=create_access_token(token_data),
+        access_token=access_token,
         refresh_token=create_refresh_token(token_data),
     )
 
@@ -279,7 +295,7 @@ async def update_profile(
         current_user.avatar_url = data.avatar_url
 
     db.add(current_user)
-    await db.flush()
+    await db.commit()
     await db.refresh(current_user)
     return current_user
 
@@ -358,7 +374,7 @@ async def update_preferences(
     current_user.notification_prefs = prefs
 
     db.add(current_user)
-    await db.flush()
+    await db.commit()
     await db.refresh(current_user)
 
     return {
@@ -366,3 +382,80 @@ async def update_preferences(
         "notification_prefs": current_user.notification_prefs,
         "phone_number": current_user.phone_number,
     }
+
+
+class SessionResponse(PydanticBaseModel):
+    id: int
+    device_info: Optional[str]
+    ip_address: Optional[str]
+    location: Optional[str]
+    last_active_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+@router.get("/sessions", response_model=List[SessionResponse])
+async def get_active_sessions(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all active sessions for the current user."""
+    query = select(UserSession).where(
+        UserSession.user_id == current_user.id,
+        UserSession.expires_at > datetime.now(timezone.utc)
+    ).order_by(UserSession.last_active_at.desc())
+    res = await db.execute(query)
+    return res.scalars().all()
+
+
+@router.delete("/sessions/{session_id}")
+async def revoke_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Revoke a specific active session."""
+    res = await db.execute(select(UserSession).where(UserSession.id == session_id, UserSession.user_id == current_user.id))
+    user_session = res.scalar_one_or_none()
+    if not user_session:
+        raise HTTPException(status_code=404, detail="Session not found.")
+        
+    await db.delete(user_session)
+    await db.commit()
+    return {"message": "Session revoked."}
+
+
+@router.post("/sessions/logout-all")
+async def logout_all_sessions(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Log out of all sessions (except current one optionally - here we just delete all)."""
+    res = await db.execute(select(UserSession).where(UserSession.user_id == current_user.id))
+    all_sessions = res.scalars().all()
+    
+    for s in all_sessions:
+        await db.delete(s)
+    await db.commit()
+    
+    return {"message": "Logged out of all sessions."}
+
+
+@router.get("/security-checkup")
+async def security_checkup(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Return security analysis such as unusual logins and 2FA status."""
+    res = await db.execute(select(UserSession).where(UserSession.user_id == current_user.id))
+    sessions = res.scalars().all()
+    
+    suspicious_logins = 0 # Dummy logic for now
+    
+    return {
+        "status": "secure" if current_user.is_2fa_enabled and suspicious_logins == 0 else "warning",
+        "is_2fa_enabled": current_user.is_2fa_enabled,
+        "active_devices_count": len(sessions),
+        "recent_alerts": suspicious_logins
+    }
+

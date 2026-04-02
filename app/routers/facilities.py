@@ -89,7 +89,7 @@ async def create_room(
         description=data.description,
     )
     db.add(room)
-    await db.flush()
+    await db.commit()
     await db.refresh(room)
     return room
 
@@ -114,7 +114,7 @@ async def update_room(
     room.amenities = data.amenities
     room.description = data.description
     db.add(room)
-    await db.flush()
+    await db.commit()
     await db.refresh(room)
     return room
 
@@ -135,7 +135,7 @@ async def delete_room(
 
     room.is_active = False
     db.add(room)
-    await db.flush()
+    await db.commit()
 
 
 # ── Booking ──
@@ -179,7 +179,7 @@ async def book_room(
         notes=data.notes,
     )
     db.add(booking)
-    await db.flush()
+    await db.commit()
     await db.refresh(booking)
     return booking
 
@@ -223,4 +223,4 @@ async def cancel_booking(
 
     booking.status = BookingStatus.CANCELLED.value
     db.add(booking)
-    await db.flush()
+    await db.commit()

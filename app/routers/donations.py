@@ -88,7 +88,7 @@ async def record_donation(
     db.add(donation)
     fund.current_balance = (fund.current_balance or Decimal("0")) + data.amount
     db.add(fund)
-    await db.flush()
+    await db.commit()
     await db.refresh(donation)
     dn, _ = await _get_names(db, donation.donor_id, donation.fund_id)
     return _don_resp(donation, dn, fund.name)
@@ -109,7 +109,7 @@ async def batch_record(
         db.add(fund)
         recorded += 1
         total_amount += d.amount
-    await db.flush()
+    await db.commit()
     return {"recorded": recorded, "total_amount": float(total_amount)}
 
 
@@ -235,7 +235,7 @@ async def list_pledges(status: Optional[str] = None, fund_id: Optional[int] = No
 async def create_pledge(data: PledgeCreate,
     current_user: User = Depends(require_role("admin", "pastor", "staff")), db: AsyncSession = Depends(get_db)):
     pledge = Pledge(**data.model_dump())
-    db.add(pledge); await db.flush(); await db.refresh(pledge)
+    db.add(pledge); await db.commit(); await db.refresh(pledge)
     return await _pledge_resp(pledge, db)
 
 

@@ -1,7 +1,7 @@
 """Import all models so Base.metadata.create_all() creates every table."""
 
 from app.models.church import Church  # noqa: F401
-from app.models.user import User, AuditLog  # noqa: F401
+from app.models.user import User, AuditLog, UserSession  # noqa: F401
 from app.models.member import Member, MemberNote  # noqa: F401
 from app.models.family import Family, FamilyRelationship  # noqa: F401
 from app.models.fund import Fund, Budget, Expense  # noqa: F401
@@ -34,3 +34,9 @@ from app.models.social import Follower, Bookmark, Mention, Report  # noqa: F401
 from app.models.login_streak import LoginDay, LoginStreak  # noqa: F401
 from app.models.sunday_checkin import CheckIn  # noqa: F401
 from app.models.music import ArtistProfile, Song, MusicDonation, SkipSubscription  # noqa: F401
+from app.models.settings import (  # noqa: F401
+    UserSettings, HiddenWord, BlockedAccount, RestrictedAccount,
+    MutedAccount, CloseFriend, Favourite, ArchivedContent
+)
+from app.models.user_activity import UserInteraction, UserContentView, RecentlyDeleted  # noqa: F401
+from app.models.support_tickets import SupportRequest, SupportReport, AbuseReport  # noqa: F401

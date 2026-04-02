@@ -69,7 +69,7 @@ async def list_services(db: AsyncSession = Depends(get_db), current_user: User =
 @router.post("/services", response_model=ServiceResponse, status_code=201)
 async def create_service(data: ServiceCreate,
     current_user: User = Depends(require_role("admin", "pastor")), db: AsyncSession = Depends(get_db)):
-    svc = Service(**data.model_dump()); db.add(svc); await db.flush(); await db.refresh(svc)
+    svc = Service(**data.model_dump()); db.add(svc); await db.commit(); await db.refresh(svc)
     return svc
 
 
@@ -84,7 +84,7 @@ async def check_in(data: CheckInRequest,
         check_in_time=datetime.now(timezone.utc), checked_in_by=current_user.id,
         is_first_time_guest=data.is_first_time_guest, guest_info=data.guest_info,
     )
-    db.add(record); await db.flush(); await db.refresh(record)
+    db.add(record); await db.commit(); await db.refresh(record)
     name = None
     if record.member_id:
         m = (await db.execute(select(Member).where(Member.id == record.member_id))).scalar_one_or_none()
@@ -323,7 +323,7 @@ async def sunday_checkin(
         year=today.year,
     )
     db.add(checkin)
-    await db.flush()
+    await db.commit()
 
     # Get updated year count
     year_count = (await db.execute(select(func.count()).where(
@@ -462,7 +462,7 @@ async def bulk_attendance(
             db.add(record)
             created += 1
 
-    await db.flush()
+    await db.commit()
     return {"created": created, "skipped": skipped, "service_id": data.service_id, "date": data.date.isoformat()}
 
 

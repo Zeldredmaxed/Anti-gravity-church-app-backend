@@ -68,7 +68,7 @@ async def create_event(
         **data.model_dump(),
     )
     db.add(event)
-    await db.flush()
+    await db.commit()
     await db.refresh(event)
     return EventResponse(
         id=event.id, church_id=event.church_id, title=event.title,
@@ -121,7 +121,7 @@ async def update_event(
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(e, field, value)
     db.add(e)
-    await db.flush()
+    await db.commit()
     await db.refresh(e)
     return EventResponse(
         id=e.id, church_id=e.church_id, title=e.title,
@@ -192,7 +192,7 @@ async def rsvp_event(
         elif old_status != "going" and data.status == "going":
             e.rsvp_count = (e.rsvp_count or 0) + 1
         db.add(e)
-        await db.flush()
+        await db.commit()
         await db.refresh(existing)
         rsvp = existing
     else:
@@ -212,7 +212,7 @@ async def rsvp_event(
                 data={"link_type": "event", "link_id": event_id},
                 church_id=e.church_id)
 
-        await db.flush()
+        await db.commit()
         await db.refresh(rsvp)
 
     return RSVPResponse(
