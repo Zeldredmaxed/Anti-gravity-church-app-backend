@@ -228,7 +228,7 @@ async def seed_dummy_data_dangerous():
     """Seeds exactly what is needed to test followers, messages, radio, and clips on a fresh DB."""
     from app.database import async_session
     from app.models.user import User
-    from app.models.social import Follow
+    from app.models.social import Follower
     from app.models.music import Song, ArtistProfile
     from app.models.clip import Clip
     from app.models.chat import Conversation, ConversationParticipant, Message
@@ -271,8 +271,8 @@ async def seed_dummy_data_dangerous():
             # 3. Create Followers (Make ALL dummies follow the first user/admin)
             for dup in dummy_users:
                 if dup.id != owner_id:
-                    db.add(Follow(follower_id=dup.id, followed_id=owner_id))
-                    db.add(Follow(follower_id=owner_id, followed_id=dup.id)) # mutual follow
+                    db.add(Follower(follower_id=dup.id, followed_id=owner_id))
+                    db.add(Follower(follower_id=owner_id, followed_id=dup.id)) # mutual follow
             
             # 4. Create an Artist & Song for Radio
             artist = ArtistProfile(user_id=owner_id, church_id=church_id, artist_name="The Voices of Anti-Gravity", bio="Our Church Band", genre="Gospel")
