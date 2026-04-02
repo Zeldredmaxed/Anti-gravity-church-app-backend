@@ -166,6 +166,14 @@ app.include_router(ws_router)
 app.include_router(assistant_router, prefix=API_PREFIX)
 
 
+@app.get("/nuke-database-dangerous")
+async def nuke_database_dangerous():
+    from app.database import engine, Base
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    return {"message": "Database completely wiped and rebuilt."}
+
 @app.get("/", tags=["Health"])
 async def root():
     return {
