@@ -38,14 +38,19 @@ async def get_clips_feed(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     category: str = Query(None),
+    author_id: int = Query(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
     """Get clips feed — cross-church, all approved clips."""
     query = select(Clip).where(
         Clip.is_deleted == False,
         Clip.moderation_status == "approved")
+        
     if category:
         query = query.where(Clip.category == category)
+    if author_id:
+        query = query.where(Clip.author_id == author_id)
+        
     query = query.order_by(Clip.is_featured.desc(), Clip.created_at.desc())
     query = query.offset(offset).limit(limit)
 
@@ -129,7 +134,7 @@ async def create_clip(
         tags=data.tags or [],
     )
     db.add(clip)
-    await db.flush()
+    await db.commit()
     await db.refresh(clip)
     await process_mentions(db, clip.description, current_user.id, "clip", clip.id)
     await db.commit()
@@ -171,7 +176,7 @@ async def amen_clip(
             f"{current_user.full_name} amened your glory clip",
             data={"link_type": "clip", "link_id": clip_id})
 
-    await db.flush()
+    await db.commit()
     return {"message": "Amened", "like_count": s.like_count}
 
 
@@ -214,7 +219,7 @@ async def add_comment(
             body=data.content[:100],
             data={"link_type": "clip", "link_id": clip_id})
 
-    await db.flush()
+    await db.commit()
     await db.refresh(comment)
     
     await process_mentions(db, comment.content, current_user.id, "clip_comment", comment.id)
@@ -275,7 +280,7 @@ async def record_view(
     db.add(view)
     s.view_count = (s.view_count or 0) + 1
     db.add(s)
-    await db.flush()
+    await db.commit()
     return {"message": "View recorded", "view_count": s.view_count}
 
 
@@ -308,7 +313,7 @@ async def share_clip(
     
     s.share_count = (s.share_count or 0) + 1
     db.add(s)
-    await db.flush()
+    await db.commit()
     
     share_url = f"https://app.church.com/s/{clip_id}"
     return {"message": "Clip shared", "share_count": s.share_count, "share_url": share_url}
