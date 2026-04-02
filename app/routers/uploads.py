@@ -101,6 +101,9 @@ async def upload_file(
             detail=f"File too large ({file_size // (1024 * 1024)}MB). "
                    f"Maximum for this type is {max_mb}MB."
         )
+    
+    # Reset file pointer after reading size
+    await file.seek(0)
 
     # Upload to Cloudinary
     resource = _resource_type(content_type)
@@ -173,6 +176,9 @@ async def upload_multiple_files(
             max_mb = max_size // (1024 * 1024)
             results.append({"error": f"Skipped '{file.filename}': too large ({file_size // (1024*1024)}MB > {max_mb}MB)"})
             continue
+            
+        # Reset file pointer after reading size
+        await file.seek(0)
 
         resource = _resource_type(content_type)
         try:
