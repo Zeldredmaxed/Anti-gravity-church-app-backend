@@ -167,7 +167,7 @@ app = FastAPI(
     description=(
         "Multi-tenant church management backend with member CRM, fund accounting, "
         "donation tracking, attendance, groups, real-time chat, social feed, "
-        "shorts, events, prayer requests, notifications, and analytics. "
+        "glory clips, events, prayer requests, notifications, and analytics. "
         "White-label ready."
     ),
     version="3.0.0",

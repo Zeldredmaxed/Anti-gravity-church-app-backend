@@ -30,3 +30,7 @@ from app.models.task import MinistryTask  # noqa: F401
 from app.models.care import CareCase, CareNote  # noqa: F401
 from app.models.activity_log import MemberActivityLog  # noqa: F401
 from app.models.facility import FacilityRoom, RoomBooking  # noqa: F401
+from app.models.social import FlockMember, Meditation, Mention, Report  # noqa: F401
+from app.models.login_streak import UserLoginDay, UserStreak  # noqa: F401
+from app.models.sunday_checkin import SundayCheckIn  # noqa: F401
+from app.models.music import ArtistProfile, Song, MusicDonation, SkipSubscription  # noqa: F401
