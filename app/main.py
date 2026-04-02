@@ -32,7 +32,6 @@ from app.routers.scriptures import router as scriptures_router
 from app.routers.social import router as social_router
 from app.routers.seek import router as seek_router
 from app.routers.store import router as store_router
-from app.routers.shorts import router as shorts_router
 from app.routers.chat import router as chat_router
 from app.routers.payment_methods import router as payment_methods_router
 from app.routers.support import router as support_router
@@ -214,7 +213,6 @@ app.include_router(alerts_router, prefix=API_PREFIX)
 app.include_router(sermons_router, prefix=API_PREFIX)
 app.include_router(bible_router, prefix=API_PREFIX)
 app.include_router(scriptures_router, prefix=API_PREFIX)
-app.include_router(shorts_router, prefix=API_PREFIX)
 app.include_router(chat_router, prefix=API_PREFIX)
 app.include_router(payment_methods_router, prefix=API_PREFIX)
 app.include_router(support_router, prefix=API_PREFIX)
@@ -251,7 +249,7 @@ async def root():
         "version": "4.0.0",
         "status": "operational",
         "features": [
-            "multi-tenant", "chat", "feed", "shorts", "events",
+            "multi-tenant", "chat", "feed", "glory_clips", "events",
             "prayers", "notifications", "crm", "giving", "attendance",
             "2fa", "facilities", "stripe", "sms", "email",
             "activity-timeline", "care-notes", "volunteer-hours",
