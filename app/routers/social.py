@@ -172,7 +172,7 @@ async def get_followers(user_id: int, db: AsyncSession = Depends(get_db), curren
     return {"data": items}
 
 
-@router.get("/social/shepherding/{user_id}/following")
+@router.get("/social/flock/{user_id}/following")
 async def get_following(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
         select(Follower, User).join(User, Follower.followed_id == User.id).where(Follower.follower_id == user_id)
