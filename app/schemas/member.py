@@ -17,6 +17,7 @@ class MemberCreate(BaseModel):
     zip_code: Optional[str] = None
     date_of_birth: Optional[date] = None
     gender: Optional[str] = None
+    pronouns: Optional[str] = None
     marital_status: Optional[str] = None
     photo_url: Optional[str] = None
     membership_status: str = "visitor"
@@ -47,6 +48,7 @@ class MemberUpdate(BaseModel):
     zip_code: Optional[str] = None
     date_of_birth: Optional[date] = None
     gender: Optional[str] = None
+    pronouns: Optional[str] = None
     marital_status: Optional[str] = None
     photo_url: Optional[str] = None
     membership_status: Optional[str] = None
@@ -78,6 +80,7 @@ class MemberResponse(BaseModel):
     zip_code: Optional[str] = None
     date_of_birth: Optional[date] = None
     gender: Optional[str] = None
+    pronouns: Optional[str] = None
     marital_status: Optional[str] = None
     photo_url: Optional[str] = None
     membership_status: str

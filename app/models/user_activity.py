@@ -72,3 +72,17 @@ class RecentlyDeleted(Base):
     expires_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc) + timedelta(days=30), index=True)
 
     user = relationship("Member", foreign_keys=[user_id])
+
+
+class TimeSpentSession(Base):
+    __tablename__ = "time_spent_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    screen_name = Column(String(100), nullable=False)
+    duration_seconds = Column(Integer, nullable=False)
+
+    logged_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+
+    user = relationship("User", foreign_keys=[user_id])

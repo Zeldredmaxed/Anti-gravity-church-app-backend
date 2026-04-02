@@ -133,3 +133,62 @@ async def remove_group_member(group_id: int, member_id: int,
     ))).scalar_one_or_none()
     if not gm: raise HTTPException(status_code=404, detail="Membership not found")
     await db.delete(gm)
+    await db.commit()
+
+
+@router.post("/{group_id}/join", status_code=201)
+async def join_group(group_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Self-serve: any authenticated user can join a group (checks capacity)."""
+    g = (await db.execute(select(Group).where(Group.id == group_id))).scalar_one_or_none()
+    if not g:
+        raise HTTPException(status_code=404, detail="Group not found")
+    if not g.is_active:
+        raise HTTPException(status_code=400, detail="This group is not currently active")
+
+    member_id = current_user.member_id or current_user.id
+
+    # Check if already a member
+    existing = (await db.execute(select(GroupMembership).where(
+        GroupMembership.group_id == group_id, GroupMembership.member_id == member_id
+    ))).scalar_one_or_none()
+    if existing:
+        raise HTTPException(status_code=400, detail="Already a member of this group")
+
+    # Check capacity
+    if g.max_capacity:
+        count = (await db.execute(select(func.count()).where(
+            GroupMembership.group_id == group_id
+        ))).scalar() or 0
+        if count >= g.max_capacity:
+            raise HTTPException(status_code=400, detail="Group is at maximum capacity")
+
+    gm = GroupMembership(
+        group_id=group_id,
+        member_id=member_id,
+        role="member",
+        joined_date=date.today(),
+    )
+    db.add(gm)
+    await db.commit()
+    return {"message": "Successfully joined the group", "membership_id": gm.id}
+
+
+@router.post("/{group_id}/leave")
+async def leave_group(group_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Self-serve: any member can leave a group."""
+    member_id = current_user.member_id or current_user.id
+
+    gm = (await db.execute(select(GroupMembership).where(
+        GroupMembership.group_id == group_id, GroupMembership.member_id == member_id
+    ))).scalar_one_or_none()
+    if not gm:
+        raise HTTPException(status_code=404, detail="You are not a member of this group")
+
+    await db.delete(gm)
+    await db.commit()
+    return {"message": "Successfully left the group"}
+

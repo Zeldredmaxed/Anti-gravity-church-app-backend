@@ -38,5 +38,6 @@ from app.models.settings import (  # noqa: F401
     UserSettings, HiddenWord, BlockedAccount, RestrictedAccount,
     MutedAccount, CloseFriend, Favourite, ArchivedContent
 )
-from app.models.user_activity import UserInteraction, UserContentView, RecentlyDeleted  # noqa: F401
+from app.models.user_activity import UserInteraction, UserContentView, RecentlyDeleted, TimeSpentSession  # noqa: F401
 from app.models.support_tickets import SupportRequest, SupportReport, AbuseReport  # noqa: F401
+from app.models.saved import SavedItem  # noqa: F401

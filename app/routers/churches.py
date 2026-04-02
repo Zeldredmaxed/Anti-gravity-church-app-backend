@@ -123,6 +123,31 @@ async def list_churches(q: str | None = None, db: AsyncSession = Depends(get_db)
     return churches
 
 
+@router.get("/{church_id}")
+async def get_church_by_id(church_id: int, db: AsyncSession = Depends(get_db)):
+    """Public: get a church by its ID."""
+    church = (await db.execute(
+        select(Church).where(Church.id == church_id)
+    )).scalar_one_or_none()
+    if not church:
+        raise HTTPException(status_code=404, detail="Church not found")
+    return {
+        "data": {
+            "id": church.id,
+            "name": church.name,
+            "subdomain": church.subdomain,
+            "description": getattr(church, "description", None),
+            "address": getattr(church, "address", None),
+            "phone_number": getattr(church, "phone_number", None),
+            "website": getattr(church, "website", None),
+            "logo_url": getattr(church, "logo_url", None),
+            "cover_image_url": getattr(church, "cover_image_url", None),
+            "timezone": getattr(church, "timezone", None),
+            "is_active": church.is_active,
+        }
+    }
+
+
 @router.get("/about")
 async def get_church_about(
     current_user: User = Depends(get_current_user),

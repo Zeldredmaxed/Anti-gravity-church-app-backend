@@ -76,6 +76,59 @@ async def list_conversations(
     return items
 
 
+@router.get("/requests")
+async def get_chat_requests(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Return conversations that were initiated by others where the current user hasn't replied yet."""
+    # Get all conversation IDs where I'm a participant
+    my_convos = (await db.execute(
+        select(ConversationParticipant.conversation_id).where(
+            ConversationParticipant.user_id == current_user.id
+        )
+    )).scalars().all()
+
+    pending = []
+    for cid in my_convos:
+        # Check if I've ever sent a message in this convo
+        my_msg_count = (await db.execute(
+            select(func.count()).where(
+                Message.conversation_id == cid,
+                Message.sender_id == current_user.id,
+            )
+        )).scalar() or 0
+
+        if my_msg_count == 0:
+            # I've never replied — this is a pending request
+            conv = (await db.execute(
+                select(Conversation).where(Conversation.id == cid)
+            )).scalar_one_or_none()
+            if conv:
+                # Get who started it
+                first_msg = (await db.execute(
+                    select(Message).where(Message.conversation_id == cid)
+                    .order_by(Message.created_at.asc()).limit(1)
+                )).scalar_one_or_none()
+
+                sender_name = None
+                if first_msg:
+                    sender = (await db.execute(
+                        select(User).where(User.id == first_msg.sender_id)
+                    )).scalar_one_or_none()
+                    sender_name = sender.full_name if sender else "Unknown"
+
+                pending.append({
+                    "id": conv.id,
+                    "type": conv.type,
+                    "name": conv.name,
+                    "sender_name": sender_name,
+                    "preview": first_msg.content[:100] if first_msg else None,
+                    "created_at": conv.created_at.isoformat() if conv.created_at else None,
+                })
+
+    return {"data": pending}
+
+
 @router.post("", response_model=ConversationResponse, status_code=201)
 async def create_conversation(
     data: ConversationCreate,

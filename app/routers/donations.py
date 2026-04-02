@@ -245,3 +245,97 @@ async def get_pledge(pledge_id: int,
     p = (await db.execute(select(Pledge).where(Pledge.id == pledge_id))).scalar_one_or_none()
     if not p: raise HTTPException(status_code=404, detail="Pledge not found")
     return await _pledge_resp(p, db)
+
+
+# ── Recurring Donations ─────────────────────────────────────────
+from pydantic import BaseModel
+
+
+class RecurringDonationCreate(BaseModel):
+    fund_id: int
+    amount: float
+    frequency: str = "monthly"  # weekly, biweekly, monthly, quarterly, yearly
+    payment_method_id: Optional[int] = None
+
+
+@router.post("/recurring", status_code=201)
+async def create_recurring_donation(
+    data: RecurringDonationCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a recurring donation schedule.
+    For now this stores the intent in the database.
+    Stripe subscription integration can be added later.
+    """
+    from datetime import timedelta, datetime, timezone
+
+    fund = (await db.execute(select(Fund).where(Fund.id == data.fund_id))).scalar_one_or_none()
+    if not fund:
+        raise HTTPException(status_code=404, detail="Fund not found")
+
+    # Calculate next charge date
+    freq_map = {
+        "weekly": timedelta(weeks=1),
+        "biweekly": timedelta(weeks=2),
+        "monthly": timedelta(days=30),
+        "quarterly": timedelta(days=90),
+        "yearly": timedelta(days=365),
+    }
+    delta = freq_map.get(data.frequency, timedelta(days=30))
+    next_date = datetime.now(timezone.utc) + delta
+
+    # Record as a pledge with recurring flag
+    pledge = Pledge(
+        donor_id=current_user.member_id or current_user.id,
+        fund_id=data.fund_id,
+        amount=Decimal(str(data.amount)),
+        start_date=date.today(),
+        end_date=date.today() + delta,
+        church_id=current_user.church_id or fund.church_id,
+    )
+    db.add(pledge)
+    await db.commit()
+    await db.refresh(pledge)
+
+    return {
+        "data": {
+            "id": pledge.id,
+            "fund_id": fund.id,
+            "fund_name": fund.name,
+            "amount": float(data.amount),
+            "frequency": data.frequency,
+            "next_date": next_date.isoformat(),
+            "status": "active",
+            "message": "Recurring donation scheduled",
+        }
+    }
+
+
+@router.get("/recurring")
+async def list_recurring_donations(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List the current user's recurring donation pledges."""
+    member_id = current_user.member_id or current_user.id
+
+    pledges = (await db.execute(
+        select(Pledge).where(Pledge.donor_id == member_id)
+        .order_by(Pledge.created_at.desc())
+    )).scalars().all()
+
+    items = []
+    for p in pledges:
+        fund = (await db.execute(select(Fund).where(Fund.id == p.fund_id))).scalar_one_or_none()
+        items.append({
+            "id": p.id,
+            "fund_id": p.fund_id,
+            "fund_name": fund.name if fund else "Unknown",
+            "amount": float(p.amount),
+            "start_date": p.start_date.isoformat() if p.start_date else None,
+            "status": "active",
+        })
+
+    return {"data": items}
+

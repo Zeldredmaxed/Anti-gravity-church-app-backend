@@ -380,6 +380,39 @@ async def record_play(
     return {"data": {"play_count": song.play_count}}
 
 
+@router.delete("/songs/{song_id}")
+async def delete_song(
+    song_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft-delete a song. Only the artist who uploaded it can delete."""
+    song = (await db.execute(select(Song).where(Song.id == song_id))).scalar_one_or_none()
+    if not song:
+        raise HTTPException(status_code=404, detail="Song not found")
+
+    # Verify ownership
+    artist = (await db.execute(
+        select(ArtistProfile).where(
+            ArtistProfile.id == song.artist_id,
+            ArtistProfile.user_id == current_user.id,
+        )
+    )).scalar_one_or_none()
+    if not artist and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="You can only delete your own songs")
+
+    song.is_active = False
+    db.add(song)
+    await db.commit()
+
+    # Remove from live radio queue if present
+    if _station.is_live:
+        _station.queue = [s for s in _station.queue if s.get("id") != song_id]
+
+    return {"message": "Song deleted"}
+
+
+
 # ── Artist Profiles ─────────────────────────────────────────────────
 
 @router.post("/artist/register", status_code=201)

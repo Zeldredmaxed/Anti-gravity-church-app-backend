@@ -59,6 +59,8 @@ import app.routers.support  # Ensure SupportTicket model is collected
 import app.models.music  # Ensure music models are collected
 from app.routers.user_activity import router as user_activity_router
 from app.routers.support_center import router as support_center_router
+from app.routers.saved import router as saved_router
+from app.routers.settings import router as settings_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -66,7 +68,11 @@ async def lifespan(app: FastAPI):
     await init_db()
     
     # Run critical one-time migrations
-    migrations = []
+    migrations = [
+        "ALTER TABLE members ADD COLUMN IF NOT EXISTS pronouns VARCHAR(30)",
+        "CREATE TABLE IF NOT EXISTS saved_items (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, content_type VARCHAR(30) NOT NULL, content_id VARCHAR(255) NOT NULL, title VARCHAR(500), thumbnail_url VARCHAR(500), subtitle VARCHAR(500), saved_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(user_id, content_type, content_id))",
+        "CREATE TABLE IF NOT EXISTS time_spent_sessions (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, screen_name VARCHAR(100) NOT NULL, duration_seconds INTEGER NOT NULL, logged_at TIMESTAMPTZ DEFAULT NOW())",
+    ]
     
     for query in migrations:
         try:
@@ -163,7 +169,8 @@ app.include_router(statements_router, prefix=API_PREFIX)
 app.include_router(stripe_webhooks_router, prefix=API_PREFIX)
 app.include_router(user_activity_router, prefix=API_PREFIX)
 app.include_router(support_center_router, prefix=API_PREFIX)
-app.include_router(seek_router, prefix=API_PREFIX)
+app.include_router(saved_router, prefix=API_PREFIX)
+app.include_router(settings_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})

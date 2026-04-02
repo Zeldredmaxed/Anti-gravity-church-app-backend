@@ -459,3 +459,61 @@ async def security_checkup(
         "recent_alerts": suspicious_logins
     }
 
+
+@router.get("/account-status")
+async def account_status(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Return the current user's account status summary."""
+    from app.models.church import Church
+
+    church_name = None
+    if current_user.church_id:
+        church = (await db.execute(
+            select(Church).where(Church.id == current_user.church_id)
+        )).scalar_one_or_none()
+        if church:
+            church_name = church.name
+
+    return {
+        "data": {
+            "account_type": current_user.role,
+            "is_active": current_user.is_active,
+            "is_verified": current_user.is_2fa_enabled,
+            "is_2fa_enabled": current_user.is_2fa_enabled,
+            "email": current_user.email,
+            "username": current_user.username,
+            "full_name": current_user.full_name,
+            "church_id": current_user.church_id,
+            "church_name": church_name,
+            "joined_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "last_login_at": current_user.last_login_at.isoformat() if current_user.last_login_at else None,
+        }
+    }
+
+
+@router.post("/invites/generate")
+async def generate_invite(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Generate a shareable invite code for the current user's church."""
+    import uuid
+
+    if not current_user.church_id:
+        raise HTTPException(status_code=400, detail="You must be in a church to generate invites")
+
+    invite_code = str(uuid.uuid4())[:8].upper()
+
+    return {
+        "data": {
+            "invite_code": invite_code,
+            "church_id": current_user.church_id,
+            "invite_url": f"https://antigravitychurch.com/join/{invite_code}",
+            "generated_by": current_user.full_name,
+            "expires_in": "7 days",
+        }
+    }
+
+

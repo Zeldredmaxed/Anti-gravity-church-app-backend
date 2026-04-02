@@ -65,6 +65,7 @@ class Member(Base):
     # Demographics
     date_of_birth = Column(Date, nullable=True)
     gender = Column(String(20), nullable=True)
+    pronouns = Column(String(30), nullable=True)  # e.g. "he/him", "she/her", "they/them"
     marital_status = Column(String(20), nullable=True)
     photo_url = Column(String(500), nullable=True)
     avatar_url = Column(String(500), nullable=True)  # Dashboard-facing alias

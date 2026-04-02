@@ -227,3 +227,99 @@ async def get_archived_content(
     
     res = await db.execute(query)
     return res.scalars().all()
+
+# ── Content Viewed Alias ────────────────────────────────────────
+# Frontend calls /activity/content-viewed, backend has /activity/viewed
+@router.get("/content-viewed", response_model=List[ContentViewResponse])
+async def get_content_viewed_alias(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Alias for /activity/viewed — returns content the user has viewed."""
+    if not current_user.member_id:
+        raise HTTPException(status_code=400, detail="User is not a member.")
+
+    query = select(UserContentView).where(
+        UserContentView.user_id == current_user.member_id
+    ).order_by(UserContentView.viewed_at.desc()).limit(50)
+    res = await db.execute(query)
+    return res.scalars().all()
+
+
+# ── Time Spent Tracking ─────────────────────────────────────────
+from app.models.user_activity import TimeSpentSession
+
+class TimeSpentLog(BaseModel):
+    screen_name: str
+    duration_seconds: int
+
+class TimeSpentResponse(BaseModel):
+    id: int
+    screen_name: str
+    duration_seconds: int
+    logged_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/time-spent")
+async def get_time_spent(
+    days: int = Query(7, ge=1, le=90),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get the user's screen time summary for the last N days."""
+    from sqlalchemy import func as sqlfunc
+    cutoff = datetime.now(timezone.utc) - __import__("datetime").timedelta(days=days)
+
+    results = (await db.execute(
+        select(
+            sqlfunc.date(TimeSpentSession.logged_at).label("date"),
+            sqlfunc.sum(TimeSpentSession.duration_seconds).label("total_seconds"),
+        )
+        .where(
+            TimeSpentSession.user_id == current_user.id,
+            TimeSpentSession.logged_at >= cutoff,
+        )
+        .group_by(sqlfunc.date(TimeSpentSession.logged_at))
+        .order_by(sqlfunc.date(TimeSpentSession.logged_at).desc())
+    )).all()
+
+    daily = [{"date": str(r.date), "minutes": round(r.total_seconds / 60, 1)} for r in results]
+    total_minutes = sum(d["minutes"] for d in daily)
+    weekly_avg = round(total_minutes / max(days / 7, 1), 1)
+
+    return {
+        "data": {
+            "daily": daily,
+            "total_minutes": round(total_minutes, 1),
+            "weekly_avg": weekly_avg,
+            "days": days,
+        }
+    }
+
+
+@router.post("/time-spent", status_code=201)
+async def log_time_spent(
+    data: TimeSpentLog,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Log a screen-time session from the frontend."""
+    session = TimeSpentSession(
+        user_id=current_user.id,
+        screen_name=data.screen_name,
+        duration_seconds=data.duration_seconds,
+    )
+    db.add(session)
+    await db.commit()
+    await db.refresh(session)
+
+    return {
+        "id": session.id,
+        "screen_name": session.screen_name,
+        "duration_seconds": session.duration_seconds,
+        "logged_at": session.logged_at.isoformat(),
+    }
+
