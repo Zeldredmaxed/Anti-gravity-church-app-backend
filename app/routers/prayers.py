@@ -17,21 +17,31 @@ from app.utils.security import get_current_user, require_role
 router = APIRouter(prefix="/prayers", tags=["Prayer Requests"])
 
 
-def _prayer_response(p, author_name=None, responses=None, is_prayed_by_me=False, author_avatar=None):
-    return PrayerRequestResponse(
-        id=p.id, church_id=p.church_id,
-        author_id=None if p.is_anonymous else p.author_id,
-        author_name=None if p.is_anonymous else author_name,
-        author_avatar=None if p.is_anonymous else author_avatar,
-        title=p.title, description=p.description, category=p.category,
-        is_anonymous=p.is_anonymous, is_urgent=p.is_urgent,
-        is_answered=p.is_answered, answered_testimony=p.answered_testimony,
-        prayed_count=p.prayed_count, visibility=p.visibility,
-        is_prayed_by_me=is_prayed_by_me,
-        created_at=p.created_at, responses=responses or [])
+def _prayer_dict(p, author_name=None, responses=None, is_prayed_by_me=False, author_avatar=None):
+    """Build a prayer response dict with all frontend-expected fields."""
+    return {
+        "id": p.id,
+        "church_id": p.church_id,
+        "author_id": None if p.is_anonymous else p.author_id,
+        "author_name": None if p.is_anonymous else author_name,
+        "author_avatar": None if p.is_anonymous else author_avatar,
+        "title": p.title,
+        "description": p.description,
+        "category": p.category or "general",
+        "is_anonymous": p.is_anonymous,
+        "is_urgent": p.is_urgent,
+        "is_answered": p.is_answered,
+        "answered_testimony": p.answered_testimony,
+        "prayed_count": p.prayed_count or 0,
+        "visibility": p.visibility,
+        "has_prayed": is_prayed_by_me,
+        "is_prayed_by_me": is_prayed_by_me,
+        "created_at": p.created_at.isoformat() if p.created_at else None,
+        "responses": responses or [],
+    }
 
 
-@router.get("", response_model=list[PrayerRequestResponse])
+@router.get("")
 async def prayer_wall(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -58,7 +68,7 @@ async def prayer_wall(
     query = query.offset(offset).limit(limit)
 
     prayers = (await db.execute(query)).scalars().all()
-    
+
     prayer_ids = [p.id for p in prayers]
     my_prayers = set()
     if prayer_ids:
@@ -70,20 +80,20 @@ async def prayer_wall(
             )
         )).scalars().all()
         my_prayers = set(prayed_rows)
-        
+
     items = []
     for p in prayers:
         author = (await db.execute(select(User).where(User.id == p.author_id))).scalar_one_or_none()
-        items.append(_prayer_response(
-            p, 
-            author.full_name if author else None, 
-            is_prayed_by_me=(p.id in my_prayers), 
+        items.append(_prayer_dict(
+            p,
+            author.full_name if author else None,
+            is_prayed_by_me=(p.id in my_prayers),
             author_avatar=getattr(author, "avatar_url", None) if author else None
         ))
     return items
 
 
-@router.post("", response_model=PrayerRequestResponse, status_code=201)
+@router.post("", status_code=201)
 async def submit_prayer(
     data: PrayerRequestCreate,
     current_user: User = Depends(get_current_user),
@@ -96,17 +106,18 @@ async def submit_prayer(
     db.add(prayer)
     await db.commit()
     await db.refresh(prayer)
-    return _prayer_response(prayer,
+    return _prayer_dict(prayer,
         None if data.is_anonymous else current_user.full_name,
         is_prayed_by_me=False,
         author_avatar=None if data.is_anonymous else getattr(current_user, "avatar_url", None))
 
 
-@router.get("/{prayer_id}", response_model=PrayerRequestResponse)
+@router.get("/{prayer_id}")
 async def get_prayer(
     prayer_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
+    """Get a single prayer by ID — returns {data: {...}}."""
     p = (await db.execute(select(PrayerRequest).where(
         PrayerRequest.id == prayer_id,
         PrayerRequest.church_id == current_user.church_id,
@@ -125,12 +136,15 @@ async def get_prayer(
     responses = []
     for r in resp_rows:
         responder = (await db.execute(select(User).where(User.id == r.responder_id))).scalar_one_or_none()
-        responses.append(PrayerResponseSchema(
-            id=r.id, author_id=r.responder_id,
-            author_name=responder.full_name if responder else None,
-            author_avatar=getattr(responder, "avatar_url", None) if responder else None,
-            content=r.content, is_prayed=r.is_prayed,
-            created_at=r.created_at))
+        responses.append({
+            "id": r.id,
+            "author_id": r.responder_id,
+            "author_name": responder.full_name if responder else None,
+            "author_avatar": getattr(responder, "avatar_url", None) if responder else None,
+            "content": r.content,
+            "is_prayed": r.is_prayed,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        })
 
     is_prayed = (await db.execute(select(PrayerResponseEntry).where(
         PrayerResponseEntry.prayer_request_id == prayer_id,
@@ -138,21 +152,60 @@ async def get_prayer(
         PrayerResponseEntry.is_prayed == True
     ))).scalar_one_or_none() is not None
 
-    return _prayer_response(
-        p, 
-        author.full_name if author else None, 
-        responses, 
+    result = _prayer_dict(
+        p,
+        author.full_name if author else None,
+        responses,
         is_prayed_by_me=is_prayed,
         author_avatar=getattr(author, "avatar_url", None) if author else None
     )
+    return {"data": result}
 
+
+# ── Comments endpoints ──
+
+@router.get("/{prayer_id}/comments")
+async def get_prayer_comments(
+    prayer_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+    """Get comments/responses for a prayer — returns {data: [...]}."""
+    p = (await db.execute(select(PrayerRequest).where(
+        PrayerRequest.id == prayer_id,
+        PrayerRequest.is_deleted == False
+    ))).scalar_one_or_none()
+    if not p:
+        raise HTTPException(status_code=404, detail="Prayer request not found")
+
+    resp_rows = (await db.execute(
+        select(PrayerResponseEntry).where(
+            PrayerResponseEntry.prayer_request_id == prayer_id,
+            PrayerResponseEntry.content.isnot(None),
+        ).order_by(PrayerResponseEntry.created_at)
+    )).scalars().all()
+
+    comments = []
+    for r in resp_rows:
+        responder = (await db.execute(select(User).where(User.id == r.responder_id))).scalar_one_or_none()
+        comments.append({
+            "id": r.id,
+            "content": r.content,
+            "author_name": responder.full_name if responder else "Anonymous",
+            "author_avatar": getattr(responder, "avatar_url", None) if responder else None,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        })
+
+    return {"data": comments}
+
+
+# ── Pray toggle ──
 
 @router.post("/{prayer_id}/pray")
 async def toggle_pray(
     prayer_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
-    """Toggle 'I prayed for this' — pray if not already, unpray if already prayed."""
+    """Toggle 'I prayed for this' — returns {data: {prayed, prayed_count}}."""
     p = (await db.execute(select(PrayerRequest).where(
         PrayerRequest.id == prayer_id, PrayerRequest.is_deleted == False
     ))).scalar_one_or_none()
@@ -172,7 +225,7 @@ async def toggle_pray(
         p.prayed_count = max((p.prayed_count or 1) - 1, 0)
         db.add(p)
         await db.commit()
-        return {"data": {"has_prayed": False, "pray_count": p.prayed_count}}
+        return {"data": {"prayed": False, "prayed_count": p.prayed_count}}
     else:
         # Pray — create record, increment count
         resp = PrayerResponseEntry(
@@ -190,11 +243,13 @@ async def toggle_pray(
                 church_id=p.church_id)
 
         await db.commit()
-        return {"data": {"has_prayed": True, "pray_count": p.prayed_count}}
+        return {"data": {"prayed": True, "prayed_count": p.prayed_count}}
 
 
-@router.post("/{prayer_id}/respond", response_model=PrayerResponseSchema, status_code=201)
-@router.post("/{prayer_id}/comments", response_model=PrayerResponseSchema, status_code=201)
+# ── Add comment/respond ──
+
+@router.post("/{prayer_id}/respond", status_code=201)
+@router.post("/{prayer_id}/comments", status_code=201)
 async def respond_to_prayer(
     prayer_id: int, data: PrayerResponseCreate,
     current_user: User = Depends(get_current_user),
@@ -226,12 +281,18 @@ async def respond_to_prayer(
 
     await db.commit()
     await db.refresh(resp)
-    return PrayerResponseSchema(
-        id=resp.id, author_id=resp.responder_id,
-        author_name=author_name,
-        author_avatar=getattr(current_user, "avatar_url", None),
-        content=resp.content, is_prayed=resp.is_prayed,
-        created_at=resp.created_at)
+    return {
+        "id": resp.id,
+        "author_id": resp.responder_id,
+        "author_name": author_name,
+        "author_avatar": getattr(current_user, "avatar_url", None),
+        "content": resp.content,
+        "is_prayed": resp.is_prayed,
+        "created_at": resp.created_at.isoformat() if resp.created_at else None,
+    }
+
+
+# ── Mark answered ──
 
 @router.put("/{prayer_id}/answered")
 async def mark_answered(
@@ -253,6 +314,8 @@ async def mark_answered(
     await db.refresh(p)
     return {"id": p.id, "is_answered": True, "status": "answered"}
 
+
+# ── Delete ──
 
 @router.delete("/{prayer_id}")
 async def delete_prayer(
