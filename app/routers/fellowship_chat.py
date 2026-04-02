@@ -94,6 +94,14 @@ async def create_conversation(
         for c in existing:
             pids = {p.user_id for p in c.participants}
             if pids == {current_user.id, other_id}:
+                if data.message:
+                    msg = Message(
+                        conversation_id=c.id, sender_id=current_user.id,
+                        content=data.message, message_type="text")
+                    db.add(msg)
+                    c.last_message_at = datetime.now(timezone.utc)
+                    db.add(c)
+                    await db.commit()
                 return ConversationResponse(
                     id=c.id, church_id=c.church_id, type=c.type, name=c.name,
                     avatar_url=c.avatar_url, created_by=c.created_by,
@@ -117,6 +125,16 @@ async def create_conversation(
             role="admin" if uid == current_user.id else "member")
         db.add(p)
     await db.commit()
+
+    if data.message:
+        msg = Message(
+            conversation_id=convo.id, sender_id=current_user.id,
+            content=data.message, message_type="text")
+        db.add(msg)
+        convo.last_message_at = datetime.now(timezone.utc)
+        db.add(convo)
+        await db.commit()
+
     await db.refresh(convo)
 
     return ConversationResponse(

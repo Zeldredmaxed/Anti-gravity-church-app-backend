@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, or_, and_
 from datetime import datetime, timezone, timedelta
 
 from app.database import get_db
@@ -42,10 +42,16 @@ async def get_clips_feed(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
     """Get clips feed — cross-church, all approved clips."""
-    query = select(Clip).where(
-        Clip.is_deleted == False,
-        Clip.moderation_status == "approved")
-        
+    query = select(Clip).where(Clip.is_deleted == False)
+
+    # Allow users to see their own pending clips, but only approved clips from others
+    query = query.where(
+        or_(
+            Clip.moderation_status == "approved",
+            Clip.author_id == current_user.id
+        )
+    )
+
     if category:
         query = query.where(Clip.category == category)
     if author_id:

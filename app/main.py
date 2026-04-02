@@ -163,6 +163,7 @@ app.include_router(statements_router, prefix=API_PREFIX)
 app.include_router(stripe_webhooks_router, prefix=API_PREFIX)
 app.include_router(user_activity_router, prefix=API_PREFIX)
 app.include_router(support_center_router, prefix=API_PREFIX)
+app.include_router(seek_router, prefix=API_PREFIX)
 from app.routers.assistant import router as assistant_router
 
 # WebSocket (no API prefix — mounted at /ws/chat/{id})

@@ -131,7 +131,7 @@ async def websocket_chat(websocket: WebSocket, conversation_id: int):
                     msg = Message(
                         conversation_id=conversation_id,
                         sender_id=user.id,
-                        content=data.get("content"),
+                        content=data.get("content") or data.get("text") or data.get("message"),
                         message_type=data.get("message_type", "text"),
                         media_url=data.get("media_url"),
                         reply_to=data.get("reply_to"),

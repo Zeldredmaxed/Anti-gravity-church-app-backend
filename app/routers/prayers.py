@@ -194,6 +194,7 @@ async def toggle_pray(
 
 
 @router.post("/{prayer_id}/respond", response_model=PrayerResponseSchema, status_code=201)
+@router.post("/{prayer_id}/comments", response_model=PrayerResponseSchema, status_code=201)
 async def respond_to_prayer(
     prayer_id: int, data: PrayerResponseCreate,
     current_user: User = Depends(get_current_user),
@@ -206,10 +207,11 @@ async def respond_to_prayer(
         raise HTTPException(status_code=404, detail="Prayer request not found")
 
     author_name = current_user.full_name or "Anonymous"
+    parsed_content = data.content or data.text or data.message
 
     resp = PrayerResponseEntry(
         prayer_request_id=prayer_id, responder_id=current_user.id,
-        content=data.content, is_prayed=data.is_prayed)
+        content=parsed_content, is_prayed=data.is_prayed)
     db.add(resp)
     if data.is_prayed:
         p.prayed_count = (p.prayed_count or 0) + 1
@@ -218,7 +220,7 @@ async def respond_to_prayer(
     if p.author_id != current_user.id:
         await create_alert(db, p.author_id, "prayer",
             f"{author_name} responded to your prayer request",
-            body=data.content[:100] if data.content else None,
+            body=parsed_content[:100] if parsed_content else None,
             data={"link_type": "prayer", "link_id": prayer_id},
             church_id=p.church_id)
 

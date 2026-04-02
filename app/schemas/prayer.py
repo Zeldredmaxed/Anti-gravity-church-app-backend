@@ -46,6 +46,8 @@ class PrayerRequestResponse(BaseModel):
 
 class PrayerResponseCreate(BaseModel):
     content: Optional[str] = None
+    text: Optional[str] = None
+    message: Optional[str] = None
     is_prayed: bool = True
 
 

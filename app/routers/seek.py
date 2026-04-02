@@ -15,6 +15,7 @@ router = APIRouter(tags=["Seek"])
 
 
 @router.get("/seek")
+@router.get("/search")
 async def seek_users(
     q: str = Query(..., min_length=1, description="Search query"),
     db: AsyncSession = Depends(get_db),

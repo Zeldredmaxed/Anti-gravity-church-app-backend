@@ -155,7 +155,7 @@ async def get_dashboard_metrics(
         )
     )).scalar() or 0
 
-    return {
+    return {"data": {
         "members": {"total": total_members, "trend": new_members_this_month, "label": "new this month"},
         "giving": {"total": float(giving_mtd), "trend": giving_trend, "label": "vs last month"},
         "attendance": {"total": attendance_30d, "trend": attendance_trend, "label": "vs prev 30d"},
@@ -163,7 +163,7 @@ async def get_dashboard_metrics(
         "care_cases": {"total": open_care_cases, "trend": 0, "label": "open"},
         "volunteer_hours": {"total": float(volunteer_hours), "trend": 0, "label": "this month"},
         "prayers": {"total": active_prayers, "trend": 0, "label": "active"},
-    }
+    }}
 
 
 # ── Chart Data ──
