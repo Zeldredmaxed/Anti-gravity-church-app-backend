@@ -58,7 +58,8 @@ async def _get_artist_name(db: AsyncSession, artist_id: int) -> str:
 # Every client that "tunes in" gets the current song + how far into it
 # we are, so they join mid-song — just like real radio.
 
-DEFAULT_SONG_DURATION = 210  # 3:30 fallback if duration not stored
+DEFAULT_SONG_DURATION = 300  # 5:00 fallback if duration not stored
+ADVANCE_GRACE_SECONDS = 15   # Extra buffer before server auto-advances
 
 
 class RadioStation:
@@ -78,20 +79,27 @@ class RadioStation:
         return song.get("duration_seconds") or DEFAULT_SONG_DURATION
 
     def advance_if_needed(self) -> None:
-        """Auto-advance past any songs whose time has elapsed."""
+        """Auto-advance past any songs whose time has elapsed.
+
+        A grace period (ADVANCE_GRACE_SECONDS) is added to the song
+        duration so that the server doesn't advance before clients
+        have finished playing — accounting for buffering, loading
+        latency, and clock drift.
+        """
         if not self.is_live or not self.queue or not self.song_started_at:
             return
 
         now = datetime.now(timezone.utc)
         elapsed = (now - self.song_started_at).total_seconds()
-        dur = self._current_song_duration()
+        dur = self._current_song_duration() + ADVANCE_GRACE_SECONDS
 
-        # Keep advancing while elapsed > current song duration
+        # Keep advancing while elapsed > current song duration + grace
         while elapsed >= dur and self.queue:
+            raw_dur = self._current_song_duration()  # actual duration for time math
             self.queue_index = (self.queue_index + 1) % len(self.queue)
-            self.song_started_at = self.song_started_at + timedelta(seconds=dur)
+            self.song_started_at = self.song_started_at + timedelta(seconds=raw_dur + ADVANCE_GRACE_SECONDS)
             elapsed = (now - self.song_started_at).total_seconds()
-            dur = self._current_song_duration()
+            dur = self._current_song_duration() + ADVANCE_GRACE_SECONDS
 
     def force_advance(self) -> None:
         """Client-triggered advance when a song finishes on device."""
@@ -114,9 +122,12 @@ class RadioStation:
         if self.song_started_at:
             elapsed = (datetime.now(timezone.utc) - self.song_started_at).total_seconds()
 
+        song_duration = self._current_song_duration()
+
         return {
             "song": song,
             "elapsed_seconds": round(elapsed, 1),
+            "song_duration_seconds": song_duration,
             "queue_position": self.queue_index,
             "queue_length": len(self.queue),
             "is_live": True,
