@@ -223,6 +223,106 @@ async def make_me_admin_dangerous():
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/seed-dummy-data-dangerous")
+async def seed_dummy_data_dangerous():
+    """Seeds exactly what is needed to test followers, messages, radio, and clips on a fresh DB."""
+    from app.database import async_session
+    from app.models.user import User
+    from app.models.social import Follow
+    from app.models.music import Song, ArtistProfile
+    from app.models.clip import Clip
+    from app.models.chat import Conversation, ConversationParticipant, Message
+    from sqlalchemy import select
+    from passlib.context import CryptContext
+    import random
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    try:
+        async with async_session() as db:
+            # 1. Check if we already have a bunch of users
+            existing_users = (await db.execute(select(User).limit(10))).scalars().all()
+            if len(existing_users) > 3:
+                return {"message": "Data already seeded"}
+            
+            church_id = 1
+            admin_user = existing_users[0] if existing_users else None
+            
+            # 2. Create Dummy Users
+            dummy_users = []
+            names = ["John Doe", "Jane Smith", "Pastor Dave", "Sarah Jenkins", "Michael Brown"]
+            for i, name in enumerate(names):
+                u = User(
+                    email=f"dummy{i}@example.com",
+                    hashed_password=pwd_context.hash("password123"),
+                    full_name=name,
+                    role="member",
+                    church_id=church_id,
+                    is_active=True
+                )
+                db.add(u)
+                dummy_users.append(u)
+            
+            await db.commit()
+            for u in dummy_users: await db.refresh(u)
+            
+            owner_id = admin_user.id if admin_user else dummy_users[0].id
+            
+            # 3. Create Followers (Make ALL dummies follow the first user/admin)
+            for dup in dummy_users:
+                if dup.id != owner_id:
+                    db.add(Follow(follower_id=dup.id, followed_id=owner_id))
+                    db.add(Follow(follower_id=owner_id, followed_id=dup.id)) # mutual follow
+            
+            # 4. Create an Artist & Song for Radio
+            artist = ArtistProfile(user_id=owner_id, church_id=church_id, artist_name="The Voices of Anti-Gravity", bio="Our Church Band", genre="Gospel")
+            db.add(artist)
+            await db.commit()
+            await db.refresh(artist)
+            
+            song = Song(
+                artist_id=artist.id,
+                title="Amazing Grace (Cover)",
+                genre="Gospel",
+                audio_url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                cover_url="https://images.unsplash.com/photo-1438032005730-c779502fac39",
+                duration_seconds=300,
+                is_approved=True,
+                is_active=True,
+            )
+            db.add(song)
+            
+            # 5. Create a dummy Clip (Short)
+            clip = Clip(
+                author_id=owner_id,
+                church_id=church_id,
+                title="Sunday Worship Highlight",
+                description="What an amazing service today!",
+                video_url="https://www.w3schools.com/html/mov_bbb.mp4",
+                thumbnail_url="https://images.unsplash.com/photo-1510590337019-5ef8d3d32116",
+                category="Worship",
+                moderation_status="approved",
+                is_featured=True
+            )
+            db.add(clip)
+            
+            # 6. Create a Direct Message Conversation
+            other_user = dummy_users[1] if dummy_users[0].id == owner_id else dummy_users[0]
+            convo = Conversation(church_id=church_id, type="direct")
+            db.add(convo)
+            await db.commit()
+            await db.refresh(convo)
+            
+            db.add(ConversationParticipant(conversation_id=convo.id, user_id=owner_id))
+            db.add(ConversationParticipant(conversation_id=convo.id, user_id=other_user.id))
+            db.add(Message(conversation_id=convo.id, sender_id=other_user.id, content="Hey! Welcome to the new app!"))
+            
+            await db.commit()
+
+            return {"message": "Success! 5 dummy members, followers, a radio song, an inbox message, and a short clip have been added."}
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/", tags=["Health"])
 async def root():
     return {
