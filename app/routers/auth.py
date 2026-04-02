@@ -102,6 +102,16 @@ async def register(
     )
     db.add(user)
     await db.flush()
+    
+    if data.church_id:
+        from app.models.member import Member
+        fn = data.full_name.split(" ")[0] if data.full_name else "Guest"
+        ln = " ".join(data.full_name.split(" ")[1:]) if data.full_name and " " in data.full_name else ""
+        existing_m = await db.execute(select(Member).where(Member.email == data.email))
+        if not existing_m.scalar_one_or_none():
+            m = Member(church_id=data.church_id, email=data.email, first_name=fn, last_name=ln)
+            db.add(m)
+            await db.flush()
     await db.refresh(user)
     return user
 
@@ -138,6 +148,15 @@ async def join_church(
     current_user.church_id = data.church_id
     db.add(current_user)
     await db.flush()
+
+    from app.models.member import Member
+    fn = current_user.full_name.split(" ")[0] if current_user.full_name else "Guest"
+    ln = " ".join(current_user.full_name.split(" ")[1:]) if current_user.full_name and " " in current_user.full_name else ""
+    existing_m = await db.execute(select(Member).where(Member.email == current_user.email, Member.church_id == data.church_id))
+    if not existing_m.scalar_one_or_none():
+        m = Member(church_id=data.church_id, email=current_user.email, first_name=fn, last_name=ln)
+        db.add(m)
+        await db.flush()
 
     token_data = {"sub": str(current_user.id), "church_id": current_user.church_id, "role": current_user.role}
     return TokenResponse(

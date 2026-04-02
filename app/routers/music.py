@@ -311,6 +311,22 @@ async def upload_song(
     db.add(song)
     await db.flush()
     await db.refresh(song)
+    
+    # Immediately add to the live radio queue if it's currently broadcasting
+    if _station.is_live:
+        _station.queue.append({
+            "id": song.id,
+            "artist_id": song.artist_id,
+            "artist_name": artist.artist_name,
+            "title": song.title,
+            "genre": song.genre,
+            "audio_url": song.audio_url,
+            "cover_url": song.cover_url,
+            "duration_seconds": song.duration_seconds,
+            "play_count": song.play_count,
+            "donation_count": song.donation_count,
+        })
+        
     return {"data": _song_resp(song, artist.artist_name)}
 
 

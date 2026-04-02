@@ -205,6 +205,8 @@ async def respond_to_prayer(
     if not p:
         raise HTTPException(status_code=404, detail="Prayer request not found")
 
+    author_name = current_user.full_name or "Anonymous"
+
     resp = PrayerResponseEntry(
         prayer_request_id=prayer_id, responder_id=current_user.id,
         content=data.content, is_prayed=data.is_prayed)
@@ -215,7 +217,7 @@ async def respond_to_prayer(
 
     if p.author_id != current_user.id:
         await create_alert(db, p.author_id, "prayer",
-            f"{current_user.full_name} responded to your prayer request",
+            f"{author_name} responded to your prayer request",
             body=data.content[:100] if data.content else None,
             data={"link_type": "prayer", "link_id": prayer_id},
             church_id=p.church_id)
@@ -224,11 +226,10 @@ async def respond_to_prayer(
     await db.refresh(resp)
     return PrayerResponseSchema(
         id=resp.id, author_id=resp.responder_id,
-        author_name=current_user.full_name,
+        author_name=author_name,
         author_avatar=getattr(current_user, "avatar_url", None),
         content=resp.content, is_prayed=resp.is_prayed,
         created_at=resp.created_at)
-
 
 @router.put("/{prayer_id}/answered")
 async def mark_answered(

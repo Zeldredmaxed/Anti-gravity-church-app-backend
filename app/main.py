@@ -232,9 +232,13 @@ async def seed_dummy_data_dangerous():
     from app.models.music import Song, ArtistProfile
     from app.models.clip import Clip
     from app.models.chat import Conversation, ConversationParticipant, Message
+    from app.models.member import Member
+    from app.models.event import Event
+    from app.models.fund import Fund
     from sqlalchemy import select
     from passlib.context import CryptContext
     import random
+    from datetime import datetime, timedelta, timezone
 
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     
@@ -265,6 +269,14 @@ async def seed_dummy_data_dangerous():
             
             await db.commit()
             for u in dummy_users: await db.refresh(u)
+            
+            # 2.5 Create Corresponding Members for CRM
+            for u in dummy_users:
+                fn = u.full_name.split(" ")[0] if u.full_name else "Guest"
+                ln = " ".join(u.full_name.split(" ")[1:]) if u.full_name and " " in u.full_name else ""
+                m = Member(church_id=church_id, email=u.email, first_name=fn, last_name=ln)
+                db.add(m)
+            await db.commit()
             
             owner_id = admin_user.id if admin_user else dummy_users[0].id
             
@@ -317,6 +329,31 @@ async def seed_dummy_data_dangerous():
             db.add(ConversationParticipant(conversation_id=convo.id, user_id=other_user.id))
             db.add(Message(conversation_id=convo.id, sender_id=other_user.id, content="Hey! Welcome to the new app!"))
             
+            await db.commit()
+
+            # 7. Create upcoming Event for Dashboard
+            event = Event(
+                church_id=church_id,
+                title="Super Sunday Worship",
+                description="Join us for a powerful time of worship.",
+                event_type="service",
+                start_datetime=datetime.now(timezone.utc) + timedelta(days=2),
+                created_by=owner_id,
+                is_published=True
+            )
+            db.add(event)
+
+            # 8. Create a custom Giving Fund
+            fund = Fund(
+                church_id=church_id,
+                name="Building Fund",
+                description="To build our new sanctuary",
+                fund_type="building",
+                target_amount=100000.0,
+                current_balance=25000.0,
+                is_active=True
+            )
+            db.add(fund)
             await db.commit()
 
             return {"message": "Success! 5 dummy members, followers, a radio song, an inbox message, and a short clip have been added."}
