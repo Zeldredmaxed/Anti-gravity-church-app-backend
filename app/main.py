@@ -206,6 +206,23 @@ async def seed_church_dangerous():
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/make-me-admin-dangerous")
+async def make_me_admin_dangerous():
+    from app.database import async_session
+    from app.models.user import User
+    from sqlalchemy import select
+    try:
+        async with async_session() as db:
+            user = (await db.execute(select(User).order_by(User.id))).scalars().first()
+            if user:
+                user.role = "admin"
+                db.add(user)
+                await db.commit()
+                return {"message": f"Successfully promoted {user.email} to Admin!"}
+            return {"error": "No user found"}
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/", tags=["Health"])
 async def root():
     return {
