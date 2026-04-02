@@ -170,15 +170,18 @@ app.include_router(assistant_router, prefix=API_PREFIX)
 async def nuke_database_dangerous():
     from app.database import engine, Base, db_url
     from sqlalchemy import text
-    async with engine.begin() as conn:
-        if "sqlite" in db_url:
-            await conn.run_sync(Base.metadata.drop_all)
-        else:
-            await conn.execute(text("DROP SCHEMA public CASCADE;"))
-            await conn.execute(text("CREATE SCHEMA public;"))
-            # ensure standard privileges are restored if necessary, usually CREATE SCHEMA is enough.
-        await conn.run_sync(Base.metadata.create_all)
-    return {"message": "Database completely wiped and rebuilt."}
+    try:
+        async with engine.begin() as conn:
+            if "sqlite" in db_url:
+                await conn.run_sync(Base.metadata.drop_all)
+            else:
+                await conn.execute(text("DROP SCHEMA public CASCADE;"))
+                await conn.execute(text("CREATE SCHEMA public;"))
+            await conn.run_sync(Base.metadata.create_all)
+        return {"message": "Database completely wiped and rebuilt."}
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}
 
 @app.get("/", tags=["Health"])
 async def root():
