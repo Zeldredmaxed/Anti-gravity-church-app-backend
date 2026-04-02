@@ -198,7 +198,7 @@ async def seed_church_dangerous():
                 name="Newbirth Church",
                 subdomain="newbirth",
                 is_active=True,
-                features_enabled={"chat": True, "giving": True, "clips": True}
+                settings={"features_enabled": {"chat": True, "giving": True, "clips": True}}
             )
             db.add(new_church)
             await db.commit()
