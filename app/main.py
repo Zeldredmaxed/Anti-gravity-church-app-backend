@@ -275,7 +275,7 @@ async def seed_dummy_data_dangerous():
                     db.add(Follower(follower_id=owner_id, followed_id=dup.id)) # mutual follow
             
             # 4. Create an Artist & Song for Radio
-            artist = ArtistProfile(user_id=owner_id, church_id=church_id, artist_name="The Voices of Anti-Gravity", bio="Our Church Band", genre="Gospel")
+            artist = ArtistProfile(user_id=owner_id, artist_name="The Voices of Anti-Gravity", bio="Our Church Band", genre="Gospel")
             db.add(artist)
             await db.commit()
             await db.refresh(artist)
@@ -300,7 +300,7 @@ async def seed_dummy_data_dangerous():
                 description="What an amazing service today!",
                 video_url="https://www.w3schools.com/html/mov_bbb.mp4",
                 thumbnail_url="https://images.unsplash.com/photo-1510590337019-5ef8d3d32116",
-                category="Worship",
+                category="worship",
                 moderation_status="approved",
                 is_featured=True
             )
@@ -321,7 +321,8 @@ async def seed_dummy_data_dangerous():
 
             return {"message": "Success! 5 dummy members, followers, a radio song, an inbox message, and a short clip have been added."}
     except Exception as e:
-        return {"error": str(e)}
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}
 
 @app.get("/", tags=["Health"])
 async def root():
