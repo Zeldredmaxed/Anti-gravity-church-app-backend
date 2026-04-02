@@ -46,9 +46,15 @@ class ParticipantResponse(BaseModel):
 
 class MessageSend(BaseModel):
     content: Optional[str] = None
+    text: Optional[str] = None
+    message: Optional[str] = None
     message_type: str = "text"
     media_url: Optional[str] = None
     reply_to: Optional[int] = None
+    
+    @property
+    def get_content(self) -> str | None:
+        return self.content or self.text or self.message
 
 
 class MessageResponse(BaseModel):
@@ -57,6 +63,8 @@ class MessageResponse(BaseModel):
     sender_id: int
     sender_name: Optional[str] = None
     content: Optional[str] = None
+    text: Optional[str] = None
+    message: Optional[str] = None
     message_type: str
     media_url: Optional[str] = None
     reply_to: Optional[int] = None

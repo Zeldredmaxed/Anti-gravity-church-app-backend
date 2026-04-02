@@ -309,7 +309,7 @@ async def upload_song(
         duration_seconds=data.duration_seconds,
     )
     db.add(song)
-    await db.flush()
+    await db.commit()
     await db.refresh(song)
     
     # Immediately add to the live radio queue if it's currently broadcasting

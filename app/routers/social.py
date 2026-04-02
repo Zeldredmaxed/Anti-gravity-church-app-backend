@@ -154,6 +154,44 @@ async def flock_suggestions(db: AsyncSession = Depends(get_db), current_user: Us
         })
     return {"data": items}
 
+@router.get("/social/flock/search")
+async def search_flock(q: str = Query(..., min_length=1), db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Search for users by name or username."""
+    from sqlalchemy import or_
+    from app.models.church import Church
+    term = f"%{q}%"
+    
+    users = (await db.execute(
+        select(User).where(
+            or_(User.full_name.ilike(term), User.username.ilike(term))
+        ).limit(20)
+    )).scalars().all()
+
+    items = []
+    for u in users:
+        church = None
+        if u.church_id:
+            church = (await db.execute(select(Church).where(Church.id == u.church_id))).scalar_one_or_none()
+        fc = (await db.execute(select(func.count()).where(Follower.followed_id == u.id))).scalar() or 0
+        pc = 0
+        
+        # Check if already following
+        is_following = (await db.execute(
+            select(Follower).where(Follower.follower_id == current_user.id, Follower.followed_id == u.id)
+        )).scalar_one_or_none() is not None
+
+        items.append({
+            "id": u.id,
+            "full_name": u.full_name,
+            "username": u.username,
+            "avatar_url": getattr(u, "avatar_url", None),
+            "church_name": church.name if church else None,
+            "followers_count": fc,
+            "post_count": pc,
+            "is_following": is_following,
+        })
+    return {"data": items}
+
 
 @router.get("/social/flock/{user_id}/followers")
 async def get_followers(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):

@@ -382,3 +382,18 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy"}
+
+@app.get("/api/v1/delete_amazing_grace", tags=["Admin"])
+async def delete_amazing_grace():
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from app.database import async_session_maker
+    from sqlalchemy import text
+    try:
+        async with async_session_maker() as db:
+            await db.execute(text("DELETE FROM songs WHERE title LIKE '%Amazing Grace%'"))
+            await db.execute(text("DELETE FROM clips WHERE title LIKE '%Amazing Grace%'"))
+            await db.commit()
+            return {"message": "Amazing grace deleted forever."}
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}

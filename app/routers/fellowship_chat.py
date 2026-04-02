@@ -156,10 +156,10 @@ async def get_messages(
         items.append(MessageResponse(
             id=m.id, conversation_id=m.conversation_id, sender_id=m.sender_id,
             sender_name=sender.full_name if sender else None,
-            content=m.content, message_type=m.message_type,
-            media_url=m.media_url, reply_to=m.reply_to,
-            reactions=m.reactions, is_edited=m.is_edited,
-            is_deleted=m.is_deleted, created_at=m.created_at))
+            content=m.content, text=m.content, message=m.content,
+            message_type=m.message_type, media_url=m.media_url,
+            reply_to=m.reply_to, reactions=m.reactions,
+            is_edited=m.is_edited, is_deleted=m.is_deleted, created_at=m.created_at))
     items.reverse()
     return items
 
@@ -177,9 +177,11 @@ async def send_message(
     if not member:
         raise HTTPException(status_code=403, detail="Not a participant")
 
+    parsed_content = data.get_content
+
     msg = Message(
         conversation_id=conversation_id, sender_id=current_user.id,
-        content=data.content, message_type=data.message_type,
+        content=parsed_content, message_type=data.message_type,
         media_url=data.media_url, reply_to=data.reply_to,
     )
     db.add(msg)
@@ -196,7 +198,7 @@ async def send_message(
 
     return MessageResponse(
         id=msg.id, conversation_id=msg.conversation_id, sender_id=msg.sender_id,
-        sender_name=current_user.full_name, content=msg.content,
+        sender_name=current_user.full_name, content=msg.content, text=msg.content, message=msg.content,
         message_type=msg.message_type, media_url=msg.media_url,
         reply_to=msg.reply_to, reactions=msg.reactions,
         is_edited=msg.is_edited, is_deleted=msg.is_deleted,

@@ -132,6 +132,7 @@ async def create_clip(
     await db.flush()
     await db.refresh(clip)
     await process_mentions(db, clip.description, current_user.id, "clip", clip.id)
+    await db.commit()
     return _clip_response(clip, current_user.full_name)
 
 
