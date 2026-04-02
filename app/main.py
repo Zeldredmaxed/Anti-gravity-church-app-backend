@@ -183,6 +183,29 @@ async def nuke_database_dangerous():
         import traceback
         return {"error": str(e), "traceback": traceback.format_exc()}
 
+@app.get("/seed-church-dangerous")
+async def seed_church_dangerous():
+    from app.database import async_session
+    from app.models.church import Church
+    from sqlalchemy import select
+    try:
+        async with async_session() as db:
+            existing = (await db.execute(select(Church).where(Church.name == "Newbirth Church"))).scalar_one_or_none()
+            if existing:
+                return {"message": "Church already exists!", "church_id": existing.id}
+            
+            new_church = Church(
+                name="Newbirth Church",
+                subdomain="newbirth",
+                is_active=True,
+                features_enabled={"chat": True, "giving": True, "clips": True}
+            )
+            db.add(new_church)
+            await db.commit()
+            return {"message": "Church created successfully!", "church_id": new_church.id}
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/", tags=["Health"])
 async def root():
     return {
