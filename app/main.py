@@ -78,10 +78,20 @@ async def lifespan(app: FastAPI):
             async with engine.begin() as conn:
                 await conn.execute(text(query))
         except Exception as e:
-            e_str = str(e).lower()
-            # Ignore expected errors: column already exists
-            if "duplicate column" not in e_str and "already exists" not in e_str and "duplicate" not in e_str:
-                pass # print(f"Migration schema update ok/skipped: {query[:30]}...")
+            pass
+            
+    # Postgres-specific migrations
+    if "sqlite" not in str(engine.url).lower():
+        pg_migrations = [
+            "ALTER TABLE members ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC'",
+        ]
+        for query in pg_migrations:
+            try:
+                async with engine.begin() as conn:
+                    await conn.execute(text(query))
+            except Exception:
+                pass
+
     print("Completed automated schema checks.")
 
     # Start background tasks

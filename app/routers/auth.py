@@ -110,12 +110,9 @@ async def register(
         ln = " ".join(data.full_name.split(" ")[1:]) if data.full_name and " " in data.full_name else ""
         existing_m = await db.execute(select(Member).where(Member.email == data.email))
         if not existing_m.scalar_one_or_none():
-            try:
-                m = Member(church_id=data.church_id, email=data.email, first_name=fn, last_name=ln)
-                db.add(m)
-                await db.commit()
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Member creation failed: {str(e)}")
+            m = Member(church_id=data.church_id, email=data.email, first_name=fn, last_name=ln)
+            db.add(m)
+            await db.commit()
     await db.refresh(user)
     return user
 

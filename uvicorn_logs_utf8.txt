@@ -1,0 +1,490 @@
+﻿uvicorn : INFO:     
+Started server process 
+[2644]
+At line:1 char:108
++ ... d -Force;Start-Sleep 
+1; uvicorn app.main:app 
+--port 8000 2>&1 | Out-F 
+...
++                          
+   ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (INF  
+  O:     Started server    
+ process [2644]:String)    
+ [], RemoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+INFO:     Waiting for 
+application startup.
+INFO:     Application 
+startup complete.
+INFO:     Uvicorn running 
+on http://127.0.0.1:8000 
+(Press CTRL+C to quit)
+Migration skipped/failed for 'ALTER TABLE members ADD COLUMN...': (sqlite3.OperationalError) near "EXISTS": syntax error
+[SQL: ALTER TABLE members ADD COLUMN IF NOT EXISTS pronouns VARCHAR(30)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'CREATE TABLE IF NOT EXISTS sav...': (sqlite3.OperationalError) near "(": syntax error
+[SQL: CREATE TABLE IF NOT EXISTS saved_items (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, content_type VARCHAR(30) NOT NULL, content_id VARCHAR(255) NOT NULL, title VARCHAR(500), thumbnail_url VARCHAR(500), subtitle VARCHAR(500), saved_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(user_id, content_type, content_id))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Migration skipped/failed for 'CREATE TABLE IF NOT EXISTS tim...': (sqlite3.OperationalError) near "(": syntax error
+[SQL: CREATE TABLE IF NOT EXISTS time_spent_sessions (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, screen_name VARCHAR(100) NOT NULL, duration_seconds INTEGER NOT NULL, logged_at TIMESTAMPTZ DEFAULT NOW())]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Completed automated schema checks.
+INFO:     127.0.0.1:37265 - "POST /api/v1/auth/register HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in 
+ASGI application
+Traceback (most recent 
+call last):
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\default.py", 
+line 941, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 147, in execute
+    self._adapt_connection.
+_handle_exception(error)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 298, in 
+_handle_exception
+    raise error
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 129, in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 132, in await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 196, in 
+greenlet_spawn
+    value = await result
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 48, in 
+execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 40, in 
+_execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 132, in 
+_execute
+    return await future
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 115, in 
+run
+    result = function()
+sqlite3.OperationalError: 
+no such column: 
+members.pronouns
+
+The above exception was 
+the direct cause of the 
+following exception:
+
+Traceback (most recent 
+call last):
+  File "C:\Python\Python310
+\lib\site-packages\uvicorn\
+protocols\http\httptools_im
+pl.py", line 401, in 
+run_asgi
+    result = await app(  # 
+type: 
+ignore[func-returns-value]
+  File "C:\Python\Python310
+\lib\site-packages\uvicorn\
+middleware\proxy_headers.py
+", line 70, in __call__
+    return await 
+self.app(scope, receive, 
+send)
+  File "C:\Python\Python310
+\lib\site-packages\fastapi\
+applications.py", line 
+1054, in __call__
+    await 
+super().__call__(scope, 
+receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\applications.py", line 
+113, in __call__
+    await self.middleware_s
+tack(scope, receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\errors.py", 
+line 187, in __call__
+    raise exc
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\errors.py", 
+line 165, in __call__
+    await self.app(scope, 
+receive, _send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\base.py", 
+line 185, in __call__
+    with 
+collapse_excgroups():
+  File "C:\Python\Python310
+\lib\contextlib.py", line 
+153, in __exit__
+    self.gen.throw(typ, 
+value, traceback)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\_utils.py", line 83, in 
+collapse_excgroups
+    raise exc
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\base.py", 
+line 187, in __call__
+    response = await self.d
+ispatch_func(request, 
+call_next)
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\a
+pp\middleware\audit.py", 
+line 16, in dispatch
+    response: Response = 
+await call_next(request)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\base.py", 
+line 163, in call_next
+    raise app_exc
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\base.py", 
+line 149, in coro
+    await self.app(scope, 
+receive_or_disconnect, 
+send_no_error)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\cors.py", 
+line 85, in __call__
+    await self.app(scope, 
+receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\middleware\exceptions.py"
+, line 62, in __call__
+    await wrap_app_handling
+_exceptions(self.app, 
+conn)(scope, receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\_exception_handler.py", 
+line 62, in wrapped_app
+    raise exc
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\_exception_handler.py", 
+line 51, in wrapped_app
+    await app(scope, 
+receive, sender)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\routing.py", line 715, 
+in __call__
+    await self.middleware_s
+tack(scope, receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\routing.py", line 735, 
+in app
+    await 
+route.handle(scope, 
+receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\routing.py", line 288, 
+in handle
+    await self.app(scope, 
+receive, send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\routing.py", line 76, in 
+app
+    await wrap_app_handling
+_exceptions(app, 
+request)(scope, receive, 
+send)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\_exception_handler.py", 
+line 62, in wrapped_app
+    raise exc
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\_exception_handler.py", 
+line 51, in wrapped_app
+    await app(scope, 
+receive, sender)
+  File "C:\Python\Python310
+\lib\site-packages\starlett
+e\routing.py", line 73, in 
+app
+    response = await 
+f(request)
+  File "C:\Python\Python310
+\lib\site-packages\fastapi\
+routing.py", line 301, in 
+app
+    raw_response = await 
+run_endpoint_function(
+  File "C:\Python\Python310
+\lib\site-packages\fastapi\
+routing.py", line 212, in 
+run_endpoint_function
+    return await 
+dependant.call(**values)
+  File "C:\Users\Administra
+tor\Newbirth Anti gravity\a
+pp\routers\auth.py", line 
+111, in register
+    existing_m = await db.e
+xecute(select(Member).where
+(Member.email == 
+data.email))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\ext\asyncio\session.py",
+ line 461, in execute
+    result = await 
+greenlet_spawn(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 201, in 
+greenlet_spawn
+    result = context.throw(
+*sys.exc_info())
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\session.py", line 
+2362, in execute
+    return 
+self._execute_internal(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\session.py", line 
+2247, in _execute_internal
+    result: Result[Any] = c
+ompile_state_cls.orm_execut
+e_statement(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\orm\context.py", line 
+305, in 
+orm_execute_statement
+    result = conn.execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1418, in execute
+    return meth(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\sql\elements.py", line 
+515, in 
+_execute_on_connection
+    return connection._exec
+ute_clauseelement(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1640, in 
+_execute_clauseelement
+    ret = 
+self._execute_context(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1846, in _execute_context
+    return 
+self._exec_single_context(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1986, in 
+_exec_single_context
+    self._handle_dbapi_exce
+ption(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+2355, in 
+_handle_dbapi_exception
+    raise sqlalchemy_except
+ion.with_traceback(exc_info
+[2]) from e
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\base.py", line 
+1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\engine\default.py", 
+line 941, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 147, in execute
+    self._adapt_connection.
+_handle_exception(error)
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 298, in 
+_handle_exception
+    raise error
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\dialects\sqlite\aiosqlit
+e.py", line 129, in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 132, in await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+  File "C:\Python\Python310
+\lib\site-packages\sqlalche
+my\util\_concurrency_py3k.p
+y", line 196, in 
+greenlet_spawn
+    value = await result
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 48, in 
+execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\cursor.py", line 40, in 
+_execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 132, in 
+_execute
+    return await future
+  File "C:\Python\Python310
+\lib\site-packages\aiosqlit
+e\core.py", line 115, in 
+run
+    result = function()
+sqlalchemy.exc.OperationalE
+rror: 
+(sqlite3.OperationalError) 
+no such column: 
+members.pronouns
+[SQL: SELECT members.id, 
+members.church_id, 
+members.campus_id, 
+members.first_name, 
+members.last_name, 
+members.email, 
+members.phone, 
+members.secondary_phone, 
+members.address, 
+members.city, 
+members.state, 
+members.zip_code, 
+members.date_of_birth, 
+members.gender, 
+members.pronouns, 
+members.marital_status, 
+members.photo_url, 
+members.avatar_url, 
+members.membership_status, 
+members.join_date, 
+members.baptism_date, 
+members.baptism_location, 
+members.baptism_type, 
+members.baptism_pastor, 
+members.salvation_status, 
+members.salvation_date, mem
+bers.completed_membership_c
+lass, members.membership_cl
+ass_date, 
+members.spiritual_gifts, 
+members.skills_tags, 
+members.interests, 
+members.health_score, 
+members.health_status, memb
+ers.background_check_status
+, members.background_check_
+date, 
+members.custom_fields, 
+members.created_by, members
+.emergency_contact_name, me
+mbers.emergency_contact_pho
+ne, members.family_id, 
+members.created_at, 
+members.updated_at, 
+members.is_deleted 
+FROM members 
+WHERE members.email = ?]
+[parameters: ('authtest2@an
+tigravity.app',)]
+(Background on this error 
+at: https://sqlalche.me/e/2
+0/e3q8)
